@@ -41,6 +41,44 @@ const reviewSchema = new mongoose.Schema({
   }
 });
 
+// Static method to get average of review rates
+reviewSchema.statics.getAverageRate = async function(courseId) {
+  const obj = await this.aggregate([
+    {
+      $match: { courseId: courseId }
+    },
+    {
+      $group: {
+        _id: `$courseId`,
+        rate: { $avg: `$rate` }
+      }
+    }
+  ]);
+  
+  // taking 2 numbers after the decimal point
+  const avgRate = obj[0].rate.toFixed(2);
+
+  try {
+
+    // update rate property of course with givin id
+    await mongoose.connection.db.collection(`courses`, async (err, collection) => {
+      await collection.findOneAndUpdate({_id: courseId}, {
+        $set: {"rate": avgRate}
+      });
+    });
+
+  } catch (error) {
+    console.log(error);
+  }
+
+};
+
+// Call getAverageRate function after save
+reviewSchema.post(`save`, function() {
+  this.constructor.getAverageRate(this.courseId);
+});
+
+// connect schema with reviews collection by creating review model
 const Review = mongoose.model(`reviews`, reviewSchema);
 
 module.exports = Review;
