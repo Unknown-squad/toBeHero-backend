@@ -2,15 +2,15 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-// chech how meny index in array must be at least one index
+// chech if array is empty or no
 function arrayOfLength(arr) {
     return Array.isArray(arr) && arr.length > 0
 }
 
-// add validation message to languages property
+// add validation message to check if languages property in mentor schema is empty or not
 const languagesValidation = [arrayOfLength, 'enter one language']
 
-// add validation message to occupation property
+// add validation message to check if occupation property in mentor schema is empty or not
 const occupationValidation = [arrayOfLength, 'please enter at least one occupation']
 
 // Create a schema
