@@ -66,6 +66,7 @@ reviewSchema.post(`save`, function() {
   this.constructor.getAverageRate(this.courseId);
 });
 
+// connect schema with reviews collection by creating review model
 const Review = mongoose.model(`reviews`, reviewSchema);
 
 module.exports = Review;
