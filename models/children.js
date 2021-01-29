@@ -2,34 +2,34 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-// Create a schema
+// create a children Schema
 const childrenSchema = new Schema({
     userName: {
         type: String,
-        requierd: true,
+        requierd: [true, 'add username'],
         unique: true,
-        min: 5,
-        max: 50
+        min: [5, 'at least 5 charater'],
+        max: [50, 'max 50 charater']
     },
     fullName: {
         type: String,
-        required: true,
-        min: 5,
-        max: 50
+        required: [true, 'add full name'],
+        min: [5, 'at least 5 charater'],
+        max: [50, 'max 50 charater']
     },
     password: {
         type: String,
-        required: true,
-        min: 96
+        required: [true, 'add password'],
+        min: [96, 'at least 8 charater']
     },
     birthDate: {
         type: Date,
-        required: true
+        required: [true, 'add ur birthday']
     },
     picture: String,
     gender: {
         type: String,
-        required: true,
+        required: [true, 'select gender'],
         enum: ['Male', 'Female']
     },
     guardianId: {
