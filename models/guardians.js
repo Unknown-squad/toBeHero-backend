@@ -31,6 +31,14 @@ const GuardianSchema = new mongoose.Schema({
     unique: [true, 'The phone number is already taken, Please choose another'],
     match: [/^\d{10}$/, 'Phone number maxlength is 10 characters']
   },
+  countryCode: {
+    type: String,
+    required: [true, 'Please select country code'],
+  },
+  address: {
+      type: String,
+      required: [true, 'Please enter address']
+  },
   bankingInfo: [
     {
       cardNumber: {
@@ -62,34 +70,18 @@ const GuardianSchema = new mongoose.Schema({
         required: [true, 'Please add a phone number']
       },
       _id: false
-    },
+    }
   ],
   varificationToken: String,
   varificationTokenExpire: {
     type: Date,
     default: Date.now,
   },
-  children: [
+  childrenId: [
     {
-      id: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: true,
-        ref: 'children'
-      },
-      userName: {
-        type: mongoose.Schema.Types.String,
-        minlength: 3,
-        maxlength: 50,
-        required: [true, 'Please add a user name'],
-        unique: false,
-        ref: 'children'
-      },
-      picture: {
-        type: mongoose.Schema.Types.String,
-        required: [true, 'Please add a picture'],
-        ref: 'children'
-      },
-      _id: false
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'children',
+      required: true
     }
   ]
 });
