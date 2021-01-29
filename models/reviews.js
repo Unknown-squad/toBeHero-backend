@@ -17,22 +17,10 @@ const reviewSchema = new mongoose.Schema({
     type: String,
     maxlength: [350, `maximum length of description is 350 letter.`]
   },
-  guardian: {
-    id: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: `guardians`,
-      required: [true, `please add guardianId.`]
-    },
-    name: {
-      type: mongoose.Schema.Types.String,
-      ref: `guardians`,
-      required: true
-    },
-    picture: {
-      type: mongoose.Schema.Types.String,
-      ref: `guardians`,
-      required: true
-    }
+  guardianId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: `guardians`,
+    required: [true, `please add guardianId.`]
   },
   courseId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -78,7 +66,6 @@ reviewSchema.post(`save`, function() {
   this.constructor.getAverageRate(this.courseId);
 });
 
-// connect schema with reviews collection by creating review model
 const Review = mongoose.model(`reviews`, reviewSchema);
 
 module.exports = Review;
