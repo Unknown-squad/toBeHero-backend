@@ -75,7 +75,7 @@ const GuardianSchema = new mongoose.Schema({
   varificationToken: String,
   varificationTokenExpire: {
     type: Date,
-    default: Date.now,
+    default: Date.now
   },
   childrenId: [
     {
