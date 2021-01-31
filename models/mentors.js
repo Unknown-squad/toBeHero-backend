@@ -48,7 +48,7 @@ const MentorSchema = new Schema({
     gender: {
         type: String,
         required: [true, 'Please enter gender'],
-        enum: ['Male', 'Female']
+        enum: ['mr', 'mrs']
     },
     birthDate: {
         type: Date,
