@@ -20,7 +20,7 @@ const childrenSchema = new Schema({
     password: {
         type: String,
         required: [true, 'add password'],
-        min: [96, 'at least 8 charater']
+        minlength: [96, 'at least 8 charater']
     },
     birthDate: {
         type: Date,
