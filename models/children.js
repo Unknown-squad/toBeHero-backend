@@ -30,7 +30,7 @@ const childrenSchema = new Schema({
     gender: {
         type: String,
         required: [true, 'select gender'],
-        enum: ['Male', 'Female']
+        enum: ['male', 'female']
     },
     guardianId: {
         type: mongoose.Schema.Types.ObjectId,
