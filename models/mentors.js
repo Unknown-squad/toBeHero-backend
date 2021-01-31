@@ -18,8 +18,8 @@ const MentorSchema = new Schema({
     fullName: {
         type: String,
         required: [true, 'Please enter your name'],
-        min: [5, 'The username must be at least 5 charater'],
-        max: [50, 'The username must be less than 50 characters long']
+        minlength: [5, 'The username must be at least 5 charater'],
+        maxlength: [50, 'The username must be less than 50 characters long']
     },
     email: {
         type: String,
@@ -30,7 +30,7 @@ const MentorSchema = new Schema({
     password: {
         type: String,
         require: [true, 'please add password'],
-        min: [96, 'The password must be at least 8 charater']
+        minlength: [96, 'The password must be at least 8 charater']
     },
     phone: {
         type: String,
@@ -116,8 +116,8 @@ const MentorSchema = new Schema({
             nameOnCard: {
                 type: String,
                 required: [true, 'add nameOnCard'],
-                min: [10, 'min 10 nameOnCard'],
-                max: [50, 'max 50 nameOnCard']
+                minlength: [10, 'min 10 nameOnCard'],
+                maxlength: [50, 'max 50 nameOnCard']
             }, 
             phoneNumber: {
                 type: String,
