@@ -57,6 +57,7 @@ const MentorSchema = new Schema({
     picture: {
         type: String,
         required: [true, 'Please enter picture'],
+        match: [/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/, 'invalid url']
     },
     occupation: {
         type: [String],
