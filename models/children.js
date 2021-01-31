@@ -8,19 +8,19 @@ const childrenSchema = new Schema({
         type: String,
         requierd: [true, 'add username'],
         unique: true,
-        min: [5, 'at least 5 charater'],
-        max: [50, 'max 50 charater']
+        minlength: [5, 'at least 5 charater'],
+        maxlength: [50, 'max 50 charater']
     },
     fullName: {
         type: String,
         required: [true, 'add full name'],
-        min: [5, 'at least 5 charater'],
-        max: [50, 'max 50 charater']
+        minlength: [5, 'at least 5 charater'],
+        maxlength: [50, 'max 50 charater']
     },
     password: {
         type: String,
         required: [true, 'add password'],
-        min: [96, 'at least 8 charater']
+        minlength: [96, 'at least 8 charater']
     },
     birthDate: {
         type: Date,
