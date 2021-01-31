@@ -51,7 +51,7 @@ const MentorSchema = new Schema({
     },
     birthDate: {
         type: Date,
-        required: [true, 'enter ur birthday']
+        required: [true, 'enter your birthday']
     },
     picture: {
         type: String,
