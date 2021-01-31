@@ -26,7 +26,10 @@ const childrenSchema = new Schema({
         type: Date,
         required: [true, 'add ur birthday']
     },
-    picture: String,
+    picture: {
+        type: String,
+        match: [/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/, 'invalid url']
+    },
     gender: {
         type: String,
         required: [true, 'select gender'],
