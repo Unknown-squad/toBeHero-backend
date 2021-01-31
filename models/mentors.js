@@ -30,12 +30,11 @@ const MentorSchema = new Schema({
     password: {
         type: String,
         require: [true, 'please add password'],
-        minlength: [96, 'The password must be at least 8 charater']
     },
     phone: {
         type: String,
         required: [true, 'Please enter phone number'],
-        match: [/^\d{10}$/, 'Invalide phone number']
+        match: [/^\d{10}$/, 'Invalid phone number']
     },
     countryCode: {
         type: String,
@@ -82,7 +81,7 @@ const MentorSchema = new Schema({
     },
     topReviewsId: {
         type: [mongoose.Schema.Types.ObjectId],
-        ref: 'mentors'
+        ref: 'reviews'
     },
     isAvailable: {
         type: Boolean,
@@ -101,17 +100,16 @@ const MentorSchema = new Schema({
             cardNumber: {
                 type: String,
                 required: [true, 'add card number'],
-                match: [/^\d{16}$/, 'Invalide phone number']
+                match: [/^\d{16}$/, 'Invalid cardNumber']
             }, 
             Expire: {
-                type: String,
-                required: [true, 'add expire'],
-                match: [/^\d{5}$/, 'Invalide phone number']
+                type: Date,
+                required: [true, 'add expire']
             }, 
             CVV: {
                 type: String,
                 required: [true, 'add CVV'],
-                match: [/^\d{3}$/, 'Invalide phone number']
+                match: [/^\d{3}$/, 'Invalid CVV']
             },
             nameOnCard: {
                 type: String,
@@ -122,7 +120,7 @@ const MentorSchema = new Schema({
             phoneNumber: {
                 type: String,
                 required: [true, 'add PhoneNumber'],
-                match: [/^\d{10}$/, 'Invalide phone number']
+                match: [/^\d{10}$/, 'Invalid phone number']
             } 
         }],
         required: false
