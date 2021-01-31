@@ -43,7 +43,7 @@ const subscriptionSchema = new mongoose.Schema({
       },
       date: {
         type: Date,
-        default: Date.now()
+        requried: [true, `please add date to appointment`]
       },
       title: String,
       mentor: {
@@ -62,7 +62,10 @@ const subscriptionSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         required: [true, `please add appoinement id.`]
       },
-      date: Date,
+      date: {
+        type: Date,
+        required: [true, `please add date to note`]
+      },
       description: {
         type: String,
         required: [true, `please add description to note`]
