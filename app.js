@@ -43,7 +43,8 @@ app.use(require('express-session')({
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Add routes files
-
+const mentorRoutes = require('./routes/mentor');
+app.use(mentorRoutes)
 
 // Connect to server
 const port = process.env.PORT || 3000;
