@@ -12,6 +12,7 @@ const courses = require(`./routes/course`);
 
 // Add config files
 const connectDB = require(`./config/db`);
+const {coursesErrorHandling} = require(`./middlewares/coursesErrorHandling`);
 
 // Read body of request
 app.use(express.urlencoded({ extended: false }));
@@ -47,6 +48,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Add routes files
 app.use(courses);
+
+// handling error of courses
+app.use(coursesErrorHandling);
 
 // Connect to server
 const port = process.env.PORT || 3000;

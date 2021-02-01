@@ -15,6 +15,11 @@ exports.getOneCourse = asyncHandler(async (req, res) => {
     model: Mentor
   });
 
+  // handle if there's no course with givin id
+  if(!course) {
+    throw new Error(`no content`);
+  }
+
   res.status(200).json({
     success: true,
     message: `successfully find course with id ${req.params.id}`,
@@ -80,7 +85,7 @@ exports.getCourses = asyncHandler(async (req, res) => {
 
   // check if there is no courses in page
   if(courses.length == 0) {
-    throw new Error(`no data in page`);
+    throw new Error(`no data`);
   }
   
   res.status(200).json({
