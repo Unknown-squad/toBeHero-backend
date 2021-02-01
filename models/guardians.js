@@ -11,7 +11,7 @@ const GuardianSchema = new mongoose.Schema({
   },
   email: {
     type: String,
-    required: [true, 'Please add an emial'],
+    required: [true, 'Please add an email'],
     unique: true,
     match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Please add a valid email']
   },
@@ -28,7 +28,6 @@ const GuardianSchema = new mongoose.Schema({
   phone: {
     type: String,
     required: [true, 'Please add a phone number'],
-    unique: [true, 'The phone number is already taken, Please choose another'],
     match: [/^\d{10}$/, 'Phone number maxlength is 10 characters']
   },
   countryCode: {
@@ -64,7 +63,6 @@ const GuardianSchema = new mongoose.Schema({
       phoneNumber: {
       type: String,
       required: [true, 'Please add a phone number'],
-      unique: [true, 'The phone number is already taken, Please choose another'],
       match: [/^\d{10}$/, 'Phone number maxlength is 10 characters']
       },
       _id: false
