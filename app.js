@@ -36,14 +36,15 @@ app.use(require('express-session')({
     secret: 'This is secret',
     store: store,
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: true
 }));
 
 // Access to public folder
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Add routes files
-
+const subscription = require('./routes/subscription');
+app.use(subscription);
 
 // Connect to server
 const port = process.env.PORT || 3000;
