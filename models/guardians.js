@@ -51,7 +51,7 @@ const GuardianSchema = new mongoose.Schema({
       },
       CVV: {
         type: String,
-        match: [/^\d{16}$/, 'Invalid CVV number'],
+        match: [/^\d{3}$/, 'Invalid CVV number'],
         required: [true, 'Please add a CVV']
       },
       nameOnCard: {
