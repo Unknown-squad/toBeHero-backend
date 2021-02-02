@@ -12,7 +12,6 @@ exports.getBasicInfoOfMentor = asyncHandler( async (req, res, next) => {
 
     // check if mentor info is found or not
     if(!mentorInfo){
-        console.log('hi')
         return res.status(404).json({
             success: false,
             error: {
@@ -29,6 +28,35 @@ exports.getBasicInfoOfMentor = asyncHandler( async (req, res, next) => {
             kind: `menotr`,
             items: [
                 mentorInfo
+            ]
+        }
+    })
+})
+
+// @desc    get mentor's balance
+// @route   Get '/api/v1/mentor/dashboard/balance'
+// @access  private(mentor)
+exports.getMentorBalace = asyncHandler(async (req, res, next) => {
+    const result = await MentorSchema.findById(req.session.user.id).select('balance');
+    
+    // check if mentor info is found or not
+    if(!result){
+        return res.status(404).json({
+            success: false,
+            error: {
+                code: 404,
+                message: 'not found'
+            }
+        });
+    }
+
+    return res.status(200).json({
+        success: true,
+        message: `menotr balance`,
+        data: {
+            kind: `menotr`,
+            items: [
+                result
             ]
         }
     })
