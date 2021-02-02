@@ -1,7 +1,9 @@
 // load requried packages
+const asyncHandler = require(`../middlewares/async`);
 const Course = require(`../models/courses`);
 const Mentor = require(`../models/mentors`);
-const asyncHandler = require(`../middlewares/async`);
+const Review = require(`../models/reviews`);
+const Guardian = require(`../models/guardians`);
 
 // @route   GET `/api/v1/courses/:id`
 // @desc    get one course
@@ -95,6 +97,48 @@ exports.getCourses = asyncHandler(async (req, res) => {
       kind: `courses`,
       count: courses.length,
       items: courses
+    }
+  });
+
+});
+
+// @route   GET `/api/v1/reviews/:courseId`
+// @desc    get reviews
+// @access  public
+exports.getReviews = asyncHandler(async (req, res) => {
+
+  // handle pagination
+  let page = parseInt(req.query.page, 10) || 1;
+  let limit = 5;
+
+  if(page <= 0) {
+    page = 1;
+  }
+  
+  // find reviews
+  const reviews = await Review
+    .find({courseId: req.params.courseId})
+    .select(`-id -courseId`)
+    .skip((page - 1) * limit)
+    .limit(limit)
+    .sort(`-creatingDate`)
+    .populate({
+      path: `guardianId`,
+      select: `fullName picture -_id`,
+      model: Guardian
+    });
+
+    if(page > reviews.length) {
+      throw new Error(`no data`);
+    }
+
+  res.status(200).json({
+    success: true,
+    message: `successfully get reviews.`,
+    data: {
+      kind: `reviews`,
+      count: reviews.length,
+      items: reviews
     }
   });
 
