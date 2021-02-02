@@ -128,7 +128,8 @@ exports.getReviews = asyncHandler(async (req, res) => {
       model: Guardian
     });
 
-    if(page > reviews.length) {
+    // handle if there's no reviews in current page
+    if(reviews.length === 0) {
       throw new Error(`no data`);
     }
 
