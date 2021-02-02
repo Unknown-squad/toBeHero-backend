@@ -18,7 +18,7 @@ exports.coursesErrorHandling = (err, req, res, next) => {
       success: false,
       error: {
         code: 404,
-        message: `there's no such content with given id.`
+        message: `there's no content found.`
       }
     });
   }
