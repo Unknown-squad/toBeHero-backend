@@ -1,6 +1,8 @@
 // Handle different error 
 exports.subscriptionErrorHandling = (err, req, res, next) => {
   
+  console.log(err.message);
+
   // Check if no conent with given data
   if (err.message === 'no content') {
     return res.status(404).json({
@@ -12,6 +14,7 @@ exports.subscriptionErrorHandling = (err, req, res, next) => {
     });
   }
   
+  // Check if unauthorized
   if (err.message === 'forbidden') {
     return res.status(403).json({
       success: false,
@@ -23,7 +26,7 @@ exports.subscriptionErrorHandling = (err, req, res, next) => {
   }
 
   // Check if invalid data
-  if (err.message === 'ObjectId') {
+  if (err.kind === 'ObjectId') {
     return res.status(400).json({
       success: false,
       error: {

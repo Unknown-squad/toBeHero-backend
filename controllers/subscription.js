@@ -4,14 +4,15 @@ const Guardian = require('../models/guardians');
 const Children = require('../models/children');
 const Course = require('../models/courses');
 const asyncHandler = require('../middlewares/async');
+const { subscribe } = require('../routes/subscription');
 
 // @desc    get all subscription for spicific mentor
 // @route   Get localhost:3000/api/v1/mentor/subscriptions
 // @access  private
 exports.getAllSubscriptions = asyncHandler (async (req, res, next) => {
-
+  
   // Check if user is authorized or not
-  if (req.session.person != 'mentor') {
+  if (req.user.person != 'mentor') {
     throw new Error('forbidden');
   }
 
@@ -62,9 +63,9 @@ exports.getAllSubscriptions = asyncHandler (async (req, res, next) => {
 // @route   Get localhost:3000/api/v1/mentor/subscription/subscriptionId
 // @access  private
 exports.getOneSubscription = asyncHandler (async (req, res, next) => {
-
+  
   // Check if user is authorized or not
-  if (req.session.person !== 'mentor') {
+  if (req.user.person != 'mentor') {
     throw new Error('forbidden');
   }
 
@@ -94,7 +95,7 @@ exports.getOneSubscription = asyncHandler (async (req, res, next) => {
   }
 
   // Check if mentor authorized
-  if (subscription.mentorId.toString() !== req.session.user.id.toString()) {
+  if (subscription.mentorId.toString() != req.session.user.id.toString()) {
     throw new Error('forbidden');
   }
 
@@ -111,4 +112,42 @@ exports.getOneSubscription = asyncHandler (async (req, res, next) => {
       ]
     }
   });
+});
+
+
+// @desc    Add new appiontment
+// @route   Post localhost:3000/api/v1/mentor/subscription/:subscriptionId/add-appointment
+// @access  private
+exports.addNewAppiontment = asyncHandler (async (req, res, next) => {
+
+  // Check if user authorized
+  if (req.user.person != 'mentor') {
+    throw new Error('forbidden');
+  }
+
+  const subscription = await Subscription
+  .findById(req.params.subscriptionId)
+  .select({appointments: 1, _id: 1});
+
+  // Check if no content
+  if (!subscription) {
+    throw new Error('no content');
+  }
+
+  // Add appointment property
+  const title = req.body.title;
+  const date = req.body.date;
+  const time = req.body.time;
+  subscription.appointments.push({
+    title: title,
+    date: `${date}T${time}`
+  });
+
+  // return result for mentor
+  res.status(201).json({
+    success: true,
+    message: 'Appointment Added successfully'
+
+  });
+  await subscription.save();
 });
