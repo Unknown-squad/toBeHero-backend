@@ -10,6 +10,9 @@ const MongoDBStore = require('connect-mongodb-session')(session);
 // Add config files
 const connectDB = require(`./config/db`);
 
+// middleware files
+const errorHandler = require('./middlewares/error')
+
 // Read body of request
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
@@ -45,6 +48,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Add routes files
 const mentorRoutes = require('./routes/mentor');
 app.use(mentorRoutes)
+
+// active error handler
+app.use(errorHandler);
 
 // Connect to server
 const port = process.env.PORT || 3000;

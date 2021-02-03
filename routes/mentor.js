@@ -8,7 +8,8 @@ const authorizedMentor = require(`../middlewares/authorizedMentor`)
 // controllers files
 const {
     getBasicInfoOfMentor,
-    getMentorBalace
+    getMentorBalace,
+    getMentorAnalytics
 } = require(`../controllers/mentor`)
 
 // @desc    get mentor's basic info 
@@ -25,4 +26,10 @@ router
     .route('/api/v1/mentor/dashboard/balance')
     .get(authorizedMentor, getMentorBalace)
 
+// @desc    get mentor's analytics
+// @route   Get '/api/v1/mentor/dashboard/analytics'
+// @access  private(mentor)
+router
+    .route('/api/v1/mentor/dashboard/analytics')
+    .get(authorizedMentor, getMentorAnalytics)
 module.exports = router
