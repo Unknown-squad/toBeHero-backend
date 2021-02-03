@@ -3,13 +3,14 @@ const Subscription = require('../models/subscriptions');
 const Guardian = require('../models/guardians');
 const Children = require('../models/children');
 const Course = require('../models/courses');
+const Mentor = require('../models/mentors');
 const asyncHandler = require('../middlewares/async');
-const { subscribe } = require('../routes/subscription');
+
 
 // @desc    get all subscription for spicific mentor
 // @route   Get localhost:3000/api/v1/mentor/subscriptions
 // @access  private
-exports.getAllSubscriptions = asyncHandler (async (req, res, next) => {
+exports.getAllMentorSubscriptions = asyncHandler (async (req, res, next) => {
   
   // Check if user is authorized or not
   if (req.user.person != 'mentor') {
@@ -19,7 +20,7 @@ exports.getAllSubscriptions = asyncHandler (async (req, res, next) => {
 
   // Get all subscriptions for mentor
   const subscriptions = await Subscription
-  .find({mentorId: req.session.user.id})
+  .find({mentorId: req.user.id})
   .select({_id: 1, appiontments: 1, guardianId: 1, childId: 1, courseId: 1})
   .populate({
     path: 'guardianId',
@@ -62,7 +63,7 @@ exports.getAllSubscriptions = asyncHandler (async (req, res, next) => {
 // @desc    get one subscription for spicific mentor
 // @route   Get localhost:3000/api/v1/mentor/subscription/subscriptionId
 // @access  private
-exports.getOneSubscription = asyncHandler (async (req, res, next) => {
+exports.getOneMentorSubscription = asyncHandler (async (req, res, next) => {
   
   // Check if user is authorized or not
   if (req.user.person != 'mentor') {
@@ -146,8 +147,55 @@ exports.addNewAppiontment = asyncHandler (async (req, res, next) => {
   // return result for mentor
   res.status(201).json({
     success: true,
-    message: 'Appointment Added successfully'
+    message: 'Appointment added successfully'
 
   });
   await subscription.save();
+});
+
+
+// @desc    get all subscription for child
+// @route   Get localhost:3000/api/v1/child/home
+// @access  private
+exports.getAllChildSubscriptions = asyncHandler (async (req, res, next) => {
+  
+  // Check if authorized or not
+  if (req.user.person != 'child') {
+    throw new Error('forbidden');
+  }
+
+  // Get all child subscription
+  const subscription = await Subscription
+  .find({childId: req.user.id})
+  .select({_id: 1, mentorId: 1, courseId: 1, appointments: 1})
+  .populate({
+    path: 'mentorId',
+    select: "fullName picture gender -_id",
+    model: Mentor
+  })
+  .populate({
+    path: 'courseId',
+    select: "title picture -_id",
+    model: Course
+  });
+
+  
+  // Check if no content
+  if (subscription.length === 0) {
+    throw new Error('no content');
+  }
+
+  // return data to child
+  res.status(200).json({
+    success: true,
+    message: 'subscriptions data',
+    data: {
+      kind: 'subscriptions',
+      items: [
+        {
+          subscription: subscription
+        }
+      ]
+    }
+  });
 });
