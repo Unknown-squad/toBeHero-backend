@@ -45,6 +45,17 @@ exports.coursesErrorHandling = (err, req, res, next) => {
     });
   }
 
+  // forbidden to get data
+  if(err.message === `forbidden`) {
+    return res.status(403).json({
+      success: false,
+      error: {
+        code: 403,
+        message: `forbidden.`
+      }
+    });
+  }
+
   // unexpected error
   else {
     return res.status(500).json({

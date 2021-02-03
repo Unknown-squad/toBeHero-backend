@@ -144,3 +144,39 @@ exports.getReviews = asyncHandler(async (req, res) => {
   });
 
 });
+
+// @route   GET `/api/v1/mentor/dashboard/courses`
+// @desc    get courses that created by mentor
+// @access  private (just mentor can see it)
+exports.getMentorCourses = asyncHandler(async (req, res) => {
+
+  // search on user
+  const currentUser = await Mentor
+    .findById(req.user.id)
+    .populate({
+      path: `coursesId`,
+      select: `_id title description picture`,
+      model: Course
+    });
+  
+  // check if user is mentor or not
+  if(!currentUser) {
+    throw new Error(`forbidden`);
+  }
+
+  // check if mentor has no courses yet
+  if(!currentUser.coursesId[0]) {
+    throw new Error(`no data`);
+  }
+
+  res.status(200).json({
+    success: true,
+    message: `successfully get mentor courses.`,
+    data: {
+      kind: `courses`,
+      count: currentUser.coursesId.length,
+      items: currentUser.coursesId
+    }
+  });
+  
+});

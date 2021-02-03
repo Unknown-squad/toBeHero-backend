@@ -3,7 +3,8 @@ const express = require(`express`);
 const router = express.Router();
 const {getOneCourse,
        getCourses,
-       getReviews} = require(`../controllers/course`);
+       getReviews,
+       getMentorCourses} = require(`../controllers/course`);
 
 // @route   GET `/api/v1/courses/:id`
 // @desc    get one course
@@ -20,6 +21,9 @@ router.get(`/api/v1/courses`, getCourses);
 // @access  public
 router.get(`/api/v1/reviews/:courseId`, getReviews);
 
-// router.post(`/api/v1/session`, setSession);
+// @route   GET `/api/v1/mentor/dashboard/courses`
+// @desc    get courses that created by mentor
+// @access  private (just mentor can see it)
+router.get(`/api/v1/mentor/dashboard/courses`, getMentorCourses);
 
 module.exports = router;
