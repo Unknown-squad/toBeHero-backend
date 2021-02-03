@@ -35,7 +35,7 @@ exports.getBasicInfoOfMentor = asyncHandler( async (req, res, next) => {
 // @route   Get '/api/v1/mentor/dashboard/balance'
 // @access  private(mentor)
 exports.getMentorBalace = asyncHandler(async (req, res, next) => {
-    const result = await MentorSchema.findById(req.session.user.id).select('balance');
+    const result = await MentorSchema.findById(req.session.user.id).select('balance -_id');
     
     // check if mentor info is found or not
     if(!result){
@@ -59,7 +59,7 @@ exports.getMentorBalace = asyncHandler(async (req, res, next) => {
 // @access  private(mentor)
 exports.getMentorAnalytics = asyncHandler(async (req, res, next) => {
     const subscriptionCount = await Subscriptions.count({mentorId: req.session.user.id});
-    const coursesCount = await MentorSchema.findById(req.session.user.id).select('coursesId')
+    const coursesCount = await MentorSchema.findById(req.session.user.id).select('coursesId -_id')
 
     // check if mentor info is found or not
     if(!coursesCount){
@@ -77,6 +77,57 @@ exports.getMentorAnalytics = asyncHandler(async (req, res, next) => {
                 {
                     coursesNumber: coursesNumber,
                     subscriptionNumber: subscriptionCount
+                }
+            ]
+        }
+    })
+})
+
+// @desc    get mentor's Mentor availability status
+// @route   Get '/api/v1/mentor/availability'
+// @access  private(mentor)
+exports.getMentorIsAvailable = asyncHandler( async (req, res, next) => {
+    const mentorInfo = await MentorSchema.findById(req.session.user.id).select('isAvailable -_id');
+
+    // check if mentor info is found or not
+    if(!mentorInfo){
+        return next(new ErrorHandler(`mentor is not found`, 404))
+    }
+
+    return res.status(200).json({
+        success: true,
+        message: `menotr availability status`,
+        data: {
+            kind: `menotr`,
+            items: [
+                mentorInfo
+            ]
+        }
+    })
+})
+
+// @desc   update mentor's availability status
+// @route   Put '/api/v1/mentor/availability'
+// @access  private(mentor)
+exports.putMentorIsAvailable = asyncHandler( async (req, res, next) => {
+    const mentorInfo = await MentorSchema.findById('601858731b53e707f8d5a01c')
+    mentorInfo.isAvailable = !mentorInfo.isAvailable;
+    await mentorInfo.save()
+
+    // check if mentor info is found or not
+    if(!mentorInfo){
+        return next(new ErrorHandler(`mentor is not found`, 404))
+    }
+
+
+    return res.status(200).json({
+        success: true,
+        message: `mentor's availability`,
+        data: {
+            kind: `menotr`,
+            items: [
+                {
+                    isAvailable: mentorInfo.isAvailable
                 }
             ]
         }

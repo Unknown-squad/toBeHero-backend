@@ -9,7 +9,9 @@ const authorizedMentor = require(`../middlewares/authorizedMentor`)
 const {
     getBasicInfoOfMentor,
     getMentorBalace,
-    getMentorAnalytics
+    getMentorAnalytics,
+    getMentorIsAvailable,
+    putMentorIsAvailable
 } = require(`../controllers/mentor`)
 
 // @desc    get mentor's basic info 
@@ -32,4 +34,15 @@ router
 router
     .route('/api/v1/mentor/dashboard/analytics')
     .get(authorizedMentor, getMentorAnalytics)
+
+// @desc  get mentor's Mentor availability status
+// @desc   update mentor's availability status
+// @route   get '/api/v1/mentor/availability'
+// @route   PUT '/api/v1/mentor/availability'
+// @access  private(mentor)
+router
+    .route('/api/v1/mentor/availability')
+    .get(authorizedMentor, getMentorIsAvailable)
+    .put(authorizedMentor, putMentorIsAvailable)
+
 module.exports = router
