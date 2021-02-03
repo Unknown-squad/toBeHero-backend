@@ -114,32 +114,43 @@ exports.getReviews = asyncHandler(async (req, res) => {
   if(page <= 0) {
     page = 1;
   }
-  
-  // find reviews
-  const reviews = await Review
-    .find({courseId: req.params.courseId})
-    .select(`-id -courseId`)
-    .skip((page - 1) * limit)
-    .limit(limit)
-    .sort(`-creatingDate`)
+
+  // search on course
+  const currentCourse = await Course
+    .findById(req.params.courseId)
     .populate({
-      path: `guardianId`,
-      select: `fullName picture -_id`,
-      model: Guardian
+      path: `reviewsId`,
+      select: `-id -courseId`,
+      model: Review,
+      options: {
+        sort: {creatingDate: -1}
+      },
+      skip: (page - 1) * limit,
+      limit: limit,
+      populate: {
+        path: `guardianId`,
+        select: `fullName picture -_id`,
+        model: Guardian
+      }
     });
 
-    // handle if there's no reviews in current page
-    if(reviews.length === 0) {
-      throw new Error(`no data`);
-    }
+  // check if course exist or not
+  if(!currentCourse) {
+    throw new Error(`no content`);
+  }
+
+  // check if course has reviews or not
+  if(!currentCourse.reviewsId[0]) {
+    throw new Error(`no data`);
+  }
 
   res.status(200).json({
     success: true,
     message: `successfully get reviews.`,
     data: {
       kind: `reviews`,
-      count: reviews.length,
-      items: reviews
+      count: currentCourse.reviewsId.length,
+      items: currentCourse.reviewsId
     }
   });
 
