@@ -7,6 +7,9 @@ const morgan = require(`morgan`);
 const session = require('express-session');
 const MongoDBStore = require('connect-mongodb-session')(session);
 
+// Add middleware files
+const {subscriptionErrorHandling} = require('./middlewares/subscriptionErrorHandling');
+
 // Add config files
 const connectDB = require(`./config/db`);
 
@@ -43,8 +46,11 @@ app.use(require('express-session')({
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Add routes files
-const subscription = require('./routes/subscription');
-app.use(subscription);
+const subscriptions = require('./routes/subscription');
+app.use(subscriptions);
+
+// Handle error
+app.use(subscriptionErrorHandling);
 
 // Connect to server
 const port = process.env.PORT || 3000;
