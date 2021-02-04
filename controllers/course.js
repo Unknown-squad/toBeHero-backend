@@ -12,17 +12,21 @@ const Guardian = require(`../models/guardians`);
 exports.getOneCourse = asyncHandler(async (req, res, next) => {
 
   // find course with givin id and pupulate mentorId
-  const course = await Course.findById(req.params.id).populate({
+  const course = await Course
+    .findById(req.params.id)
+    .select(`-reviewsId`)
+    .populate({
     path: `mentorId`,
     select: `_id fullName picture isAvailable`,
     model: Mentor
   });
 
-  // handle if there's no course with givin id
+  // check if there's no course with givin id
   if(!course) {
-    throw new Error(`no content`);
+    return next(new ErrorResponse(`Course not found with givin id.`, 404));
   }
 
+  // send response
   res.status(200).json({
     success: true,
     message: `successfully find course with id ${req.params.id}`,

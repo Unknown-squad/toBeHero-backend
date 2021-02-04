@@ -8,51 +8,6 @@ exports.coursesErrorHandling = (err, req, res, next) => {
   let error = {...err};
   error.message = err.message;
 
-  // if user don't select any genre
-  if(err.message === `no genre`) {
-    return res.status(400).json({
-      success: false,
-      error: {
-        code: 400,
-        message: `please pick any genre`
-      }
-    });
-  }
-
-  // if user choose page that hasn't any data
-  if(err.message === `no data`) {
-    return res.status(404).json({
-      success: false,
-      error: {
-        code: 404,
-        message: `there's no content found.`
-      }
-    });
-  }
-
-  // no content error
-  if(err.message === `no content`) {
-    return res.status(404).json({
-      success: false,
-      error: {
-        code: 404,
-        message: `there's no data with givin id.`
-      }
-    });
-  }
-
-  
-  // forbidden to get data
-  if(err.message === `forbidden`) {
-    return res.status(403).json({
-      success: false,
-      error: {
-        code: 403,
-        message: `forbidden.`
-      }
-    });
-  }
-
   // validation error
   if(err.name === `ValidationError`) {
 
