@@ -208,7 +208,7 @@ exports.getAllChildSubscriptions = asyncHandler (async (req, res, next) => {
 exports.getChildSubsForGuardian = asyncHandler (async (req, res, next) => {
   
   // Check if authorized or not
-  if (req.session.person != 'guardian') {
+  if (req.user.person != 'guardian') {
     throw new Error('forbidden');
   }
 
@@ -236,7 +236,7 @@ exports.getChildSubsForGuardian = asyncHandler (async (req, res, next) => {
   const child = await Children
   .findById(req.params.childId)
   .select({_id: 0, guardianId: 1});
-  if(child.guardianId != req.session.user.id) {
+  if(child.guardianId != req.user.id) {
     throw new Error('forbidden');
   }
 
