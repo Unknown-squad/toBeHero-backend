@@ -8,6 +8,7 @@ const asyncHandler = require('../middlewares/async');
 const { populate } = require('../models/subscriptions');
 
 
+
 // @desc    get all subscription for spicific mentor
 // @route   Get localhost:3000/api/v1/mentor/subscriptions
 // @access  private
@@ -59,6 +60,7 @@ exports.getAllMentorSubscriptions = asyncHandler (async (req, res, next) => {
     }
   });
 });
+
 
 
 // @desc    get one subscription for spicific mentor
@@ -117,6 +119,7 @@ exports.getOneMentorSubscription = asyncHandler (async (req, res, next) => {
 });
 
 
+
 // @desc    Add new appiontment
 // @route   Post localhost:3000/api/v1/mentor/subscription/:subscriptionId/add-appointment
 // @access  private
@@ -153,6 +156,7 @@ exports.addNewAppiontment = asyncHandler (async (req, res, next) => {
   });
   await subscription.save();
 });
+
 
 
 // @desc    get all subscription for child
@@ -200,6 +204,7 @@ exports.getAllChildSubscriptions = asyncHandler (async (req, res, next) => {
     }
   });
 });
+
 
 
 // @desc    Get child's subscription for guardian
@@ -250,6 +255,61 @@ exports.getChildSubsForGuardian = asyncHandler (async (req, res, next) => {
       items: [
         {
           childSubscriptions: childSubscriptions
+        }
+      ]
+    }
+  });
+});
+
+
+
+// @desc    Get child's subscription for guardian
+// @route   Get localhost:3000/api/v1/guardian/child-subscription/childId/subscriptionId
+// @access  private
+exports.getOneChildsubscForGuardian = asyncHandler (async (req, res, next) => {
+  
+  // Check if authorized or not
+  if (req.user.person != 'guardian') {
+    throw new Error('forbidden');
+  }
+
+  // Get one child subscription for guardian
+  const childSubscription = await Subscription
+  .findById(req.params.subscriptionId)
+  .select({_id: 1, childId: 1, mentorId: 1, appointments: 1})
+  .populate({
+    path: 'childId',
+    select: "fullName picture -_id",
+    model: Children
+  })
+  .populate({
+    path: 'mentorId',
+    select: "_id fullName gender picture phone countryCode",
+    model: Mentor
+  });
+
+  // Check if no content
+  if (!childSubscription) {
+    throw new Error('no content');
+  }
+
+  // Check if guardian authorized for child's subscription
+  const child = await Children
+  .findById(req.params.childId)
+  .select({_id: 0, guardianId: 1});
+  if(child.guardianId != req.user.id) {
+    throw new Error('forbidden');
+  }
+
+  //return data to guardian
+  res.status(200).json({
+    success: true,
+    message: "Child's subscription",
+    data: {
+      kind: 'subscriptoins',
+      items: [
+        {
+          childSubscription: childSubscription
         }
       ]
     }

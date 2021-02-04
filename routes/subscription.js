@@ -39,4 +39,11 @@ router.get('/api/v1/child/home', subscription.getAllChildSubscriptions);
 router.get('/api/v1/guardian/child-subscription/:childId', subscription.getChildSubsForGuardian);
 
 
+
+// @desc    Get child's subscription for guardian
+// @route   Get localhost:3000/api/v1/guardian/child-subscription/childId/subscriptionId
+// @access  private
+router.get('/api/v1/guardian/child-subscription/:childId/:subscriptionId', subscription.getOneChildsubscForGuardian);
+
+
 module.exports = router;

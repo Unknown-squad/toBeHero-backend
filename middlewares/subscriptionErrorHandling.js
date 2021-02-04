@@ -1,10 +1,10 @@
 // Handle different error 
 exports.subscriptionErrorHandling = (err, req, res, next) => {
   
-  console.log(err.message);
+  console.log(err);
 
   // Check if no conent with given data
-  if (err.message === 'no content') {
+  if (err.message === 'no content' || err.message === "Cannot read property 'guardianId' of null") {
     return res.status(404).json({
       success: false,
       error: {
