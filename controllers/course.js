@@ -142,14 +142,15 @@ exports.getReviews = asyncHandler(async (req, res, next) => {
 
   // check if course exist or not
   if(!currentCourse) {
-    throw new Error(`no content`);
+    return next(new ErrorResponse(`Course not found with givin id.`, 404));
   }
 
   // check if course has reviews or not
   if(!currentCourse.reviewsId[0]) {
-    throw new Error(`no data`);
+    return next(new ErrorResponse(`there's no reviews for this course.`, 404));
   }
 
+  // send response
   res.status(200).json({
     success: true,
     message: `successfully get reviews.`,
