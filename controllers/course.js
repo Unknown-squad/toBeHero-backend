@@ -168,6 +168,17 @@ exports.getReviews = asyncHandler(async (req, res, next) => {
 // @access  private (just mentor can see it)
 exports.getMentorCourses = asyncHandler(async (req, res, next) => {
 
+  req.user = {
+    person: `mentor`,
+    id: `6014ab907de41177abded6ae`,
+
+  };
+
+  // check if user is mentor or not
+  if(req.user.person !== `mentor`) {
+    return next(new ErrorResponse(`forbidden.`, 403));
+  }
+
   // search on user
   const currentUser = await Mentor
     .findById(req.user.id)
@@ -177,16 +188,12 @@ exports.getMentorCourses = asyncHandler(async (req, res, next) => {
       model: Course
     });
   
-  // check if user is mentor or not
-  if(!currentUser) {
-    throw new Error(`forbidden`);
-  }
-
-  // check if mentor has no courses yet
+  // check if mentor has no courses
   if(!currentUser.coursesId[0]) {
-    throw new Error(`no data`);
+    return next(new ErrorResponse(`there's no courses created by this mentor.`, 404));
   }
 
+  // send response
   res.status(200).json({
     success: true,
     message: `successfully get mentor courses.`,
