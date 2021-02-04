@@ -5,7 +5,8 @@ const {getOneCourse,
        getCourses,
        getReviews,
        getMentorCourses,
-       postReview} = require(`../controllers/course`);
+       postReview,
+       postCourse} = require(`../controllers/course`);
 
 // @route   GET `/api/v1/courses/:id`
 // @desc    get one course
@@ -31,5 +32,10 @@ router.get(`/api/v1/mentor/dashboard/courses`, getMentorCourses);
 // @desc    add new review to course
 // @access  private (only guardian can add reviews)
 router.post(`/api/v1/add-review`, postReview);
+
+// @route   POST `/api/v1/mentor/dashboard/new-course`
+// @desc    add new course by mentor
+// @access  private (only mentor can add new course)
+router.post(`/api/v1/mentor/dashboard/new-course`, postCourse);
 
 module.exports = router;

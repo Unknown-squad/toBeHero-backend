@@ -168,12 +168,6 @@ exports.getReviews = asyncHandler(async (req, res, next) => {
 // @access  private (just mentor can see it)
 exports.getMentorCourses = asyncHandler(async (req, res, next) => {
 
-  req.user = {
-    person: `mentor`,
-    id: `6014ab907de41177abded6ae`,
-
-  };
-
   // check if user is mentor or not
   if(req.user.person !== `mentor`) {
     return next(new ErrorResponse(`forbidden.`, 403));
@@ -252,5 +246,17 @@ exports.postReview = asyncHandler(async (req, res, next) => {
       }]
     }
   });
+
+});
+
+// @route   POST `/api/v1/mentor/dashboard/new-course`
+// @desc    add new course by mentor
+// @access  private (only mentor can add new course)
+exports.postCourse = asyncHandler(async (req, res, next) => {
+
+  // check if user is mentor or not
+  if(req.user.person !== `mentor`) {
+    return new ErrorResponse(`forbidden.`, 304);
+  }
 
 });
