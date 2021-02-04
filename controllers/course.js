@@ -1,5 +1,6 @@
 // load requried packages
 const asyncHandler = require(`../middlewares/async`);
+const ErrorResponse = require(`../utils/errorResponse`);
 const Course = require(`../models/courses`);
 const Mentor = require(`../models/mentors`);
 const Review = require(`../models/reviews`);
@@ -8,7 +9,7 @@ const Guardian = require(`../models/guardians`);
 // @route   GET `/api/v1/courses/:id`
 // @desc    get one course
 // @access  public
-exports.getOneCourse = asyncHandler(async (req, res) => {
+exports.getOneCourse = asyncHandler(async (req, res, next) => {
 
   // find course with givin id and pupulate mentorId
   const course = await Course.findById(req.params.id).populate({
@@ -36,7 +37,7 @@ exports.getOneCourse = asyncHandler(async (req, res) => {
 // @route   GET `/api/v1/courses`
 // @desc    get courses
 // @access  public
-exports.getCourses = asyncHandler(async (req, res) => {
+exports.getCourses = asyncHandler(async (req, res, next) => {
 
   // Genre
   if(!req.query.genre) {
@@ -105,7 +106,7 @@ exports.getCourses = asyncHandler(async (req, res) => {
 // @route   GET `/api/v1/reviews/:courseId`
 // @desc    get reviews
 // @access  public
-exports.getReviews = asyncHandler(async (req, res) => {
+exports.getReviews = asyncHandler(async (req, res, next) => {
 
   // handle pagination
   let page = parseInt(req.query.page, 10) || 1;
@@ -159,7 +160,7 @@ exports.getReviews = asyncHandler(async (req, res) => {
 // @route   GET `/api/v1/mentor/dashboard/courses`
 // @desc    get courses that created by mentor
 // @access  private (just mentor can see it)
-exports.getMentorCourses = asyncHandler(async (req, res) => {
+exports.getMentorCourses = asyncHandler(async (req, res, next) => {
 
   // search on user
   const currentUser = await Mentor
@@ -190,4 +191,53 @@ exports.getMentorCourses = asyncHandler(async (req, res) => {
     }
   });
   
+});
+
+// @route   POST `/api/v1/add-review`
+// @desc    add new review to course
+// @access  private (only guardian can add reviews)
+exports.postReview = asyncHandler(async (req, res, next) => {
+
+  // check if user is authorized to add new review
+  if(req.user.person !== `guardian`) {
+    return next(new ErrorResponse(`forbidden.`, 403));
+  }
+
+  // create new review
+  const newReview = await Review.create({
+    rate: req.body.params.rate,
+    description: req.body.params.description,
+    courseId: req.body.params.courseId,
+    guardianId: req.user.id
+  });
+
+  // find course with givin id
+  const course = await Course.findById(req.body.params.courseId);
+
+  // check if there's no course with givin id
+  if(!course) {
+    return next(new ErrorResponse(`Course not found with givin id.`, 404));
+  }
+
+  // update course data
+  course.reviewCounter++;
+  course.reviewsId.push(newReview._id);
+  await course.save();
+
+  // send response
+  res.status(201).json({
+    success: true,
+    message: `review created successfully.`,
+    data: {
+      kind: `guardian`,
+      items: [{
+        reviewId: newReview._id,
+        giardian: {
+          fullName: req.user.fullName,
+          picture: req.user.picture
+        }
+      }]
+    }
+  });
+
 });

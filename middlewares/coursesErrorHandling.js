@@ -1,5 +1,12 @@
+const ErrorResponse = require(`../utils/errorResponse`);
+
 exports.coursesErrorHandling = (err, req, res, next) => {
+
+  // console error for dev
   console.log(err);
+
+  let error = {...err};
+  error.message = err.message;
 
   // if user don't select any genre
   if(err.message === `no genre`) {
@@ -34,17 +41,7 @@ exports.coursesErrorHandling = (err, req, res, next) => {
     });
   }
 
-  // id of content not valid
-  if(err.kind === `ObjectId`) {
-    return res.status(400).json({
-      success: false,
-      error: {
-        code: 400,
-        message: `invalid id.`
-      }
-    });
-  }
-
+  
   // forbidden to get data
   if(err.message === `forbidden`) {
     return res.status(403).json({
@@ -56,15 +53,36 @@ exports.coursesErrorHandling = (err, req, res, next) => {
     });
   }
 
-  // unexpected error
-  else {
-    return res.status(500).json({
-      success: false,
-      error: {
-        code: 500,
-        message: `Server error.`
+  // validation error
+  if(err.name === `ValidationError`) {
+
+    // export messages from errors object
+    const message = Object.values(err.errors).map(val => {
+
+      // check if kind of error is ObjectId
+      if(val.kind === `ObjectId`) {
+        val.message = `invalid id at path ${val.path}`
       }
+      return ` ${val.message}`;
+
     });
+
+    error = new ErrorResponse(message, 400);
+  } 
+  
+  // id of content not valid
+  if(err.name === `CastError`) {
+    const message = `invalid id.`;
+    error = new ErrorResponse(message, 400);
   }
+
+  // unexpected error
+  res.status(error.statusCode || 500).json({
+    success: false,
+    error: {
+      code: error.statusCode,
+      message: error.message || `Server error.`
+    }
+  });
 
 };
