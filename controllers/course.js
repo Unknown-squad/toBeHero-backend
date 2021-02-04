@@ -45,7 +45,7 @@ exports.getCourses = asyncHandler(async (req, res, next) => {
 
   // Genre
   if(!req.query.genre) {
-    throw new Error(`no genre`);
+    return next(new ErrorResponse(`please pick any genre.`, 400));
   }
 
   // Sort
@@ -79,22 +79,23 @@ exports.getCourses = asyncHandler(async (req, res, next) => {
   
   // find and filter courses
   const courses = await Course
-  .find({genre: req.query.genre, rate: {$gte: filter}})
-  .sort(sortby)
-  .skip((page - 1) * limit)
-  .limit(limit)
-  .select(` -creatingDate -topicsList -mediaURLS -subscriptionNumber -reviewsId`)
-  .populate({
-    path: "mentorId",
-    select: "_id fullName picture isAvailable",
-    model: Mentor
-  });
+    .find({genre: req.query.genre, rate: {$gte: filter}})
+    .sort(sortby)
+    .skip((page - 1) * limit)
+    .limit(limit)
+    .select(` -creatingDate -topicsList -mediaURLS -subscriptionNumber -reviewsId`)
+    .populate({
+      path: "mentorId",
+      select: "_id fullName picture isAvailable",
+      model: Mentor
+    });
 
   // check if there is no courses in page
-  if(courses.length == 0) {
-    throw new Error(`no data`);
+  if(courses.length === 0) {
+    return next(new ErrorResponse(`this page has no data.`, 404));
   }
   
+  // send response
   res.status(200).json({
     success: true,
     message: `successfully get courses data of page ${page}`,
