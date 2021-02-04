@@ -5,6 +5,7 @@ const Children = require('../models/children');
 const Course = require('../models/courses');
 const Mentor = require('../models/mentors');
 const asyncHandler = require('../middlewares/async');
+const { populate } = require('../models/subscriptions');
 
 
 // @desc    get all subscription for spicific mentor
@@ -194,6 +195,61 @@ exports.getAllChildSubscriptions = asyncHandler (async (req, res, next) => {
       items: [
         {
           subscription: subscription
+        }
+      ]
+    }
+  });
+});
+
+
+// @desc    Get child's subscription for guardian
+// @route   Get localhost:3000/api/v1/guardian/child-subscription/childId
+// @access  private
+exports.getChildSubsForGuardian = asyncHandler (async (req, res, next) => {
+  
+  // Check if authorized or not
+  if (req.session.person != 'guardian') {
+    throw new Error('forbidden');
+  }
+
+  // get child subscriptions for guardian
+  const childSubscriptions = await Subscription
+  .find({childId: req.params.childId})
+  .select({_id: 1, courseId: 1, mentorId: 1})
+  .populate({
+    path: 'mentorId',
+    select: "_id fullName picture",
+    model: Mentor
+  })
+  .populate({
+    path: 'courseId',
+    select: "title description picture -_id",
+    model: Course
+  });
+  
+  // Check if no content
+  if (childSubscriptions.length === 0) {
+    throw new Error('no content');
+  }
+
+  // Check if guardian authorized for child's subscriptions
+  const child = await Children
+  .findById(req.params.childId)
+  .select({_id: 0, guardianId: 1});
+  if(child.guardianId != req.session.user.id) {
+    throw new Error('forbidden');
+  }
+
+
+  // return data to child
+  res.status(200).json({
+    success: true,
+    message: "Child's subscriptions",
+    data: {
+      kind: 'subscriptions',
+      items: [
+        {
+          childSubscriptions: childSubscriptions
         }
       ]
     }
