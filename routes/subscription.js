@@ -8,7 +8,7 @@ const subscription = require('../controllers/subscription');
 // @desc    get all subscription for spicific mentor
 // @route   Get localhost:3000/api/v1/mentor/subscriptions
 // @access  private
-router.get('/api/v1/mentor/subscriptions', subscription.getOneMentorSubscription);
+router.get('/api/v1/mentor/subscriptions', subscription.getAllMentorSubscriptions);
 
 
 
@@ -43,7 +43,7 @@ router.get('/api/v1/guardian/child-subscription/:childId', subscription.getChild
 // @desc    Get child's subscription for guardian
 // @route   Get localhost:3000/api/v1/guardian/child-subscription/childId/subscriptionId
 // @access  private
-router.get('/api/v1/guardian/child-subscription/:childId/:subscriptionId', subscription.getOneChildsubscForGuardian);
+router.get('/api/v1/guardian/child-subscription/:childId/:subscriptionId', subscription.getOneChildsubForGuardian);
 
 
 module.exports = router;

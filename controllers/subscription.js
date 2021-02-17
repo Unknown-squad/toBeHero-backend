@@ -99,7 +99,7 @@ exports.getOneMentorSubscription = asyncHandler (async (req, res, next) => {
   }
 
   // Check if mentor authorized
-  if (subscription.mentorId.toString() != req.session.user.id.toString()) {
+  if (subscription.mentorId.toString() != req.user.id.toString()) {
     throw new Error('forbidden');
   }
 
@@ -124,19 +124,24 @@ exports.getOneMentorSubscription = asyncHandler (async (req, res, next) => {
 // @route   Post localhost:3000/api/v1/mentor/subscription/:subscriptionId/add-appointment
 // @access  private
 exports.addNewAppiontment = asyncHandler (async (req, res, next) => {
-
+  
   // Check if user authorized
-  if (req.user.person != 'mentor') {
+  if (req.session.person != 'mentor') {
     throw new Error('forbidden');
   }
 
   const subscription = await Subscription
   .findById(req.params.subscriptionId)
-  .select({appointments: 1, _id: 1});
+  .select({appointments: 1, _id: 1, mentorId: 1});
 
   // Check if no content
   if (!subscription) {
     throw new Error('no content');
+  }
+
+  // Check if mentor auhtorized
+  if (subscription.mentorId.toString() != req.user.id.toString()) {
+    throw new Error('forbidden');
   }
 
   // Add appointment property
@@ -211,7 +216,7 @@ exports.getAllChildSubscriptions = asyncHandler (async (req, res, next) => {
 // @route   Get localhost:3000/api/v1/guardian/child-subscription/childId
 // @access  private
 exports.getChildSubsForGuardian = asyncHandler (async (req, res, next) => {
-  
+
   // Check if authorized or not
   if (req.user.person != 'guardian') {
     throw new Error('forbidden');
@@ -220,7 +225,7 @@ exports.getChildSubsForGuardian = asyncHandler (async (req, res, next) => {
   // get child subscriptions for guardian
   const childSubscriptions = await Subscription
   .find({childId: req.params.childId})
-  .select({_id: 1, courseId: 1, mentorId: 1})
+  .select({_id: 1, courseId: 1, mentorId: 1, appointments: 1})
   .populate({
     path: 'mentorId',
     select: "_id fullName picture",
@@ -230,6 +235,25 @@ exports.getChildSubsForGuardian = asyncHandler (async (req, res, next) => {
     path: 'courseId',
     select: "title description picture -_id",
     model: Course
+  });
+  
+  // Get child's nextAppointment && other data
+  let result = [];
+  childSubscriptions.forEach(el => {
+    let arrayOfDates = [];
+    let minDate;
+    el.appointments.forEach(el => {
+      if (el.date > Date.now()) {
+        arrayOfDates.push(el.date);
+      }
+    });
+    minDate = new Date(Math.min(...arrayOfDates));
+    result.push({
+      _id: el._id,
+      mentorId: el.mentorId,
+      courseId: el.courseId,
+      nextAppointment: minDate
+    });
   });
   
   // Check if no content
@@ -244,8 +268,7 @@ exports.getChildSubsForGuardian = asyncHandler (async (req, res, next) => {
   if(child.guardianId != req.user.id) {
     throw new Error('forbidden');
   }
-
-
+  
   // return data to child
   res.status(200).json({
     success: true,
@@ -254,7 +277,7 @@ exports.getChildSubsForGuardian = asyncHandler (async (req, res, next) => {
       kind: 'subscriptions',
       items: [
         {
-          childSubscriptions: childSubscriptions
+          childSubscriptions: result
         }
       ]
     }
@@ -266,7 +289,7 @@ exports.getChildSubsForGuardian = asyncHandler (async (req, res, next) => {
 // @desc    Get child's subscription for guardian
 // @route   Get localhost:3000/api/v1/guardian/child-subscription/childId/subscriptionId
 // @access  private
-exports.getOneChildsubscForGuardian = asyncHandler (async (req, res, next) => {
+exports.getOneChildsubForGuardian = asyncHandler (async (req, res, next) => {
   
   // Check if authorized or not
   if (req.user.person != 'guardian') {
