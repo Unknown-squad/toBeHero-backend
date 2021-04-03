@@ -36,6 +36,7 @@ const subscriptionSchema = new mongoose.Schema({
     default: false
   },
   appointments: {
+    type: [{
       date: {
         type: Date,
         requried: [true, `please add date to appointment`]
