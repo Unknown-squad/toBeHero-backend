@@ -59,14 +59,14 @@ exports.getMentorBalace = asyncHandler(async (req, res, next) => {
 // @access  private(mentor)
 exports.getMentorAnalytics = asyncHandler(async (req, res, next) => {
     const subscriptionCount = await Subscriptions.count({mentorId: req.session.user.id});
-    const coursesCount = await MentorSchema.findById(req.session.user.id).select('coursesId -_id')
+    const coursesCount = await MentorSchema.findById(req.session.user.id)
 
     // check if mentor info is found or not
     if(!coursesCount){
         return next(new ErrorHandler(`mentor is not found`, 404))
     }
     // enter number of courses into coursesNumber
-    coursesNumber = coursesCount.coursesId.length
+    const coursesNumber = coursesCount.coursesId.length
 
     return res.status(200).json({
         success: true,
@@ -114,7 +114,7 @@ exports.putMentorIsAvailable = asyncHandler( async (req, res, next) => {
 
         // check if mentor info is found or not
         if(!mentorInfo){
-            return next(new ErrorHandler(`mentor is not found`, 404))
+            return next(new ErrorHandler(`there's no such mentor with given id.`, 404))
         }
 
     mentorInfo.isAvailable = !mentorInfo.isAvailable;
@@ -134,24 +134,27 @@ exports.putMentorIsAvailable = asyncHandler( async (req, res, next) => {
     })
 })
 
-// @desc   get mentor profile
-// @route   Get '/api/v1/mentor/profile/mentorId'
-// @access public
-const getMentorProfile = asyncHandler(async (req, res, next) => {
-    const limit = parseInt(req.queue.limit, 10) || 8
-    const page = parseInt(req.queue.page, 10) || 1
-    const skip = (page - 1) * limit
-    const mentorInfo = await MentorSchema.findById('601858731b53e707f8d5a01c')
-        .select('-creatingDate -bankingInfo -verificationToken -verificationTokenExpire')
-        .populate({
-            path: 'courses',
-            
-        })
+// @desc    get mentor's profile
+// @route   Get '/api/v1/mentor/profile/:mentorId'
+// @access  public
+exports.getMentorProfile = asyncHandler(async (req, res, next) => {
+    console.log(req.params.mentorId)
+    // get mentor info.
+    const mentorInfo = await MentorSchema.findById(req.params.mentorId).select(`-coursesId -SubscriptionIDs -bankingInfo -verificationToken -verificationTokenExpire`)
+        .populate('topReviewsId')
 
     // check if mentor info is found or not
     if(!mentorInfo){
-        return next(new ErrorHandler(`mentor is not found`, 404))
+        return next(new ErrorHandler(`there's no such mentor with given id.`, 404))
     }
 
-
+    // send respone to cliant
+    res.status(200).json({
+        success: true,
+        message: `mentor data`,
+        data: {
+            Kind: `mentor`,
+            items:  mentorInfo
+        }
+    })
 })

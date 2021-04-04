@@ -11,7 +11,8 @@ const {
     getMentorBalace,
     getMentorAnalytics,
     getMentorIsAvailable,
-    putMentorIsAvailable
+    putMentorIsAvailable,
+    getMentorProfile
 } = require(`../controllers/mentor`)
 
 // @desc    get mentor's basic info 
@@ -44,5 +45,12 @@ router
     .route('/api/v1/mentor/availability')
     .get(authorizedMentor, getMentorIsAvailable)
     .put(authorizedMentor, putMentorIsAvailable)
+
+// @desc    get mentor's profile
+// @route   Get '/api/v1/mentor/profile/:mentorId'
+// @access  public
+router
+    .route('/api/v1/mentor/profile/:mentorId')
+    .get(getMentorProfile)
 
 module.exports = router
