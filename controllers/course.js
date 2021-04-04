@@ -210,6 +210,14 @@ exports.postReview = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse(`forbidden.`, 403));
   }
 
+  // find course with givin id
+  const course = await Course.findById(req.body.params.courseId);
+  
+  // check if there's no course with givin id
+  if(!course) {
+    return next(new ErrorResponse(`Course not found with givin id.`, 404));
+  }
+
   // create new review
   const newReview = await Review.create({
     rate: req.body.params.rate,
@@ -218,15 +226,7 @@ exports.postReview = asyncHandler(async (req, res, next) => {
     guardianId: req.user.id
   });
 
-  // find course with givin id
-  const course = await Course.findById(req.body.params.courseId);
-
-  // check if there's no course with givin id
-  if(!course) {
-    return next(new ErrorResponse(`Course not found with givin id.`, 404));
-  }
-
-  // update course data
+  // increase reviewCounter by 1 and push new review id to course
   course.reviewCounter++;
   course.reviewsId.push(newReview._id);
   await course.save();
@@ -246,6 +246,30 @@ exports.postReview = asyncHandler(async (req, res, next) => {
       }]
     }
   });
+
+  // adding new review to topRewviews in mentor who created current course
+  // filter reviews by rate, only reviews with rate equal or greater than 4 will added to topReviews
+  if(newReview.rate >= 4) {
+
+    // find mentor to access to top reviews
+    const currentMentor = await Mentor.findById(course.mentorId);
+
+    // check if the length of top reviews is less than 4
+    // and if so add the id of new review to the begining of top review array
+    if(currentMentor.topReviewsId.length < 4) {
+      currentMentor.topReviewsId.unshift(newReview._id);
+      await currentMentor.save();
+    }
+    
+    // check if tha maximum length of top reviews is 4
+    // and if so remove the oldest review then add the new one to the begining of top review array
+    else {
+      currentMentor.topReviewsId.pop();
+      currentMentor.topReviewsId.unshift(newReview._id);
+      await currentMentor.save();
+    }
+
+  }
 
 });
 
