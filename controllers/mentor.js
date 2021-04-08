@@ -158,3 +158,37 @@ exports.getMentorProfile = asyncHandler(async (req, res, next) => {
         }
     })
 })
+
+// @desc    get mentor's courses
+// @route   Get '/api/v1/mentor/courses/mentorId?page='
+// @access  public
+exports.getMentorCourses = asyncHandler(async (req, res, next) => {
+    // add pagenation
+    const limit = 8;
+    const { page = 1 } = req.query;
+
+    // get mentor's courses
+    const coursesOfMentor = await MentorSchema.findById(req.params.mentorId)
+        .select(`coursesId -_id`)
+        .limit(limit)
+        .skip((page - 1) * limit)
+        .populate({
+            path: `couressId`,
+            select: `_id title picture discription`
+        });
+
+    // check if there are courses
+    if (coursesOfMentor.coursesId.length === 0) {
+        return next(new ErrorHandler(`there's no such courses with given mentor id ${req.params.mentorId}`, 404));
+    };
+
+    // send successfully response
+    res.status(200).json({
+        success: true,
+        message: `mentor data`,
+        data: {
+            Kind: `mentor`,
+            items: coursesOfMentor
+        }
+    })
+})

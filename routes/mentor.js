@@ -53,4 +53,11 @@ router
     .route('/api/v1/mentor/profile/:mentorId')
     .get(getMentorProfile)
 
+// @desc    get mentor's courses
+// @route   Get '/api/v1/mentor/courses/:mentorId'
+// @access  public
+router
+    .route('/api/v1/mentor/courses/:mentorId')
+    .get(getMentorCourses)
+
 module.exports = router
