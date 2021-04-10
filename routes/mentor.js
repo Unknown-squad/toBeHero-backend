@@ -60,4 +60,11 @@ router
     .route('/api/v1/mentor/courses/:mentorId')
     .get(getMentorCourses)
 
+// @desc    update mentor's courses
+// @route   PUT '/api/v1/mentor/dashboard/basic-info'
+// @access  privet
+router
+    .route('/api/v1/mentor/dashboard/basic-info')
+    .put(authorizedMentor, updateMentorInfo);
+    
 module.exports = router

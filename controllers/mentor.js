@@ -191,4 +191,33 @@ exports.getMentorCourses = asyncHandler(async (req, res, next) => {
             items: coursesOfMentor
         }
     })
-})
+});
+
+// @desc    update mentor's courses
+// @route   PUT '/api/v1/mentor/dashboard/basic-info'
+// @access  privet
+exports.updateMentorInfo = asyncHandler( async (req, res, next) => {   
+    // get user data
+    const user = await MentorSchema.findById(req.session.id);
+
+    // check if found user
+    if (!user) {
+        return next(new ErrorHandler(`there's no such mentor with given id ${req.params.mentorId}`, 404));
+    }
+
+    // save new update
+    user.fullName       = req.body.fullName;
+    user.address        = req.body.address;
+    user.gender         = req.body.gender;
+    user.birthDate      = req.body.birthDate;
+    user.occupation     = req.body.occupation;
+    user.certificates   = req.body.certificates;
+    user.description    = req.body.description;
+    await user.save();
+
+    // send successfully response
+    res.status(201).json({
+        success: true,
+        message: `mentor basic information is updated successfully.`
+    })
+});
