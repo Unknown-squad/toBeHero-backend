@@ -6,6 +6,7 @@ const dotenv = require(`dotenv`);
 const morgan = require(`morgan`);
 const session = require('express-session');
 const MongoDBStore = require('connect-mongodb-session')(session);
+const fileUpload = require(`express-fileupload`);
 
 // load routes
 const courses = require(`./routes/course`);
@@ -17,6 +18,9 @@ const {coursesErrorHandling} = require(`./middlewares/coursesErrorHandling`);
 // Read body of request
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
+
+// use file upload
+app.use(fileUpload());
 
 // using dotenv
 dotenv.config({path: `./config/config.env`});
