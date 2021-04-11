@@ -170,12 +170,6 @@ exports.getReviews = asyncHandler(async (req, res, next) => {
 // @desc    get courses that created by mentor
 // @access  private (just mentor can see it)
 exports.getMentorCourses = asyncHandler(async (req, res, next) => {
-  console.log(req.body);
-
-  // check if user is mentor or not
-  if(req.user.person !== `mentor`) {
-    return next(new ErrorResponse(`forbidden.`, 403));
-  }
 
   // search on user
   const currentUser = await Mentor
@@ -208,11 +202,6 @@ exports.getMentorCourses = asyncHandler(async (req, res, next) => {
 // @desc    add new review to course
 // @access  private (only guardian can add reviews)
 exports.postReview = asyncHandler(async (req, res, next) => {
-
-  // check if user is authorized to add new review
-  if(req.user.person !== `guardian`) {
-    return next(new ErrorResponse(`forbidden.`, 403));
-  }
 
   // find course with givin id
   const course = await Course.findById(req.body.params.courseId);
@@ -302,11 +291,6 @@ exports.postCourse = asyncHandler(async (req, res, next) => {
       topicsList: [`thing`]
     }
   } */
-
-  // check if user is mentor or not
-  if(req.user.person !== `mentor`) {
-    return new ErrorResponse(`forbidden.`, 304);
-  }
 
   let isFiles = false;
   
@@ -503,4 +487,13 @@ exports.postCourse = asyncHandler(async (req, res, next) => {
 
   });
 
+});
+
+// @route   GET `/api/v1/courses/:id`
+// @desc    update paricular course
+// @access  private (only mentor can update his own courses)
+exports.putCourse = asyncHandler(async (req, res, next) => {
+
+  
+  
 });
