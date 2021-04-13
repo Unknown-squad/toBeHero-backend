@@ -5,13 +5,21 @@ const ErrorResponse = require('../utils/errorResponse');
 // Handle error
 exports.subscriptionErrorHandling = (err, req, res, next) => {
   console.log(err);
+  console.log(err.name);
   let error = {...err};
   error.message = err.message;
 
   
   // Check if invalid data
   if (err.name === 'CastError') {
-    const message = `Invalid id`;
+    const message = 'Invalid id';
+    error = new ErrorResponse(message, 400);
+  }
+
+  // Check validation error
+  if (err.name === 'ValidationError') {
+    console.log('Mahmoud');
+    const message = 'Invalid date or time';
     error = new ErrorResponse(message, 400);
   }
 

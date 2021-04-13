@@ -125,6 +125,12 @@ exports.getOneMentorSubscription = asyncHandler (async (req, res, next) => {
 // @access  private/mentor
 exports.addNewAppiontment = asyncHandler (async (req, res, next) => {
   
+
+  req.user = {
+    person: 'mentor',
+    id: '60196798ad18f83aaca6ac42'
+  };
+
   // Check if user authorized
   if (req.user.person != 'mentor') {
     return next(new ErrorResponse(`Forbidden.`, 403));
@@ -144,27 +150,30 @@ exports.addNewAppiontment = asyncHandler (async (req, res, next) => {
     return next(new ErrorResponse(`Forbidden.`, 403));
   }
 
-  // Add appointment property
-  req.body = {
-    method: 'mentor.appointment.post',
-    params: {
-      title: req.body.title,
-      time: req.body.time,
-      date: req.body.date,
-    }
+  // Check if req.body is empty
+  const {params, method} = req.body;
+  if (!params || !method) {
+    return next(new ErrorResponse('Method or params are missing.'));
   }
+  const {title, date, time} = req.body.params;
+  if (!title, !date, !time) {
+    return next(new ErrorResponse('Params are missing.', 400));
+  }
+
+  // Add appointment
   subscription.appointments.push({
     title: req.body.params.title,
     date: `${req.body.params.date}T${req.body.params.time}`
   });
+  
+  // Save result
+  await subscription.save();
 
   // return result for mentor
   res.status(201).json({
     success: true,
-    message: 'Appointment added successfully.'
-
+    message: 'Appointment created successfully'
   });
-  await subscription.save();
 });
 
 
