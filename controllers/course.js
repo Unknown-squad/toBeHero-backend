@@ -233,7 +233,7 @@ exports.postReview = asyncHandler(async (req, res, next) => {
       kind: `guardian`,
       items: [{
         reviewId: newReview._id,
-        giardian: {
+        guardian: {
           fullName: req.user.fullName,
           picture: req.user.picture
         }
