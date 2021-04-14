@@ -7,7 +7,8 @@ const Review = require(`../models/reviews`);
 const Guardian = require(`../models/guardians`);
 const path = require(`path`);
 const fs = require(`fs`);
-const { clear } = require("console");
+const {filterArray} = require(`../utils/filterArray`);
+const mongoose = require(`mongoose`);
 
 // @route   GET `/api/v1/courses/:id`
 // @desc    get one course
@@ -282,32 +283,27 @@ exports.postCourse = asyncHandler(async (req, res, next) => {
       title: 'title',
       price: 123,
       description: 'description',
-      topicList: [
+      topicsList: [
         'thing-2',
         'thing-2',
         'thing-3'
       ],
-      genre: 'Art',
-      topicsList: [`thing`]
+      genre: 'Art'
     }
   } */
-
-  let isFiles = false;
-  
-  // check if one or more images uploaded as course picture
-  if(req.files) {
-    isFiles = true;
-    if(Array.isArray(req.files.picture)) {
-      return next(new ErrorResponse(`please chose only one image to upload as course picture.`, 400));
-    }
-  }
+  // end of testing
   
   // create global virables to set picture path and media urls path
   let picturePath;
   let mediaURLSPath = [];
   
-  // check if there's no files uploaded
-  if(isFiles) {
+  // check if there's no files to upload
+  if(req.files) {
+    
+    // check if one or more images uploaded as course picture
+    if(Array.isArray(req.files.picture)) {
+      return next(new ErrorResponse(`please chose only one image to upload as course picture.`, 400));
+    }
     
     // handle course picture uploading
     // check if there's course picture uploaded
@@ -316,7 +312,7 @@ exports.postCourse = asyncHandler(async (req, res, next) => {
     }
 
     // set name of course picture
-    let pictureName = `image-course-${req.user.person}-${Date.now()}${path.parse(req.files.picture.name).ext}`;
+    let pictureName = `image-course-${req.user.person}-${Date.now()}${mongoose.Types.ObjectId()}${path.parse(req.files.picture.name).ext}`;
     
     // set dir of images and videos
     let pictureDir = `${__dirname}/../public/images/${pictureName}`;
@@ -398,7 +394,7 @@ exports.postCourse = asyncHandler(async (req, res, next) => {
         }
         
         // set image name and video name
-        let mediaName = `${fileType}-course-${req.user.person}-${Date.now()}${path.parse(file.name).ext}`;
+        let mediaName = `${fileType}-course-${req.user.person}-${Date.now()}${mongoose.Types.ObjectId()}${path.parse(file.name).ext}`;
 
         // set image dir and video dir
         let mediaDir = `${__dirname}/../public/${fileType}s/${mediaName}`;
@@ -470,7 +466,7 @@ exports.postCourse = asyncHandler(async (req, res, next) => {
           fs.unlinkSync(`${__dirname}/../public${mediaURLSPath[i]}`);
         }
 
-        // clear pathes after deleting files
+        // clear paths after deleting files
         mediaURLSPath = [];
       }
 
@@ -489,11 +485,285 @@ exports.postCourse = asyncHandler(async (req, res, next) => {
 
 });
 
-// @route   GET `/api/v1/courses/:id`
+// @route   PUT `/api/v1/courses/:id`
 // @desc    update paricular course
 // @access  private (only mentor can update his own courses)
 exports.putCourse = asyncHandler(async (req, res, next) => {
 
+  // just for testing
+  /* req.user = {
+    person: `mentor`
+  }
+  req.body = {
+    method: 'post.course',
+    params: {
+      title: 'rmrm',
+      price: 6969,
+      description: 'alien course',
+      topicsList: [
+        '69 thing 69',
+        '69 thing 69',
+        '69 thing 69'
+      ],
+      genre: 'Music',
+      mediaUrls: [
+        // "/videos/video-course-mentor-161835834370260763047ff4b4e40054fd55f.MP4"
+      ],
+      // picture: `/images/image-course-mentor-16183563497106076287d0e0cdc372ccabe6c.jpg`
+    }
+  } */
+  // end of testing
   
+  // find course with given id
+  const currentCourse = await Course.findById(req.params.id);
+  
+  // check if there's course found with given id
+  if(!currentCourse) {
+    return next(new ErrorResponse(`there's no such course found with given id.`, 404));
+  }
+
+  // check if there's no body with request
+  if(!req.body || !req.body.params) {
+    return next(new ErrorResponse(`The body of request and params is required.`));
+  }
+
+  // create global virables to set picture path and media urls path
+  let oldPicturePath = currentCourse.picture;
+  let newPicturePath;
+  let picturePath;
+  let oldMediaURLSPath = req.body.params.mediaUrls;
+  let newMediaURLSPath = [];
+  let deletedPicture;
+  let deletedMedia = [];
+
+  // handle probability of no new files uploaded
+  if(!req.files) {
+
+    // keep old picture path
+    picturePath = oldPicturePath;
+
+    // check if there's no media and prepare to remove the old
+    if(!req.body.params.mediaUrls || req.body.params.mediaUrls.length == 0) {
+
+      // add media in course to deleted media and prepare to delete them
+      deletedMedia = currentCourse.mediaURLS;
+
+    } else if(req.body.params.mediaUrls || req.body.params.mediaUrls != 0) {
+
+      // get diffrent paths between course media paths and request media paths
+      deletedMedia = filterArray(currentCourse.mediaURLS, req.body.params.mediaUrls);
+
+    }
+
+  }
+  else {
+
+    // check if there's no media with body o the request
+    if(!req.body.params.mediaUrls || req.body.params.mediaUrls.length == 0) {
+      deletedMedia = currentCourse.mediaURLS;
+    }
+
+    // handle if mediaURLS is exists
+    else {
+
+      // get diffrent paths between course media paths and request media paths
+      deletedMedia = filterArray(currentCourse.mediaURLS, req.body.params.mediaUrls);
+
+    }
+
+    // handle course's picture uploading
+    // check if picture is exist
+    if(req.files.picture) {
+      
+      // set name of course picture
+      let pictureName = `image-course-${req.user.person}-${Date.now()}${mongoose.Types.ObjectId()}${path.parse(req.files.picture.name).ext}`;
+      
+      // set dir of images and videos
+      let pictureDir = `${__dirname}/../public/images/${pictureName}`;
+      
+      // set path of course picture 
+      newPicturePath = `/images/${pictureName}`;
+      
+      // set size limit of course picture
+      if(req.files.picture.size > 8 * 1024 * 1024) {
+        return next(new ErrorResponse(`file: max size of course picture is 8 mb`, 400));
+      }
+      
+      // check mime type of course picture
+      if(!req.files.picture.mimetype.startsWith(`image`)) {
+        return next(new ErrorResponse(`file: course picture can only be image.`, 400));
+      }
+      
+      // start upload course picture
+      req.files.picture.mv(pictureDir, (err) => {
+        if(err) {
+          return next(new ErrorResponse(`file: ${err.message}`, 500));
+        }
+      });
+
+      // set course's picture to new picture
+      picturePath = newPicturePath;
+      
+      // save path of old course picture preparing to delete it
+      deletedPicture = currentCourse.picture;
+      
+    } else {
+
+      // if there's not course picture uploaded, then keep old one
+      picturePath = oldPicturePath;
+
+    }
+    
+    // handle course's media uploading
+    // check if there's course's media uploaded
+    if(req.files.mediaUrls) {
+
+      // set mediaLength and isMultiblefiles as global variables to check if media is multible files or one file
+      let mediaLength = 1;
+      let isMultiblefiles = false;
+
+      // check if media is multible files uploaded
+      if(Array.isArray(req.files.mediaUrls)) {
+        mediaLength = req.files.mediaUrls.length;
+        isMultiblefiles = true;
+      }
+      
+      // loop on mediaURLS array
+      for(let i = 0; i < mediaLength ; i++) {
+
+        // set some of public variables to use them in uploading process
+        let file = req.files.mediaUrls;
+        let fileType;
+        let imageSizeLimit = 8 * 1024 * 1024;
+        let videoSizeLimit = 30 * 1024 * 1024;
+        let fileSizeLimit;
+
+        // check if media is multible files uploaded
+        if(isMultiblefiles) {
+          file = req.files.mediaUrls[i];
+        }
+
+        // check mimetype
+        if(file.mimetype.startsWith(`video`)) {
+          fileType = `video`;
+          fileSizeLimit = videoSizeLimit;
+        }
+        else if(file.mimetype.startsWith(`image`)){
+          fileType = `image`;
+          fileSizeLimit = imageSizeLimit;
+        }
+        else {
+
+          // set path of files to send it to next middleware
+          req.filesPath = {
+            coursePicture: newPicturePath,
+            mediaUrls: newMediaURLSPath
+          }
+
+          return next(new ErrorResponse(`file: only images and videos can be uploaded.`, 400));
+        }
+        
+        // set image name and video name
+        let mediaName = `${fileType}-course-${req.user.person}-${Date.now()}${mongoose.Types.ObjectId()}${path.parse(file.name).ext}`;
+
+        // set image dir and video dir
+        let mediaDir = `${__dirname}/../public/${fileType}s/${mediaName}`;
+
+        // set path of image and video
+        let mediaPath = `/${fileType}s/${mediaName}`;
+      
+        // set size limit
+        if(file.size > fileSizeLimit) {
+          
+          // set path of files to send it to next middleware
+          req.filesPath = {
+            coursePicture: newPicturePath,
+            mediaUrls: newMediaURLSPath
+          }
+
+          return next(new ErrorResponse(`file: max size of ${fileType} is ${fileSizeLimit / 1024 / 1024} mb`, 400));
+        }
+
+        // push current media to mediaURLSPath array
+        newMediaURLSPath.push(mediaPath);
+
+        // start upload process
+        file.mv(mediaDir, (err) => {
+          if(err) {
+
+            // set path of files to send it to next middleware
+            req.filesPath = {
+              coursePicture: newPicturePath,
+              mediaUrls: newMediaURLSPath
+            }
+
+            return next(new ErrorResponse(`file: ${err.message}`, 500));
+          }
+        });
+
+      }
+
+    }
+
+  }
+
+  // add old media urls to new media urls
+  let mediaURLSPath = oldMediaURLSPath.concat(newMediaURLSPath);
+
+  // update current course
+  await currentCourse.updateOne({
+    title: req.body.params.title,
+    price: req.body.params.price,
+    description: req.body.params.description,
+    picture: picturePath,
+    topicsList: req.body.params.topicsList,
+    mediaURLS: mediaURLSPath,
+    genre: req.body.params.genre
+  }, (err) => {
+
+    if(err) {
+
+      // delete new course picture which uploaded by user
+      if(newPicturePath) {
+        fs.unlinkSync(`${__dirname}/../public${newPicturePath}`);
+      }
+
+      // delete new media which uploaded by user
+      if(newMediaURLSPath || newMediaURLSPath.length !== 0) {
+        for(let i = 0; i < newMediaURLSPath.length; i++) {
+          fs.unlinkSync(`${__dirname}/../public${newMediaURLSPath[i]}`);
+        }
+      }
+
+      return next(new ErrorResponse(err.message, 500));
+
+    }
+
+    if(!err && deletedMedia.length != 0) {
+      
+      // delete course's media that removed by user
+      for(let i = 0; i < deletedMedia.length; i++) {
+        
+        // delete media
+        fs.unlinkSync(`${__dirname}/../public${deletedMedia[i]}`);
+
+      }
+
+    }
+
+    if(!err && deletedPicture) {
+
+      // delete course picture that removed by user
+      fs.unlinkSync(`${__dirname}/../public${deletedPicture}`);
+
+    }
+
+    // send response
+    res.status(200).json({
+      success: true,
+      message: `course updated successfully`
+    });
+
+  });
   
 });

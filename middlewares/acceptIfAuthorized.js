@@ -4,6 +4,12 @@ const ErrorResponse = require(`../utils/errorResponse`);
 
 // middleware to check authorization
 exports.acceptIfGuardian = asyncHandler(async (req, res, next) => {
+
+  // just for testing
+  /* req.user = {
+    person: `mentor`,
+    id: `606f00646adcf04d84c70a6b`
+  } */
   
   // check if user is (guardian) authorized
   if(req.user.person !== `guardian`) {
@@ -17,6 +23,12 @@ exports.acceptIfGuardian = asyncHandler(async (req, res, next) => {
 
 // middleware to check authorization
 exports.acceptIfMentor = asyncHandler(async (req, res, next) => {
+
+  // just for testing
+  /* req.user = {
+    person: `mentor`,
+    id: `606f00646adcf04d84c70a6b`
+  } */
   
   // check if user is (mentor) authorized
   if(req.user.person !== `mentor`) {

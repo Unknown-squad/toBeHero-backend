@@ -47,7 +47,7 @@ exports.coursesErrorHandling = (err, req, res, next) => {
       }
   
       // delete course media
-      if(req.filesPath.mediaUrls[0]) {
+      if(req.filesPath.mediaUrls.length != 0) {
         for(let i = 0; i < req.filesPath.mediaUrls.length; i++) {
           fs.unlinkSync(`${__dirname}/../public${req.filesPath.mediaUrls[i]}`);
         }
