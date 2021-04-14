@@ -76,7 +76,7 @@ exports.getOneMentorSubscription = asyncHandler (async (req, res, next) => {
   // Get one subscription for mentor
   const subscription = await Subscription
   .findById(req.params.subscriptionId)
-  .select({_id: 1, guardianId: 1, childId: 1, courseId: 1, appiontments: 1, mentorId: 1})
+  .select({_id: 1, guardianId: 1, childId: 1, courseId: 1, appointments: 1, mentorId: 1})
   .populate({
     path: 'guardianId',
     select: "fullName picture phone countryCode -_id",
@@ -124,12 +124,6 @@ exports.getOneMentorSubscription = asyncHandler (async (req, res, next) => {
 // @route   Post localhost:3000/api/v1/mentor/subscription/:subscriptionId/add-appointment
 // @access  private/mentor
 exports.addNewAppiontment = asyncHandler (async (req, res, next) => {
-  
-
-  req.user = {
-    person: 'mentor',
-    id: '60196798ad18f83aaca6ac42'
-  };
 
   // Check if user authorized
   if (req.user.person != 'mentor') {
@@ -153,11 +147,18 @@ exports.addNewAppiontment = asyncHandler (async (req, res, next) => {
   // Check if req.body is empty
   const {params, method} = req.body;
   if (!params || !method) {
-    return next(new ErrorResponse('Method or params are missing.'));
+    return next(new ErrorResponse('Method or params are missing.', 400));
   }
   const {title, date, time} = req.body.params;
-  if (!title, !date, !time) {
+  if (!title || !date || !time) {
     return next(new ErrorResponse('Params are missing.', 400));
+  }
+
+  // Check date of appointment
+  const newDate = new Date(date);
+  console.log(newDate);
+  if (newDate < Date.now()) {
+    return next(new ErrorResponse('Date must be an upcoming date', 400));
   }
 
   // Add appointment
@@ -172,7 +173,7 @@ exports.addNewAppiontment = asyncHandler (async (req, res, next) => {
   // return result for mentor
   res.status(201).json({
     success: true,
-    message: 'Appointment created successfully'
+    message: subscription.appointments
   });
 });
 
@@ -330,17 +331,18 @@ exports.getChildSubForGuardian = asyncHandler (async (req, res, next) => {
     model: Mentor
   });
 
+  // Check if no content
+  if (!childSubscription) {
+    return next(new ErrorResponse(`No Content.`, 404));
+  }
+
+
   let childSub = {
     _id: childSubscription._id,
     childId: childSubscription.childId,
     mentorId: childSubscription.mentorId,
     appointments: childSubscription.appointments
   };
-
-  // Check if no content
-  if (!childSubscription) {
-    return next(new ErrorResponse(`No Content.`, 404));
-  }
 
   // Check if guardian authorized for child's subscription
   if (childSubscription.guardianId != req.user.id) {

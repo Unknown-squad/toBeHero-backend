@@ -18,7 +18,6 @@ exports.subscriptionErrorHandling = (err, req, res, next) => {
 
   // Check validation error
   if (err.name === 'ValidationError') {
-    console.log('Mahmoud');
     const message = 'Invalid date or time';
     error = new ErrorResponse(message, 400);
   }
