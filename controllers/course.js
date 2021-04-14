@@ -76,7 +76,7 @@ exports.getCourses = asyncHandler(async (req, res, next) => {
 
   // page
   let page = parseInt(req.query.page, 10) || 1;
-  let limit = 10;
+  let limit = 24;
   if(page < 0) {
     page = 1;
   }
@@ -119,7 +119,7 @@ exports.getReviews = asyncHandler(async (req, res, next) => {
 
   // handle pagination
   let page = parseInt(req.query.page, 10) || 1;
-  let limit = 5;
+  let limit = 4;
 
   if(page <= 0) {
     page = 1;
