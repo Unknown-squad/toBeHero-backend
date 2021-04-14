@@ -12,7 +12,9 @@ const {
     getMentorAnalytics,
     getMentorIsAvailable,
     putMentorIsAvailable,
-    getMentorProfile
+    getMentorProfile,
+    getMentorCourses,
+    updateMentorInfo
 } = require(`../controllers/mentor`)
 
 // @desc    get mentor's basic info 

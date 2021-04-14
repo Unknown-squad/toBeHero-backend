@@ -1,6 +1,7 @@
 // models files
 const MentorSchema = require(`../models/mentors`);
-const Subscriptions = require(`../models/subscriptions`)
+const Subscriptions = require(`../models/subscriptions`);
+const coursesSchema = require(`../models/courses`)
 
 // middlewares files
 const asyncHandler = require('../middlewares/async');
@@ -12,7 +13,7 @@ const ErrorHandler = require('../utils/errorHandler')
 // @route   Get '/api/v1/mentor/dashboard/basic-info'
 // @access  private(mentor)
 exports.getBasicInfoOfMentor = asyncHandler( async (req, res, next) => {
-    const mentorInfo = await MentorSchema.findById('601858731b53e707f8d5asdfadfa01c').select('fullName gender email phone countryCode birthDate languages occupation certificates description picture');
+    const mentorInfo = await MentorSchema.findById('60696acb19985a03a36d00ba').select('fullName gender email phone countryCode birthDate languages occupation certificates description picture -_id');
 
     // check if mentor info is found or not
     if(!mentorInfo){
@@ -23,7 +24,7 @@ exports.getBasicInfoOfMentor = asyncHandler( async (req, res, next) => {
         success: true,
         message: `menotr basic information`,
         data: {
-            kind: `menotr`,
+            kind: `mentor`,
             items: [
                 mentorInfo
             ]
@@ -35,7 +36,7 @@ exports.getBasicInfoOfMentor = asyncHandler( async (req, res, next) => {
 // @route   Get '/api/v1/mentor/dashboard/balance'
 // @access  private(mentor)
 exports.getMentorBalace = asyncHandler(async (req, res, next) => {
-    const result = await MentorSchema.findById(req.session.user.id).select('balance -_id');
+    const result = await MentorSchema.findById('60696acb19985a03a36d00ba').select('balance -_id');
     
     // check if mentor info is found or not
     if(!result){
@@ -46,7 +47,7 @@ exports.getMentorBalace = asyncHandler(async (req, res, next) => {
         success: true,
         message: `menotr balance`,
         data: {
-            kind: `menotr`,
+            kind: `mentor`,
             items: [
                 result
             ]
@@ -58,8 +59,8 @@ exports.getMentorBalace = asyncHandler(async (req, res, next) => {
 // @route   Get '/api/v1/mentor/dashboard/analytics'
 // @access  private(mentor)
 exports.getMentorAnalytics = asyncHandler(async (req, res, next) => {
-    const subscriptionCount = await Subscriptions.count({mentorId: req.session.user.id});
-    const coursesCount = await MentorSchema.findById(req.session.user.id)
+    const subscriptionCount = await Subscriptions.count({mentorId: `60696acb19985a03a36d00ba`});
+    const coursesCount = await MentorSchema.findById('60696acb19985a03a36d00ba')
 
     // check if mentor info is found or not
     if(!coursesCount){
@@ -70,9 +71,9 @@ exports.getMentorAnalytics = asyncHandler(async (req, res, next) => {
 
     return res.status(200).json({
         success: true,
-        message: `menotr balance`,
+        message: `mentor balance`,
         data: {
-            kind: `menotr`,
+            kind: `mentor`,
             items: [
                 {
                     coursesNumber: coursesNumber,
@@ -87,7 +88,7 @@ exports.getMentorAnalytics = asyncHandler(async (req, res, next) => {
 // @route   Get '/api/v1/mentor/availability'
 // @access  private(mentor)
 exports.getMentorIsAvailable = asyncHandler( async (req, res, next) => {
-    const mentorInfo = await MentorSchema.findById(req.session.user.id).select('isAvailable -_id');
+    const mentorInfo = await MentorSchema.findById(`60696acb19985a03a36d00ba`).select('isAvailable -_id');
 
     // check if mentor info is found or not
     if(!mentorInfo){
@@ -98,7 +99,7 @@ exports.getMentorIsAvailable = asyncHandler( async (req, res, next) => {
         success: true,
         message: `menotr availability status`,
         data: {
-            kind: `menotr`,
+            kind: `mentor`,
             items: [
                 mentorInfo
             ]
@@ -110,7 +111,7 @@ exports.getMentorIsAvailable = asyncHandler( async (req, res, next) => {
 // @route   Put '/api/v1/mentor/availability'
 // @access  private(mentor)
 exports.putMentorIsAvailable = asyncHandler( async (req, res, next) => {
-    const mentorInfo = await MentorSchema.findById('601858731b53e707f8d5a01c')
+    const mentorInfo = await MentorSchema.findById('60696acb19985a03a36d00ba')
 
         // check if mentor info is found or not
         if(!mentorInfo){
@@ -169,14 +170,14 @@ exports.getMentorCourses = asyncHandler(async (req, res, next) => {
 
     // get mentor's courses
     const coursesOfMentor = await MentorSchema.findById(req.params.mentorId)
-        .select(`coursesId -_id`)
-        .limit(limit)
-        .skip((page - 1) * limit)
+        .select(`coursesId`)
+        .slice('coursesId', [((page -1) * limit), limit])
         .populate({
-            path: `couressId`,
-            select: `_id title picture discription`
-        });
+            path: `coursesId`,
+            model: `course`
+        })
 
+console.log(coursesOfMentor)
     // check if there are courses
     if (coursesOfMentor.coursesId.length === 0) {
         return next(new ErrorHandler(`there's no such courses with given mentor id ${req.params.mentorId}`, 404));
@@ -188,7 +189,7 @@ exports.getMentorCourses = asyncHandler(async (req, res, next) => {
         message: `mentor data`,
         data: {
             Kind: `mentor`,
-            items: coursesOfMentor
+            items: coursesOfMentor.coursesId
         }
     })
 });
@@ -198,7 +199,7 @@ exports.getMentorCourses = asyncHandler(async (req, res, next) => {
 // @access  privet
 exports.updateMentorInfo = asyncHandler( async (req, res, next) => {   
     // get user data
-    const user = await MentorSchema.findById(req.session.id);
+    const user = await MentorSchema.findById(`60696acb19985a03a36d00ba`);
 
     // check if found user
     if (!user) {
@@ -213,6 +214,7 @@ exports.updateMentorInfo = asyncHandler( async (req, res, next) => {
     user.occupation     = req.body.occupation;
     user.certificates   = req.body.certificates;
     user.description    = req.body.description;
+    user.languages      = req.body.languages;
     await user.save();
 
     // send successfully response
