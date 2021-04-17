@@ -64,15 +64,15 @@ exports.getMentorBalace = asyncHandler(async (req, res, next) => {
 exports.getMentorAnalytics = asyncHandler(async (req, res, next) => {
     const subscriptionCount = await Subscriptions
         .count({mentorId: req.user.id});
-    const coursesCount = await MentorSchema
+    const courses = await MentorSchema
         .findById(req.user.id)
 
     // check if mentor info is found or not
-    if(!coursesCount){
+    if(!courses){
         return next(new ErrorHandler(`mentor is not found`, 404))
     }
     // enter number of courses into coursesNumber
-    const coursesNumber = coursesCount.coursesId.length
+    const coursesNumber = courses.coursesId.length
 
     return res.status(200).json({
         success: true,
@@ -119,44 +119,46 @@ exports.getMentorIsAvailable = asyncHandler( async (req, res, next) => {
 // @access  private(mentor)
 exports.putMentorIsAvailable = asyncHandler( async (req, res, next) => {
     const mentorInfo = await MentorSchema
-        .findById(req.user.id)
+        .findById(req.user.id);
 
-        // check if mentor info is found or not
-        if(!mentorInfo){
-            return next(new ErrorHandler(`there's no such mentor with given id.`, 404))
-        }
+    // check if mentor info is found or not
+    if (!mentorInfo) {
+        return next(new ErrorHandler(`there's no such mentor with given id.`, 404));
+    }
 
     mentorInfo.isAvailable = !mentorInfo.isAvailable;
-    await mentorInfo.save()
+    await mentorInfo.save();
 
-    return res.status(200).json({
-        success: true,
-        message: `mentor's availability`,
-        data: {
-            kind: `menotr`,
-            items: [
-                {
-                    isAvailable: mentorInfo.isAvailable
-                }
-            ]
+    return res.status(200).json(
+        {
+            success: true,
+            message: `mentor's availability`,
+            data: {
+                kind: `menotr`,
+                items: [
+                    {
+                        isAvailable: mentorInfo.isAvailable
+                    }
+                ]
+            }
         }
-    })
-})
+    );
+});
 
 // @desc    get mentor's profile
 // @route   Get '/api/v1/mentor/profile/:mentorId'
 // @access  public
 exports.getMentorProfile = asyncHandler(async (req, res, next) => {
-    console.log(req.params.mentorId)
+    // console.log(req.params.mentorId)
     // get mentor info.
     const mentorInfo = await MentorSchema
         .findById(req.params.mentorId)
         .select(`-coursesId -SubscriptionIDs -bankingInfo -verificationToken -verificationTokenExpire`)
-        .populate('topReviewsId')
+        .populate('topReviewsId');
 
     // check if mentor info is found or not
     if(!mentorInfo){
-        return next(new ErrorHandler(`there's no such mentor with given id.`, 404))
+        return next(new ErrorHandler(`there's no such mentor with given id.`, 404));
     }
 
     // send respone to cliant
@@ -168,7 +170,7 @@ exports.getMentorProfile = asyncHandler(async (req, res, next) => {
             items:  mentorInfo
         }
     })
-})
+});
 
 // @desc    get mentor's courses
 // @route   Get '/api/v1/mentor/courses/mentorId?page='
@@ -181,13 +183,13 @@ exports.getMentorCourses = asyncHandler(async (req, res, next) => {
     // get mentor's courses
     const coursesOfMentor = await MentorSchema.findById(req.params.mentorId)
         .select(`coursesId`)
-        .slice('coursesId', [((page -1) * limit), limit])
+        .slice('coursesId', [((page - 1) * limit), limit])
         .populate({
             path: `coursesId`,
-            model: `course`
-        })
+            model: `Course`
+        });
 
-console.log(coursesOfMentor)
+    console.log(coursesOfMentor)
     // check if there are courses
     if (coursesOfMentor.coursesId.length === 0) {
         return next(new ErrorHandler(`there's no such courses with given mentor id ${req.params.mentorId}`, 404));
@@ -217,14 +219,14 @@ exports.updateMentorInfo = asyncHandler( async (req, res, next) => {
     }
 
     // save new update
-    user.fullName       = req.body.fullName;
-    user.address        = req.body.address;
-    user.gender         = req.body.gender;
-    user.birthDate      = req.body.birthDate;
-    user.occupation     = req.body.occupation;
-    user.certificates   = req.body.certificates;
-    user.description    = req.body.description;
-    user.languages      = req.body.languages;
+    user.fullName       = req.body.params.fullName;
+    user.address        = req.body.params.address;
+    user.gender         = req.body.params.gender;
+    user.birthDate      = req.body.params.birthDate;
+    user.occupation     = req.body.params.occupation;
+    user.certificates   = req.body.params.certificates;
+    user.description    = req.body.params.description;
+    user.languages      = req.body.params.languages;
     await user.save();
 
     // send successfully response

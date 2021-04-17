@@ -64,7 +64,7 @@ router
 
 // @desc    update mentor's courses
 // @route   PUT '/api/v1/mentor/dashboard/basic-info'
-// @access  privet
+// @access  privet(mentor)
 router
     .route('/api/v1/mentor/dashboard/basic-info')
     .put(authorizedMentor, updateMentorInfo);
