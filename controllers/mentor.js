@@ -13,7 +13,8 @@ const ErrorHandler = require('../utils/errorHandler')
 // @route   Get '/api/v1/mentor/dashboard/basic-info'
 // @access  private(mentor)
 exports.getBasicInfoOfMentor = asyncHandler( async (req, res, next) => {
-    const mentorInfo = await MentorSchema.findById('60696acb19985a03a36d00ba').select('fullName gender email phone countryCode birthDate languages occupation certificates description picture -_id');
+    const mentorInfo = await MentorSchema.findById(req.user.id)
+        .select('fullName gender email phone countryCode birthDate languages occupation certificates description picture -_id');
 
     // check if mentor info is found or not
     if(!mentorInfo){
@@ -36,7 +37,9 @@ exports.getBasicInfoOfMentor = asyncHandler( async (req, res, next) => {
 // @route   Get '/api/v1/mentor/dashboard/balance'
 // @access  private(mentor)
 exports.getMentorBalace = asyncHandler(async (req, res, next) => {
-    const result = await MentorSchema.findById('60696acb19985a03a36d00ba').select('balance -_id');
+    const result = await MentorSchema
+        .findById(req.user.id)
+        .select('balance -_id');
     
     // check if mentor info is found or not
     if(!result){
@@ -59,8 +62,10 @@ exports.getMentorBalace = asyncHandler(async (req, res, next) => {
 // @route   Get '/api/v1/mentor/dashboard/analytics'
 // @access  private(mentor)
 exports.getMentorAnalytics = asyncHandler(async (req, res, next) => {
-    const subscriptionCount = await Subscriptions.count({mentorId: `60696acb19985a03a36d00ba`});
-    const coursesCount = await MentorSchema.findById('60696acb19985a03a36d00ba')
+    const subscriptionCount = await Subscriptions
+        .count({mentorId: req.user.id});
+    const coursesCount = await MentorSchema
+        .findById(req.user.id)
 
     // check if mentor info is found or not
     if(!coursesCount){
@@ -88,7 +93,9 @@ exports.getMentorAnalytics = asyncHandler(async (req, res, next) => {
 // @route   Get '/api/v1/mentor/availability'
 // @access  private(mentor)
 exports.getMentorIsAvailable = asyncHandler( async (req, res, next) => {
-    const mentorInfo = await MentorSchema.findById(`60696acb19985a03a36d00ba`).select('isAvailable -_id');
+    const mentorInfo = await MentorSchema
+        .findById(req.user.id)
+        .select('isAvailable -_id');
 
     // check if mentor info is found or not
     if(!mentorInfo){
@@ -111,7 +118,8 @@ exports.getMentorIsAvailable = asyncHandler( async (req, res, next) => {
 // @route   Put '/api/v1/mentor/availability'
 // @access  private(mentor)
 exports.putMentorIsAvailable = asyncHandler( async (req, res, next) => {
-    const mentorInfo = await MentorSchema.findById('60696acb19985a03a36d00ba')
+    const mentorInfo = await MentorSchema
+        .findById(req.user.id)
 
         // check if mentor info is found or not
         if(!mentorInfo){
@@ -141,7 +149,9 @@ exports.putMentorIsAvailable = asyncHandler( async (req, res, next) => {
 exports.getMentorProfile = asyncHandler(async (req, res, next) => {
     console.log(req.params.mentorId)
     // get mentor info.
-    const mentorInfo = await MentorSchema.findById(req.params.mentorId).select(`-coursesId -SubscriptionIDs -bankingInfo -verificationToken -verificationTokenExpire`)
+    const mentorInfo = await MentorSchema
+        .findById(req.params.mentorId)
+        .select(`-coursesId -SubscriptionIDs -bankingInfo -verificationToken -verificationTokenExpire`)
         .populate('topReviewsId')
 
     // check if mentor info is found or not
@@ -196,10 +206,10 @@ console.log(coursesOfMentor)
 
 // @desc    update mentor's courses
 // @route   PUT '/api/v1/mentor/dashboard/basic-info'
-// @access  privet
+// @access  privet(mentor)
 exports.updateMentorInfo = asyncHandler( async (req, res, next) => {   
     // get user data
-    const user = await MentorSchema.findById(`60696acb19985a03a36d00ba`);
+    const user = await MentorSchema.findById(req.user.id);
 
     // check if found user
     if (!user) {
