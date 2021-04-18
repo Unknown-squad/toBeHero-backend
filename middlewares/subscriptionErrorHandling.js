@@ -8,7 +8,6 @@ exports.subscriptionErrorHandling = (err, req, res, next) => {
   console.log(err.name);
   let error = {...err};
   error.message = err.message;
-
   
   // Check if invalid data
   if (err.name === 'CastError') {

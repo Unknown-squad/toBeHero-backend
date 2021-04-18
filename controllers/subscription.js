@@ -15,11 +15,6 @@ const { populate } = require('../models/subscriptions');
 // @access  private/mentor
 exports.getMentorSubscriptions = asyncHandler (async (req, res, next) => {
   
-  // Check if user is authorized or not
-  if (req.user.person != 'mentor') {
-    return next(new ErrorResponse(`Forbidden.`, 403));
-  }
-
   // Get all subscriptions for mentor
   const subscriptions = await Subscription
   .find({mentorId: req.user.id})
@@ -45,7 +40,6 @@ exports.getMentorSubscriptions = asyncHandler (async (req, res, next) => {
     return next(new ErrorResponse(`No Content.`, 404));
   }
 
-
   // return data to mentor
   res.status(200).json({
     success: true,
@@ -67,11 +61,6 @@ exports.getMentorSubscriptions = asyncHandler (async (req, res, next) => {
 // @route   Get localhost:3000/api/v1/mentor/subscription/subscriptionId
 // @access  private/mentor
 exports.getOneMentorSubscription = asyncHandler (async (req, res, next) => {
-  
-  // Check if user is authorized or not
-  if (req.user.person != 'mentor') {
-    return next(new ErrorResponse(`Forbidden.`, 403));
-  }
 
   // Get one subscription for mentor
   const subscription = await Subscription
@@ -125,11 +114,6 @@ exports.getOneMentorSubscription = asyncHandler (async (req, res, next) => {
 // @access  private/mentor
 exports.addNewAppiontment = asyncHandler (async (req, res, next) => {
 
-  // Check if user authorized
-  if (req.user.person != 'mentor') {
-    return next(new ErrorResponse(`Forbidden.`, 403));
-  }
-
   const subscription = await Subscription
   .findById(req.params.subscriptionId)
   .select({appointments: 1, _id: 1, mentorId: 1});
@@ -145,18 +129,22 @@ exports.addNewAppiontment = asyncHandler (async (req, res, next) => {
   }
 
   // Check if req.body is empty
-  const {params, method} = req.body;
+  const { params, method } = req.body;
   if (!params || !method) {
     return next(new ErrorResponse('Method or params are missing.', 400));
   }
-  const {title, date, time} = req.body.params;
+  const { title, date, time } = req.body.params;
   if (!title || !date || !time) {
     return next(new ErrorResponse('Params are missing.', 400));
   }
 
-  // Check date of appointment
-  const newDate = new Date(date);
-  console.log(newDate);
+  // Check if day is valid
+  if (date.split('-').length < 3) {
+    return next(new ErrorResponse('Invalid date or time', 400));
+  }
+  
+  // Check if date of appointment valid
+  const newDate = new Date(`${date}T${time}`);
   if (newDate < Date.now()) {
     return next(new ErrorResponse('Date must be an upcoming date', 400));
   }
@@ -164,7 +152,7 @@ exports.addNewAppiontment = asyncHandler (async (req, res, next) => {
   // Add appointment
   subscription.appointments.push({
     title: req.body.params.title,
-    date: `${req.body.params.date}T${req.body.params.time}`
+    date: newDate
   });
   
   // Save result
@@ -173,7 +161,7 @@ exports.addNewAppiontment = asyncHandler (async (req, res, next) => {
   // return result for mentor
   res.status(201).json({
     success: true,
-    message: subscription.appointments
+    message: 'Appointment created successfully'
   });
 });
 
@@ -183,11 +171,6 @@ exports.addNewAppiontment = asyncHandler (async (req, res, next) => {
 // @route   Get localhost:3000/api/v1/child/home
 // @access  private/child
 exports.getAllChildSubscriptions = asyncHandler (async (req, res, next) => {
-
-  // Check if authorized or not
-  if (req.user.person != 'child') {
-    return next(new ErrorResponse(`Forbidden.`, 403));
-  }
 
   // Get all child subscription
   const subscription = await Subscription
@@ -204,7 +187,6 @@ exports.getAllChildSubscriptions = asyncHandler (async (req, res, next) => {
     model: Course
   });
 
-  
   // Check if no content
   if (subscription.length === 0) {
     return next(new ErrorResponse(`No Content.`, 404));
@@ -232,11 +214,6 @@ exports.getAllChildSubscriptions = asyncHandler (async (req, res, next) => {
 // @access  private/guardian
 exports.getChildSubsForGuardian = asyncHandler (async (req, res, next) => {
 
-  // Check if authorized or not
-  if (req.user.person != 'guardian') {
-    return next(new ErrorResponse(`Forbidden.`, 403));
-  }
-
   // get child subscriptions for guardian
   const childSubscriptions = await Subscription
   .find({childId: req.params.childId})
@@ -256,7 +233,6 @@ exports.getChildSubsForGuardian = asyncHandler (async (req, res, next) => {
     select: "_id guardianId",
     model: Children
   });
-  
   
   // Get child's nextAppointment && other data
   let childSubs = [];
@@ -284,7 +260,7 @@ exports.getChildSubsForGuardian = asyncHandler (async (req, res, next) => {
 
   // Check if guardian authorized to see child's subscriptions
   childSubscriptions.forEach(el => {
-    if (el.childId.guardianId != req.user.id) {
+    if (el.childId.guardianId.toString() != req.user.id.toString()) {
       return next(new ErrorResponse(`Forbidden.`, 403));
     }
   });
@@ -336,16 +312,16 @@ exports.getChildSubForGuardian = asyncHandler (async (req, res, next) => {
     return next(new ErrorResponse(`No Content.`, 404));
   }
 
-
+  // Save the result which will return to the user
   let childSub = {
     _id: childSubscription._id,
-    childId: childSubscription.childId,
-    mentorId: childSubscription.mentorId,
+    child: childSubscription.childId,
+    mentor: childSubscription.mentorId,
     appointments: childSubscription.appointments
   };
 
   // Check if guardian authorized for child's subscription
-  if (childSubscription.guardianId != req.user.id) {
+  if (childSubscription.guardianId.toString() != req.user.id.toString()) {
     return next(new ErrorResponse(`Forbidden.`, 403));
   }
 
