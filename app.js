@@ -6,13 +6,21 @@ const dotenv = require(`dotenv`);
 const morgan = require(`morgan`);
 const session = require('express-session');
 const MongoDBStore = require('connect-mongodb-session')(session);
+const fileUpload = require(`express-fileupload`);
+
+// load routes
+const courses = require(`./routes/course`);
 
 // Add config files
 const connectDB = require(`./config/db`);
+const {coursesErrorHandling} = require(`./middlewares/coursesErrorHandling`);
 
 // Read body of request
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
+
+// use file upload
+app.use(fileUpload());
 
 // using dotenv
 dotenv.config({path: `./config/config.env`});
@@ -43,7 +51,10 @@ app.use(require('express-session')({
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Add routes files
+app.use(courses);
 
+// handling error of courses
+app.use(coursesErrorHandling);
 
 // Connect to server
 const port = process.env.PORT || 3000;
