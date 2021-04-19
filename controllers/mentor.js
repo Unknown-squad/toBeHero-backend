@@ -1,3 +1,6 @@
+//  module requirements
+const bcrypt = require(`bcrypts`)
+
 // models files
 const MentorSchema = require(`../models/mentors`);
 const Subscriptions = require(`../models/subscriptions`);
@@ -234,4 +237,58 @@ exports.updateMentorInfo = asyncHandler( async (req, res, next) => {
         success: true,
         message: `mentor basic information is updated successfully.`
     })
+});
+
+// @desc    authourzithed user to change emial or password or phone number
+// @route   POST '/api/v1/mentor/dashboard/verify'
+// @access  privet(mentor)
+exports.authourzithedUpdateAdvSetting = asyncHandler(async (req, res, next) => {
+    let oldPassword = req.body.params.oldPassword;
+
+    // get mentor info
+    const user = await MentorSchema.findById(req.user.id);
+
+    // check if found user
+    if (!user) {
+        return next(new ErrorHandler(`there's no such mentor with given id ${req.user.id}`, 404));
+    }
+
+    // compare insert password with password saved in database
+    const chackPassword = await bcrypt.compare(oldPassword, user.password);
+    
+    if (!chackPassword) {
+        return next(new ErrorHandler(`incorrect old password`, 400));
+    }
+
+        // send successfully response
+        res.status(200).json({
+            success: true,
+            message: `authourized to change sitting`
+        });
+})
+
+// @desc    change password
+// @route   PUT '/api/v1/mentor/dashboard/change-password'
+// @access  privet(mentor)
+exports.changeMentorPassword = asyncHandler(async (req, res, next) => {
+    let newPassword = req.body.params.newPassword;
+
+
+    // validation new password
+    if (newPassword.length < 8) {
+        return next(new ErrorHandler(`invalid new password`, 400));
+    }
+
+    // send successfully response
+    res.status(201).json({
+        success: true,
+        message: `updated user password`
+    });
+});
+
+// @desc    change email
+// @route   PUT '/api/v1/mentor/dashboard/change-phone'
+// @access  privet(mentor)
+exports.changeMentorEmail = asyncHandler(async (req, res, next) => {
+    let 
 });
