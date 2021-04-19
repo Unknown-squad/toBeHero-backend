@@ -214,7 +214,8 @@ exports.getMentorCourses = asyncHandler(async (req, res, next) => {
 // @access  privet(mentor)
 exports.updateMentorInfo = asyncHandler( async (req, res, next) => {   
     // get user data
-    const user = await MentorSchema.findById(req.user.id);
+    const user = await MentorSchema
+        .findById(req.user.id);
 
     // check if found user
     if (!user) {
@@ -242,7 +243,7 @@ exports.updateMentorInfo = asyncHandler( async (req, res, next) => {
 // @desc    authorizithed user to change emial or password or phone number
 // @route   POST '/api/v1/mentor/dashboard/authorization'
 // @access  privet(mentor)
-exports.authourzithedUpdateAdvSetting = asyncHandler(async (req, res, next) => {
+exports.authorzithedUpdateAdvSetting = asyncHandler(async (req, res, next) => {
     let oldPassword = req.body.params.oldPassword;
 
     req.user = {
@@ -265,14 +266,10 @@ exports.authourzithedUpdateAdvSetting = asyncHandler(async (req, res, next) => {
     }
 
     // create expire time to authourized mentor to modify email or password or phone number
-    
-    const expireDate = new Date();
-    user.authorizationModify = expireDate.setSeconds(15);
-    const todayDate = new Date()
-    console.log(todayDate)
-    console.log(user.authorizationModify)
-    console.log(user.authorizationModify < todayDate)
-
+    let expireDate = new Date();
+    expireDate.setDate(expireDate.getDate() + 1);
+    console.log(expireDate)
+    user.authorizationModify = expireDate;
     await user.save();
 
     // send successfully response
@@ -286,24 +283,81 @@ exports.authourzithedUpdateAdvSetting = asyncHandler(async (req, res, next) => {
 // @route   PUT '/api/v1/mentor/dashboard/change-password'
 // @access  privet(mentor)
 exports.changeMentorPassword = asyncHandler(async (req, res, next) => {
-    let newPassword = req.body.params.newPassword;
+    const newPassword = req.body.params.newPassword;
+    req.user = {
+        id: '60696acb19985a03a36d00ba'
+    };
+    // get mentor data
+    const user = await MentorSchema.findById(req.user.id);
 
+    // chack if user authorized to change data
+    const date = new Date()
+    if (user.authorizationModify <= date) {
+        return next(new ErrorHandler(`forbaddin`, 403));
+    }
 
     // validation new password
     if (newPassword.length < 8) {
-        return next(new ErrorHandler(`invalid new password`, 400));
-    }
+        return next(new ErrorHandler(`invalid password`, 400));
+    };
+
+    // encrypt new password
+    const encryptPassword = await bcrypt.hash(newPassword, 12);
+
+    // save new password
+    user.password = encryptPassword;
+
+    // expire authrization date
+    user.authorizationModify = Date.now();
+
+    // save data
+    await user.save()
 
     // send successfully response
-    res.status(201).json({
+    res.status(200).json({
         success: true,
         message: `updated user password`
     });
 });
 
 // @desc    change email
-// @route   PUT '/api/v1/mentor/dashboard/change-phone'
+// @route   PUT '/api/v1/mentor/dashboard/change-email'
 // @access  privet(mentor)
 exports.changeMentorEmail = asyncHandler(async (req, res, next) => {
-    let 
+    const newEmail = req.body.params.newEmail;
+    req.user = {
+        id: '60696acb19985a03a36d00ba'
+    };
+
+    // get mentor data
+    const user = await MentorSchema.findById(req.user.id);
+
+    // chack if user authorized to change data
+    const date = new Date()
+    if (user.authorizationModify <= date) {
+        return next(new ErrorHandler(`forbaddin`, 403));
+    };
+
+    // check if email is used
+    const checkEmail = await MentorSchema.findOne({email: newEmail});
+    if (checkEmail) {
+        return next(new ErrorHandler(`this email aready used`, 409));
+    };
+
+    // create token
+    const verificationToken = Math.random().toString().substring(2, 8);
+
+    // save token
+    user.verificationToken = verificationToken;
+    user.verificationTokenExpire = Date.now() + 24*60*60*1000;
+    await user.save();
+
+    // send token to user's gmail
+    
+
+    // send successfully response
+    res.status(200).json({
+        success: true,
+        message: `check your gmail`
+    });
 });

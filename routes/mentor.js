@@ -15,7 +15,9 @@ const {
     getMentorProfile,
     getMentorCourses,
     updateMentorInfo,
-    authourzithedUpdateAdvSetting
+    authorzithedUpdateAdvSetting,
+    changeMentorPassword,
+    changeMentorEmail
 } = require(`../controllers/mentor`)
 
 // @desc    get mentor's basic info 
@@ -75,6 +77,20 @@ router
 // @access  privet(mentor)
 router
     .route('/api/v1/mentor/dashboard/authorization')
-    .post(authorizedMentor, authourzithedUpdateAdvSetting);
+    .post(authorizedMentor, authorzithedUpdateAdvSetting);
+
+// @desc    change password
+// @route   PUT '/api/v1/mentor/dashboard/change-password'
+// @access  privet(mentor)
+router
+    .route('/api/v1/mentor/dashboard/change-password')
+    .put(authorizedMentor, changeMentorPassword);
+
+// @desc    change email
+// @route   PUT '/api/v1/mentor/dashboard/change-email'
+// @access  privet(mentor)
+router
+    .route('/api/v1/mentor/dashboard/change-email')
+    .put(authorizedMentor, changeMentorEmail);
     
 module.exports = router
