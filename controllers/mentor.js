@@ -1,5 +1,5 @@
 //  module requirements
-const bcrypt = require(`bcrypts`)
+const bcrypt = require(`bcrypt`)
 
 // models files
 const MentorSchema = require(`../models/mentors`);
@@ -239,14 +239,18 @@ exports.updateMentorInfo = asyncHandler( async (req, res, next) => {
     })
 });
 
-// @desc    authourzithed user to change emial or password or phone number
-// @route   POST '/api/v1/mentor/dashboard/verify'
+// @desc    authorizithed user to change emial or password or phone number
+// @route   POST '/api/v1/mentor/dashboard/authorization'
 // @access  privet(mentor)
 exports.authourzithedUpdateAdvSetting = asyncHandler(async (req, res, next) => {
     let oldPassword = req.body.params.oldPassword;
 
+    req.user = {
+        id: '60696acb19985a03a36d00ba'
+    };
     // get mentor info
-    const user = await MentorSchema.findById(req.user.id);
+    const user = await MentorSchema
+        .findById(req.user.id);
 
     // check if found user
     if (!user) {
@@ -255,16 +259,27 @@ exports.authourzithedUpdateAdvSetting = asyncHandler(async (req, res, next) => {
 
     // compare insert password with password saved in database
     const chackPassword = await bcrypt.compare(oldPassword, user.password);
-    
+    console.log(chackPassword)
     if (!chackPassword) {
         return next(new ErrorHandler(`incorrect old password`, 400));
     }
 
-        // send successfully response
-        res.status(200).json({
-            success: true,
-            message: `authourized to change sitting`
-        });
+    // create expire time to authourized mentor to modify email or password or phone number
+    
+    const expireDate = new Date();
+    user.authorizationModify = expireDate.setSeconds(15);
+    const todayDate = new Date()
+    console.log(todayDate)
+    console.log(user.authorizationModify)
+    console.log(user.authorizationModify < todayDate)
+
+    await user.save();
+
+    // send successfully response
+    res.status(200).json({
+        success: true,
+        message: `user authorized to modify data`
+    })
 })
 
 // @desc    change password
