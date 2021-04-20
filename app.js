@@ -11,6 +11,9 @@ const fileUpload = require(`express-fileupload`);
 // load routes
 const courses = require(`./routes/course`);
 
+// Add middleware files
+const {subscriptionErrorHandling} = require('./middlewares/subscriptionErrorHandling');
+
 // Add config files
 const connectDB = require(`./config/db`);
 const {coursesErrorHandling} = require(`./middlewares/coursesErrorHandling`);
@@ -44,13 +47,18 @@ app.use(require('express-session')({
     secret: 'This is secret',
     store: store,
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: true
 }));
 
 // Access to public folder
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Add routes files
+const subscriptions = require('./routes/subscription');
+app.use(subscriptions);
+
+// Handle error of subscriptions
+app.use(subscriptionErrorHandling);
 app.use(courses);
 
 // handling error of courses
