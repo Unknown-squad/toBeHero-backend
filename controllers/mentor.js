@@ -1,5 +1,8 @@
 //  module requirements
-const bcrypt = require(`bcrypt`)
+const bcrypt = require(`bcrypt`);
+const mongoose = require(`mongoose`);
+const path = require(`path`);
+const fs = require(`fs`)
 
 // models files
 const MentorSchema = require(`../models/mentors`);
@@ -280,7 +283,7 @@ exports.authorzithedUpdateAdvSetting = asyncHandler(async (req, res, next) => {
 })
 
 // @desc    change password
-// @route   PUT '/api/v1/mentor/dashboard/change-password'
+// @route   PUT '/api/v1/mentor/dashboard/password'
 // @access  privet(mentor)
 exports.changeMentorPassword = asyncHandler(async (req, res, next) => {
     const newPassword = req.body.params.newPassword;
@@ -321,9 +324,9 @@ exports.changeMentorPassword = asyncHandler(async (req, res, next) => {
 });
 
 // @desc    change email
-// @route   PUT '/api/v1/mentor/dashboard/change-email'
+// @route   PUT '/api/v1/mentor/dashboard/email'
 // @access  privet(mentor)
-exports.changeMentorEmail = asyncHandler(async (req, res, next) => {
+/* exports.changeMentorEmail = asyncHandler(async (req, res, next) => {
     const newEmail = req.body.params.newEmail;
     req.user = {
         id: '60696acb19985a03a36d00ba'
@@ -360,4 +363,65 @@ exports.changeMentorEmail = asyncHandler(async (req, res, next) => {
         success: true,
         message: `check your gmail`
     });
-});
+}); */
+
+// @desc    change profile picture
+// @route   PUT '/api/v1/mentor/dashboard/picture'
+// @access  privet(mentor)
+exports.changeMentorPicture = asyncHandler(async (req, res, next) => {
+    req.user = {
+        id: '60696acb19985a03a36d00ba',
+        person: 'mentor'
+    };
+
+    // found user
+    let user = await MentorSchema.findById(req.user.id);
+    
+    if (!user) {
+        return next(new ErrorHandler(`id not found`, 500))
+    }
+
+    // check if file sent 
+    if (!req.files) {
+        return next(new ErrorHandler(`please upload file`, 400))
+    }
+
+    let img = req.files.img
+    // check if file is img
+    if (!img.mimetype.startsWith(`image`)) {
+        return next(new ErrorHandler(`please upload file`, 400))
+    }
+
+    // check size img
+    if (img.size > 5 * 1024 * 1024) {
+        return next(new ErrorHandler(`please upload file`, 400))
+    }
+
+    // upload img
+    const fileName = `image-${req.user.person}-${Date.now()}${mongoose.Types.ObjectId()}${path.parse(img.name).ext}`;
+    img.mv(`./public/images/${fileName}`, function(err) {
+        // if error delete new img
+        if (err){
+            fs.unlinkSync(`./public/images/${fileName}`)
+            return next(err);
+        }
+        console.log(user)
+        let oldPicture = user.picture
+
+        // save new img path in DB
+        user.picture = `/images/${fileName}`;
+        user.save(function(err) {
+            fs.unlinkSync(`./public/images/${fileName}`);
+            return next(err);
+        });
+
+        // delete old picture
+        fs.unlinkSync(`./public/${oldPicture}`);
+
+        // send successfully response
+        res.status(200).json({
+            success: true,
+            message: `uploaded new image`
+        });
+    });
+})

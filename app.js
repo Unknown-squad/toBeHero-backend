@@ -6,6 +6,7 @@ const dotenv = require(`dotenv`);
 const morgan = require(`morgan`);
 const session = require('express-session');
 const MongoDBStore = require('connect-mongodb-session')(session);
+const fileUpload = require('express-fileupload');
 
 // Add config files
 const connectDB = require(`./config/db`);
@@ -41,6 +42,9 @@ app.use(require('express-session')({
     resave: false,
     saveUninitialized: false
 }));
+
+// active express-fileupload package
+app.use(fileUpload())
 
 // Access to public folder
 app.use(express.static(path.join(__dirname, 'public')));
