@@ -6,17 +6,20 @@ const dotenv = require(`dotenv`);
 const morgan = require(`morgan`);
 const session = require('express-session');
 const MongoDBStore = require('connect-mongodb-session')(session);
-const fileUpload = require(`express-fileupload`);
+const fileUpload = require('express-fileupload');
 
 // load routes
 const courses = require(`./routes/course`);
+const mentorRoutes = require('./routes/mentor');
+const subscriptions = require('./routes/subscription');
 
 // Add middleware files
 const {subscriptionErrorHandling} = require('./middlewares/subscriptionErrorHandling');
+const errorHandler = require('./middlewares/error')
+const {coursesErrorHandling} = require(`./middlewares/coursesErrorHandling`);
 
 // Add config files
 const connectDB = require(`./config/db`);
-const {coursesErrorHandling} = require(`./middlewares/coursesErrorHandling`);
 
 // Read body of request
 app.use(express.urlencoded({ extended: false }));
@@ -50,18 +53,20 @@ app.use(require('express-session')({
     saveUninitialized: true
 }));
 
+// active express-fileupload package
+app.use(fileUpload())
+
 // Access to public folder
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Add routes files
-const subscriptions = require('./routes/subscription');
+// use routes
+app.use(mentorRoutes)
 app.use(subscriptions);
-
-// Handle error of subscriptions
-app.use(subscriptionErrorHandling);
 app.use(courses);
 
-// handling error of courses
+// Use error handler
+app.use(errorHandler);
+app.use(subscriptionErrorHandling);
 app.use(coursesErrorHandling);
 
 // Connect to server
