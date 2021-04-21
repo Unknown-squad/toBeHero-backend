@@ -437,6 +437,26 @@ exports.changeMentorPicture = asyncHandler(async (req, res, next) => {
 // @route   PUT '/api/v1/mentor/dashboard/phone'
 // @access  privet(mentor)
 exports.changeMentorPhone = asyncHandler(async (req, res, next) => {
+    req.user = {
+        id: '60696acb19985a03a36d00ba',
+        person: 'mentor'
+    };
+
     // get user info 
-    // validation new country code
+    let user = await MentorSchema.findById(req.user.id);
+    
+    if (!user) {
+        return next(new ErrorHandler(`id not found`, 400));
+    }
+
+    // save new data
+    user.countryCode = req.body.params.countryCode;
+    user.phone = req.body.params.phone;
+    await user.save();
+
+    // send successfully response
+    res.status(200).json({
+        success: true,
+        message: `save phone number of user`
+    });
 })

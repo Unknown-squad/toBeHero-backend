@@ -17,7 +17,8 @@ const {
     updateMentorInfo,
     authorzithedUpdateAdvSetting,
     changeMentorPassword,
-    changeMentorPicture
+    changeMentorPicture,
+    changeMentorPhone
 } = require(`../controllers/mentor`)
 
 // @desc    get mentor's basic info 
@@ -99,5 +100,12 @@ router
 router
     .route('/api/v1/mentor/dashboard/picture')
     .put(authorizedMentor, changeMentorPicture);
+
+// @desc    change user phone number
+// @route   PUT '/api/v1/mentor/dashboard/phone'
+// @access  privet(mentor)
+router
+    .route('/api/v1/mentor/dashboard/phone')
+    .put(authorizedMentor, changeMentorPhone);
         
 module.exports = router
