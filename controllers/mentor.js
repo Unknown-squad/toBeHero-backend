@@ -378,7 +378,7 @@ exports.changeMentorPicture = asyncHandler(async (req, res, next) => {
     let user = await MentorSchema.findById(req.user.id);
     
     if (!user) {
-        return next(new ErrorHandler(`id not found`, 500))
+        return next(new ErrorHandler(`id not found`, 400))
     }
 
     // check if file sent 
@@ -414,13 +414,13 @@ exports.changeMentorPicture = asyncHandler(async (req, res, next) => {
             if (err) {
                 console.log(err)
                 fs.unlinkSync(`./public/images/${fileName}`);
-                return next(err);
+                return next(`didn't save new image`, 500);
             }
 
             // delete old picture
             fs.unlink(`./public${oldPicture}`, (err) => {
                 if (err) {
-                    return next(err)
+                    return next(`server error`, 500);
                 }
 
                 // send successfully response
