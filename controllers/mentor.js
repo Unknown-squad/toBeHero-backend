@@ -405,23 +405,30 @@ exports.changeMentorPicture = asyncHandler(async (req, res, next) => {
             fs.unlinkSync(`./public/images/${fileName}`)
             return next(err);
         }
-        console.log(user)
+        
         let oldPicture = user.picture
 
         // save new img path in DB
         user.picture = `/images/${fileName}`;
         user.save(function(err) {
-            fs.unlinkSync(`./public/images/${fileName}`);
-            return next(err);
-        });
+            if (err) {
+                console.log(err)
+                fs.unlinkSync(`./public/images/${fileName}`);
+                return next(err);
+            }
 
-        // delete old picture
-        fs.unlinkSync(`./public/${oldPicture}`);
+            // delete old picture
+            fs.unlink(`./public${oldPicture}`, (err) => {
+                if (err) {
+                    return next(err)
+                }
 
-        // send successfully response
-        res.status(200).json({
-            success: true,
-            message: `uploaded new image`
+                // send successfully response
+                res.status(200).json({
+                    success: true,
+                    message: `uploaded new image`
+                });
+            });
         });
     });
 })
