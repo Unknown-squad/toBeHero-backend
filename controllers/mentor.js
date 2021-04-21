@@ -365,7 +365,7 @@ exports.changeMentorPassword = asyncHandler(async (req, res, next) => {
     });
 }); */
 
-// @desc    change profile picture
+// @desc    change picture profile
 // @route   PUT '/api/v1/mentor/dashboard/picture'
 // @access  privet(mentor)
 exports.changeMentorPicture = asyncHandler(async (req, res, next) => {
@@ -431,4 +431,12 @@ exports.changeMentorPicture = asyncHandler(async (req, res, next) => {
             });
         });
     });
+});
+
+// @desc    change user phone number
+// @route   PUT '/api/v1/mentor/dashboard/phone'
+// @access  privet(mentor)
+exports.changeMentorPhone = asyncHandler(async (req, res, next) => {
+    // get user info 
+    // validation new country code
 })

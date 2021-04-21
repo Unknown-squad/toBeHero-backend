@@ -93,7 +93,7 @@ router
     .route('/api/v1/mentor/dashboard/change-email')
     .put(authorizedMentor, changeMentorEmail); */
 
-// @desc    change profile picture
+// @desc    change picture profile
 // @route   PUT '/api/v1/mentor/dashboard/picture'
 // @access  privet(mentor)
 router
