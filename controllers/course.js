@@ -150,7 +150,7 @@ exports.getReviews = asyncHandler(async (req, res, next) => {
   }
 
   // check if course has reviews or not
-  if(!currentCourse.reviewsId[0]) {
+  if(currentCourse.reviewsId.length === 0) {
     return next(new ErrorResponse(`there's no reviews for this course.`, 404));
   }
 
@@ -182,7 +182,7 @@ exports.getMentorCourses = asyncHandler(async (req, res, next) => {
     });
   
   // check if mentor has no courses
-  if(!currentUser.coursesId[0]) {
+  if(currentUser.coursesId.length === 0) {
     return next(new ErrorResponse(`there's no courses created by this mentor.`, 404));
   }
 
@@ -312,7 +312,7 @@ exports.postCourse = asyncHandler(async (req, res, next) => {
     }
 
     // set name of course picture
-    let pictureName = `image-course-${req.user.person}-${Date.now()}${mongoose.Types.ObjectId()}${path.parse(req.files.picture.name).ext}`;
+    let pictureName = `image-${req.user.person}-${Date.now()}${mongoose.Types.ObjectId()}${path.parse(req.files.picture.name).ext}`;
     
     // set dir of images and videos
     let pictureDir = `${__dirname}/../public/images/${pictureName}`;
@@ -321,7 +321,7 @@ exports.postCourse = asyncHandler(async (req, res, next) => {
     picturePath = `/images/${pictureName}`;
     
     // set size limit of course picture
-    if(req.files.picture.size > 8 * 1024 * 1024) {
+    if(req.files.picture.size > 5 * 1024 * 1024) {
       return next(new ErrorResponse(`file: max size of course picture is 8 mb`, 400));
     }
 
@@ -364,8 +364,8 @@ exports.postCourse = asyncHandler(async (req, res, next) => {
         // set some of public variables to use them in uploading process
         let file = req.files.mediaUrls;
         let fileType;
-        let imageSizeLimit = 8 * 1024 * 1024;
-        let videoSizeLimit = 30 * 1024 * 1024;
+        let imageSizeLimit = 5 * 1024 * 1024;
+        let videoSizeLimit = 100 * 1024 * 1024;
         let fileSizeLimit;
 
         // check if media is multible files uploaded
@@ -394,7 +394,7 @@ exports.postCourse = asyncHandler(async (req, res, next) => {
         }
         
         // set image name and video name
-        let mediaName = `${fileType}-course-${req.user.person}-${Date.now()}${mongoose.Types.ObjectId()}${path.parse(file.name).ext}`;
+        let mediaName = `${fileType}-${req.user.person}-${Date.now()}${mongoose.Types.ObjectId()}${path.parse(file.name).ext}`;
 
         // set image dir and video dir
         let mediaDir = `${__dirname}/../public/${fileType}s/${mediaName}`;
@@ -461,7 +461,7 @@ exports.postCourse = asyncHandler(async (req, res, next) => {
       }
 
       // delete course media
-      if(mediaURLSPath[0]) {
+      if(mediaURLSPath.length !== 0) {
         for(let i = 0; i < mediaURLSPath.length; i++) {
           fs.unlinkSync(`${__dirname}/../public${mediaURLSPath[i]}`);
         }
@@ -576,7 +576,7 @@ exports.putCourse = asyncHandler(async (req, res, next) => {
     if(req.files.picture) {
       
       // set name of course picture
-      let pictureName = `image-course-${req.user.person}-${Date.now()}${mongoose.Types.ObjectId()}${path.parse(req.files.picture.name).ext}`;
+      let pictureName = `image-${req.user.person}-${Date.now()}${mongoose.Types.ObjectId()}${path.parse(req.files.picture.name).ext}`;
       
       // set dir of images and videos
       let pictureDir = `${__dirname}/../public/images/${pictureName}`;
@@ -585,7 +585,7 @@ exports.putCourse = asyncHandler(async (req, res, next) => {
       newPicturePath = `/images/${pictureName}`;
       
       // set size limit of course picture
-      if(req.files.picture.size > 8 * 1024 * 1024) {
+      if(req.files.picture.size > 5 * 1024 * 1024) {
         return next(new ErrorResponse(`file: max size of course picture is 8 mb`, 400));
       }
       
@@ -634,8 +634,8 @@ exports.putCourse = asyncHandler(async (req, res, next) => {
         // set some of public variables to use them in uploading process
         let file = req.files.mediaUrls;
         let fileType;
-        let imageSizeLimit = 8 * 1024 * 1024;
-        let videoSizeLimit = 30 * 1024 * 1024;
+        let imageSizeLimit = 5 * 1024 * 1024;
+        let videoSizeLimit = 100 * 1024 * 1024;
         let fileSizeLimit;
 
         // check if media is multible files uploaded
@@ -664,7 +664,7 @@ exports.putCourse = asyncHandler(async (req, res, next) => {
         }
         
         // set image name and video name
-        let mediaName = `${fileType}-course-${req.user.person}-${Date.now()}${mongoose.Types.ObjectId()}${path.parse(file.name).ext}`;
+        let mediaName = `${fileType}-${req.user.person}-${Date.now()}${mongoose.Types.ObjectId()}${path.parse(file.name).ext}`;
 
         // set image dir and video dir
         let mediaDir = `${__dirname}/../public/${fileType}s/${mediaName}`;
