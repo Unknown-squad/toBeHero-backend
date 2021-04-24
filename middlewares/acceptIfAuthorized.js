@@ -27,7 +27,7 @@ exports.acceptIfMentor = asyncHandler(async (req, res, next) => {
   // just for testing
   /* req.user = {
     person: `mentor`,
-    id: `606f00646adcf04d84c70a6b`
+    id: `6083842afd1bb5eaec7a3590`
   } */
   
   // check if user is (mentor) authorized

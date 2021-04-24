@@ -46,14 +46,22 @@ exports.getOneCourse = asyncHandler(async (req, res, next) => {
 // @desc    get courses
 // @access  public
 exports.getCourses = asyncHandler(async (req, res, next) => {
-
-  // Genre
-  if(!req.query.genre) {
-    return next(new ErrorResponse(`please pick any genre.`, 400));
-  }
-
+  
   // Sort
   let sortby;
+  
+  // Genre
+  if(!req.query.genre) {
+    
+    // search on every genre
+    req.query.genre = ['Art', 'Music', 'Programming', 'Drawing', 'Quran', 'Physics', 'Mathematics', 'Chemistry', 'Philosophy'];
+
+    // return courses in descending order of subscription number
+    sortby = ` -subscriptionNumber`;
+
+  }
+
+  // hndle sorting
   if(req.query.sortby === `rating`) {
     sortby = `-rate`;
   } else if(req.query.sortby === `popularity`) {
@@ -150,7 +158,7 @@ exports.getReviews = asyncHandler(async (req, res, next) => {
   }
 
   // check if course has reviews or not
-  if(!currentCourse.reviewsId[0]) {
+  if(currentCourse.reviewsId.length === 0) {
     return next(new ErrorResponse(`there's no reviews for this course.`, 404));
   }
 
@@ -182,7 +190,7 @@ exports.getMentorCourses = asyncHandler(async (req, res, next) => {
     });
   
   // check if mentor has no courses
-  if(!currentUser.coursesId[0]) {
+  if(currentUser.coursesId.length === 0) {
     return next(new ErrorResponse(`there's no courses created by this mentor.`, 404));
   }
 
@@ -273,22 +281,18 @@ exports.postReview = asyncHandler(async (req, res, next) => {
 exports.postCourse = asyncHandler(async (req, res, next) => {
 
   // just for testing
-  /* req.user = {
-    person: `mentor`,
-    id: `606f00646adcf04d84c70a6b`
-  }
-  req.body = {
+  /* req.body = {
     method: 'post.course',
     params: {
       title: 'title',
-      price: 123,
-      description: 'description',
+      price: 6969,
+      description: 'Alien Alien',
       topicsList: [
-        'thing-2',
-        'thing-2',
-        'thing-3'
+        'Alien Alien-1',
+        'Alien Alien-2',
+        'Alien Alien-3'
       ],
-      genre: 'Art'
+      genre: 'Mathematics'
     }
   } */
   // end of testing
@@ -312,7 +316,7 @@ exports.postCourse = asyncHandler(async (req, res, next) => {
     }
 
     // set name of course picture
-    let pictureName = `image-course-${req.user.person}-${Date.now()}${mongoose.Types.ObjectId()}${path.parse(req.files.picture.name).ext}`;
+    let pictureName = `image-${req.user.person}-${Date.now()}${mongoose.Types.ObjectId()}${path.parse(req.files.picture.name).ext}`;
     
     // set dir of images and videos
     let pictureDir = `${__dirname}/../public/images/${pictureName}`;
@@ -321,7 +325,7 @@ exports.postCourse = asyncHandler(async (req, res, next) => {
     picturePath = `/images/${pictureName}`;
     
     // set size limit of course picture
-    if(req.files.picture.size > 8 * 1024 * 1024) {
+    if(req.files.picture.size > 5 * 1024 * 1024) {
       return next(new ErrorResponse(`file: max size of course picture is 8 mb`, 400));
     }
 
@@ -347,13 +351,25 @@ exports.postCourse = asyncHandler(async (req, res, next) => {
     // handle course's media uploading
     // check if there's course's media uploaded
     if(req.files.mediaUrls) {
-
+      
       // set mediaLength and isMultiblefiles as global variables to check if media is multible files or one file
       let mediaLength = 1;
       let isMultiblefiles = false;
-
+      
       // check if media is multible files uploaded
       if(Array.isArray(req.files.mediaUrls)) {
+        
+        // set maximum number of media to 5
+        if(req.files.mediaUrls.length > 5) {
+
+          req.filesPath = {
+            coursePicture: picturePath
+          }
+
+          return next(new ErrorResponse(`file: max number of media files is 5`, 400));
+        }
+        
+        // handle media files as array
         mediaLength = req.files.mediaUrls.length;
         isMultiblefiles = true;
       }
@@ -364,8 +380,8 @@ exports.postCourse = asyncHandler(async (req, res, next) => {
         // set some of public variables to use them in uploading process
         let file = req.files.mediaUrls;
         let fileType;
-        let imageSizeLimit = 8 * 1024 * 1024;
-        let videoSizeLimit = 30 * 1024 * 1024;
+        let imageSizeLimit = 5 * 1024 * 1024;
+        let videoSizeLimit = 100 * 1024 * 1024;
         let fileSizeLimit;
 
         // check if media is multible files uploaded
@@ -394,7 +410,7 @@ exports.postCourse = asyncHandler(async (req, res, next) => {
         }
         
         // set image name and video name
-        let mediaName = `${fileType}-course-${req.user.person}-${Date.now()}${mongoose.Types.ObjectId()}${path.parse(file.name).ext}`;
+        let mediaName = `${fileType}-${req.user.person}-${Date.now()}${mongoose.Types.ObjectId()}${path.parse(file.name).ext}`;
 
         // set image dir and video dir
         let mediaDir = `${__dirname}/../public/${fileType}s/${mediaName}`;
@@ -447,7 +463,7 @@ exports.postCourse = asyncHandler(async (req, res, next) => {
     mediaURLS: mediaURLSPath,
     genre: req.body.params.genre,
     mentorId: req.user.id
-  }, (err) => {
+  }, async (err, user) => {
 
     // check if there's an error with creating new course
     if(err) {
@@ -461,7 +477,7 @@ exports.postCourse = asyncHandler(async (req, res, next) => {
       }
 
       // delete course media
-      if(mediaURLSPath[0]) {
+      if(mediaURLSPath.length !== 0) {
         for(let i = 0; i < mediaURLSPath.length; i++) {
           fs.unlinkSync(`${__dirname}/../public${mediaURLSPath[i]}`);
         }
@@ -474,14 +490,21 @@ exports.postCourse = asyncHandler(async (req, res, next) => {
       return next(new ErrorResponse(err.message, 400));
 
     }
-    
-    // send response
-    return res.status(201).json({
-      success: true,
-      message: `Course created successfully.`
-    });
 
-  });
+      // send response
+      res.status(201).json({
+        success: true,
+        message: `Course created successfully.`
+      });
+
+      // find mentor by his id
+      const currentMentor = await Mentor.findById(req.user.id);
+    
+      // update coursesId array in mentor model
+      currentMentor.coursesId.push(user._id);
+      await currentMentor.save();
+
+    });
 
 });
 
@@ -491,10 +514,7 @@ exports.postCourse = asyncHandler(async (req, res, next) => {
 exports.putCourse = asyncHandler(async (req, res, next) => {
 
   // just for testing
-  /* req.user = {
-    person: `mentor`
-  }
-  req.body = {
+  /* req.body = {
     method: 'post.course',
     params: {
       title: 'rmrm',
@@ -507,7 +527,10 @@ exports.putCourse = asyncHandler(async (req, res, next) => {
       ],
       genre: 'Music',
       mediaUrls: [
-        // "/videos/video-course-mentor-161835834370260763047ff4b4e40054fd55f.MP4"
+        "/images/image-mentor-16193095037856084b3bf13624d83d7ec1dad.jpg",
+        "/images/image-mentor-16193095037866084b3bf13624d83d7ec1dae.jpg",
+        "/images/image-mentor-16193095037866084b3bf13624d83d7ec1daf.jpg",
+        "/images/image-mentor-16193095037866084b3bf13624d83d7ec1db0.jpg"
       ],
       // picture: `/images/image-course-mentor-16183563497106076287d0e0cdc372ccabe6c.jpg`
     }
@@ -525,6 +548,11 @@ exports.putCourse = asyncHandler(async (req, res, next) => {
   // check if there's no body with request
   if(!req.body || !req.body.params) {
     return next(new ErrorResponse(`The body of request and params is required.`));
+  }
+  
+  // set maximum number of uploaded files
+  if(req.body.params.mediaUrls.length > 5) {
+    return next(new ErrorResponse(`max number of media files is 5`, 400));
   }
 
   // create global virables to set picture path and media urls path
@@ -558,7 +586,7 @@ exports.putCourse = asyncHandler(async (req, res, next) => {
   }
   else {
 
-    // check if there's no media with body o the request
+    // check if there's no media with body on the request
     if(!req.body.params.mediaUrls || req.body.params.mediaUrls.length == 0) {
       deletedMedia = currentCourse.mediaURLS;
     }
@@ -576,7 +604,7 @@ exports.putCourse = asyncHandler(async (req, res, next) => {
     if(req.files.picture) {
       
       // set name of course picture
-      let pictureName = `image-course-${req.user.person}-${Date.now()}${mongoose.Types.ObjectId()}${path.parse(req.files.picture.name).ext}`;
+      let pictureName = `image-${req.user.person}-${Date.now()}${mongoose.Types.ObjectId()}${path.parse(req.files.picture.name).ext}`;
       
       // set dir of images and videos
       let pictureDir = `${__dirname}/../public/images/${pictureName}`;
@@ -585,7 +613,7 @@ exports.putCourse = asyncHandler(async (req, res, next) => {
       newPicturePath = `/images/${pictureName}`;
       
       // set size limit of course picture
-      if(req.files.picture.size > 8 * 1024 * 1024) {
+      if(req.files.picture.size > 5 * 1024 * 1024) {
         return next(new ErrorResponse(`file: max size of course picture is 8 mb`, 400));
       }
       
@@ -627,6 +655,18 @@ exports.putCourse = asyncHandler(async (req, res, next) => {
         mediaLength = req.files.mediaUrls.length;
         isMultiblefiles = true;
       }
+
+      // set maximum number of uploaded files
+      if((req.body.params.mediaUrls.length + mediaLength) > 5) {
+
+        // send new course picture to next middleware to delete it
+        req.filesPath = {
+          coursePicture: newPicturePath
+        }
+
+        return next(new ErrorResponse(`file: max number of media files is 5`, 400));
+
+      }
       
       // loop on mediaURLS array
       for(let i = 0; i < mediaLength ; i++) {
@@ -634,8 +674,8 @@ exports.putCourse = asyncHandler(async (req, res, next) => {
         // set some of public variables to use them in uploading process
         let file = req.files.mediaUrls;
         let fileType;
-        let imageSizeLimit = 8 * 1024 * 1024;
-        let videoSizeLimit = 30 * 1024 * 1024;
+        let imageSizeLimit = 5 * 1024 * 1024;
+        let videoSizeLimit = 100 * 1024 * 1024;
         let fileSizeLimit;
 
         // check if media is multible files uploaded
@@ -664,7 +704,7 @@ exports.putCourse = asyncHandler(async (req, res, next) => {
         }
         
         // set image name and video name
-        let mediaName = `${fileType}-course-${req.user.person}-${Date.now()}${mongoose.Types.ObjectId()}${path.parse(file.name).ext}`;
+        let mediaName = `${fileType}-${req.user.person}-${Date.now()}${mongoose.Types.ObjectId()}${path.parse(file.name).ext}`;
 
         // set image dir and video dir
         let mediaDir = `${__dirname}/../public/${fileType}s/${mediaName}`;

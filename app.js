@@ -14,9 +14,9 @@ const mentorRoutes = require('./routes/mentor');
 const subscriptions = require('./routes/subscription');
 
 // Add middleware files
-const {subscriptionErrorHandling} = require('./middlewares/subscriptionErrorHandling');
-const errorHandler = require('./middlewares/error')
-const {coursesErrorHandling} = require(`./middlewares/coursesErrorHandling`);
+/* const {subscriptionErrorHandling} = require('./middlewares/subscriptionErrorHandling');
+const errorHandler = require('./middlewares/error') */
+const {errorHandling} = require(`./middlewares/ErrorHandling`);
 
 // Add config files
 const connectDB = require(`./config/db`);
@@ -47,14 +47,11 @@ let store = new MongoDBStore({
 
 // Connect to session
 app.use(require('express-session')({
-    secret: 'This is secret',
+    secret: process.env.SESSION_SECRET,
     store: store,
     resave: false,
     saveUninitialized: true
 }));
-
-// active express-fileupload package
-app.use(fileUpload())
 
 // Access to public folder
 app.use(express.static(path.join(__dirname, 'public')));
@@ -65,9 +62,9 @@ app.use(subscriptions);
 app.use(courses);
 
 // Use error handler
-app.use(errorHandler);
-app.use(subscriptionErrorHandling);
-app.use(coursesErrorHandling);
+app.use(errorHandling);
+/* app.use(errorHandler);
+app.use(subscriptionErrorHandling); */
 
 // Connect to server
 const port = process.env.PORT || 3000;
