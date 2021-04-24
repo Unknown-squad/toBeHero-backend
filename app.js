@@ -47,7 +47,7 @@ let store = new MongoDBStore({
 
 // Connect to session
 app.use(require('express-session')({
-    secret: 'This is secret',
+    secret: process.env.SESSION_SECRET,
     store: store,
     resave: false,
     saveUninitialized: true

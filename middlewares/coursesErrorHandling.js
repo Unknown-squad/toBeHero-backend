@@ -46,14 +46,19 @@ exports.coursesErrorHandling = (err, req, res, next) => {
         req.filesPath.coursePicture = '';
       }
   
-      // delete course media
-      if(req.filesPath.mediaUrls.length != 0) {
-        for(let i = 0; i < req.filesPath.mediaUrls.length; i++) {
-          fs.unlinkSync(`${__dirname}/../public${req.filesPath.mediaUrls[i]}`);
+      // check if there's  mediaUrls
+      if(req.filesPath.mediaUrls) {
+        
+        // delete course media
+        if(req.filesPath.mediaUrls.length != 0) {
+          for(let i = 0; i < req.filesPath.mediaUrls.length; i++) {
+            fs.unlinkSync(`${__dirname}/../public${req.filesPath.mediaUrls[i]}`);
+          }
+  
+          // clear pathes after deleting files
+          req.filesPath.mediaUrls = [];
         }
 
-        // clear pathes after deleting files
-        req.filesPath.mediaUrls = [];
       }
 
     }

@@ -289,14 +289,14 @@ exports.postCourse = asyncHandler(async (req, res, next) => {
     method: 'post.course',
     params: {
       title: 'title',
-      price: 123,
-      description: 'description',
+      price: 6969,
+      description: 'Philosophy',
       topicsList: [
-        'thing-2',
-        'thing-2',
-        'thing-3'
+        'Philosophy-1',
+        'Philosophy-2',
+        'Philosophy-3'
       ],
-      genre: 'Programming'
+      genre: 'Philosophy'
     }
   } */
   // end of testing
@@ -455,7 +455,7 @@ exports.postCourse = asyncHandler(async (req, res, next) => {
     mediaURLS: mediaURLSPath,
     genre: req.body.params.genre,
     mentorId: req.user.id
-  }, (err) => {
+  }, async (err, user) => {
 
     // check if there's an error with creating new course
     if(err) {
@@ -482,15 +482,21 @@ exports.postCourse = asyncHandler(async (req, res, next) => {
       return next(new ErrorResponse(err.message, 400));
 
     }
-    
-    // send response
-    return res.status(201).json({
-      success: true,
-      message: `Course created successfully.`
-    });
 
-  });
-  console.log(123);
+      // send response
+      res.status(201).json({
+        success: true,
+        message: `Course created successfully.`
+      });
+
+      // find mentor by his id
+      const currentMentor = await Mentor.findById(req.user.id);
+    
+      // update coursesId array in mentor model
+      currentMentor.coursesId.push(user._id);
+      await currentMentor.save();
+
+    });
 
 });
 
