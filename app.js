@@ -53,9 +53,6 @@ app.use(require('express-session')({
     saveUninitialized: true
 }));
 
-// active express-fileupload package
-app.use(fileUpload())
-
 // Access to public folder
 app.use(express.static(path.join(__dirname, 'public')));
 

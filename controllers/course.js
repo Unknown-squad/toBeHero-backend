@@ -46,14 +46,22 @@ exports.getOneCourse = asyncHandler(async (req, res, next) => {
 // @desc    get courses
 // @access  public
 exports.getCourses = asyncHandler(async (req, res, next) => {
-
-  // Genre
-  if(!req.query.genre) {
-    return next(new ErrorResponse(`please pick any genre.`, 400));
-  }
-
+  
   // Sort
   let sortby;
+  
+  // Genre
+  if(!req.query.genre) {
+    
+    // search on every genre
+    req.query.genre = ['Art', 'Music', 'Programming', 'Drawing', 'Quran', 'Physics', 'Mathematics', 'Chemistry', 'Philosophy'];
+
+    // return courses in descending order of subscription number
+    sortby = ` -subscriptionNumber`;
+
+  }
+
+  // hndle sorting
   if(req.query.sortby === `rating`) {
     sortby = `-rate`;
   } else if(req.query.sortby === `popularity`) {
@@ -276,8 +284,8 @@ exports.postCourse = asyncHandler(async (req, res, next) => {
   /* req.user = {
     person: `mentor`,
     id: `606f00646adcf04d84c70a6b`
-  }
-  req.body = {
+  } */
+  /* req.body = {
     method: 'post.course',
     params: {
       title: 'title',
@@ -288,7 +296,7 @@ exports.postCourse = asyncHandler(async (req, res, next) => {
         'thing-2',
         'thing-3'
       ],
-      genre: 'Art'
+      genre: 'Programming'
     }
   } */
   // end of testing
@@ -482,6 +490,7 @@ exports.postCourse = asyncHandler(async (req, res, next) => {
     });
 
   });
+  console.log(123);
 
 });
 
