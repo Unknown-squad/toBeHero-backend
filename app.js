@@ -62,9 +62,9 @@ app.use(subscriptions);
 app.use(courses);
 
 // Use error handler
+app.use(coursesErrorHandling);
 app.use(errorHandler);
 app.use(subscriptionErrorHandling);
-app.use(coursesErrorHandling);
 
 // Connect to server
 const port = process.env.PORT || 3000;

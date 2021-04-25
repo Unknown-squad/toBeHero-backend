@@ -281,22 +281,18 @@ exports.postReview = asyncHandler(async (req, res, next) => {
 exports.postCourse = asyncHandler(async (req, res, next) => {
 
   // just for testing
-  /* req.user = {
-    person: `mentor`,
-    id: `606f00646adcf04d84c70a6b`
-  } */
   /* req.body = {
     method: 'post.course',
     params: {
       title: 'title',
       price: 6969,
-      description: 'Philosophy',
+      description: 'Alien Alien',
       topicsList: [
-        'Philosophy-1',
-        'Philosophy-2',
-        'Philosophy-3'
+        'Alien Alien-1',
+        'Alien Alien-2',
+        'Alien Alien-3'
       ],
-      genre: 'Philosophy'
+      genre: 'Mathematics'
     }
   } */
   // end of testing
@@ -355,13 +351,25 @@ exports.postCourse = asyncHandler(async (req, res, next) => {
     // handle course's media uploading
     // check if there's course's media uploaded
     if(req.files.mediaUrls) {
-
+      
       // set mediaLength and isMultiblefiles as global variables to check if media is multible files or one file
       let mediaLength = 1;
       let isMultiblefiles = false;
-
+      
       // check if media is multible files uploaded
       if(Array.isArray(req.files.mediaUrls)) {
+        
+        // set maximum number of media to 5
+        if(req.files.mediaUrls.length > 5) {
+
+          req.filesPath = {
+            coursePicture: picturePath
+          }
+
+          return next(new ErrorResponse(`file: max number of media files is 5`, 400));
+        }
+        
+        // handle media files as array
         mediaLength = req.files.mediaUrls.length;
         isMultiblefiles = true;
       }
@@ -506,10 +514,7 @@ exports.postCourse = asyncHandler(async (req, res, next) => {
 exports.putCourse = asyncHandler(async (req, res, next) => {
 
   // just for testing
-  /* req.user = {
-    person: `mentor`
-  }
-  req.body = {
+  /* req.body = {
     method: 'post.course',
     params: {
       title: 'rmrm',
@@ -522,7 +527,10 @@ exports.putCourse = asyncHandler(async (req, res, next) => {
       ],
       genre: 'Music',
       mediaUrls: [
-        // "/videos/video-course-mentor-161835834370260763047ff4b4e40054fd55f.MP4"
+        "/images/image-mentor-16193095037856084b3bf13624d83d7ec1dad.jpg",
+        "/images/image-mentor-16193095037866084b3bf13624d83d7ec1dae.jpg",
+        "/images/image-mentor-16193095037866084b3bf13624d83d7ec1daf.jpg",
+        "/images/image-mentor-16193095037866084b3bf13624d83d7ec1db0.jpg"
       ],
       // picture: `/images/image-course-mentor-16183563497106076287d0e0cdc372ccabe6c.jpg`
     }
@@ -540,6 +548,11 @@ exports.putCourse = asyncHandler(async (req, res, next) => {
   // check if there's no body with request
   if(!req.body || !req.body.params) {
     return next(new ErrorResponse(`The body of request and params is required.`));
+  }
+  
+  // set maximum number of uploaded files
+  if(req.body.params.mediaUrls.length > 5) {
+    return next(new ErrorResponse(`max number of media files is 5`, 400));
   }
 
   // create global virables to set picture path and media urls path
@@ -573,7 +586,7 @@ exports.putCourse = asyncHandler(async (req, res, next) => {
   }
   else {
 
-    // check if there's no media with body o the request
+    // check if there's no media with body on the request
     if(!req.body.params.mediaUrls || req.body.params.mediaUrls.length == 0) {
       deletedMedia = currentCourse.mediaURLS;
     }
@@ -641,6 +654,18 @@ exports.putCourse = asyncHandler(async (req, res, next) => {
       if(Array.isArray(req.files.mediaUrls)) {
         mediaLength = req.files.mediaUrls.length;
         isMultiblefiles = true;
+      }
+
+      // set maximum number of uploaded files
+      if((req.body.params.mediaUrls.length + mediaLength) > 5) {
+
+        // send new course picture to next middleware to delete it
+        req.filesPath = {
+          coursePicture: newPicturePath
+        }
+
+        return next(new ErrorResponse(`file: max number of media files is 5`, 400));
+
       }
       
       // loop on mediaURLS array
