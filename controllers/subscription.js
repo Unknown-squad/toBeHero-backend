@@ -46,11 +46,7 @@ exports.getMentorSubscriptions = asyncHandler (async (req, res, next) => {
     message: 'Subscriptions data',
     data: {
       kind: 'subscription',
-      items: [
-        {
-          subscriptions: subscriptions
-        }
-      ]
+      items: subscriptions
     }
   });
 });
@@ -98,11 +94,7 @@ exports.getOneMentorSubscription = asyncHandler (async (req, res, next) => {
     message: 'subscription data',
     data: {
       kind: 'subscription',
-      items: [
-        {
-          subscription: subscription
-        }
-      ]
+      items: [subscription]
     }
   });
 });
@@ -198,11 +190,7 @@ exports.getAllChildSubscriptions = asyncHandler (async (req, res, next) => {
     message: 'subscriptions data',
     data: {
       kind: 'subscriptions',
-      items: [
-        {
-          subscription: subscription
-        }
-      ]
+      items: subscription
     }
   });
 });
@@ -271,11 +259,7 @@ exports.getChildSubsForGuardian = asyncHandler (async (req, res, next) => {
     message: "Child's subscriptions",
     data: {
       kind: 'subscriptions',
-      items: [
-        {
-          childSubscriptions: childSubs
-        }
-      ]
+      items: childSubs
     }
   });
 });
@@ -331,11 +315,7 @@ exports.getChildSubForGuardian = asyncHandler (async (req, res, next) => {
     message: "Child's subscription",
     data: {
       kind: 'subscriptoins',
-      items: [
-        {
-          childSubscription: childSub
-        }
-      ]
+      items: [childSub]
     }
   });
 });
