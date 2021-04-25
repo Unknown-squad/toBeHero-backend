@@ -1,7 +1,7 @@
 const fs = require(`fs`);
 const ErrorResponse = require(`../utils/errorResponse`);
 
-exports.coursesErrorHandling = (err, req, res, next) => {
+exports.errorHandling = (err, req, res, next) => {
 
   // console error for dev
   console.log(err);
@@ -19,6 +19,12 @@ exports.coursesErrorHandling = (err, req, res, next) => {
       if(val.kind === `ObjectId`) {
         val.message = `invalid id at path ${val.path}`
       }
+      
+      // check if kind of error is ObjectId
+      if(val.kind === `date`) {
+        val.message = `Invalid date or time`;
+      }
+
       return ` ${val.message}`;
 
     });
@@ -28,7 +34,7 @@ exports.coursesErrorHandling = (err, req, res, next) => {
   
   // id of content not valid
   if(err.name === `CastError`) {
-    const message = `invalid id.`;
+    const message = `Invalid id.`;
     error = new ErrorResponse(message, 400);
   }
 

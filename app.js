@@ -14,9 +14,9 @@ const mentorRoutes = require('./routes/mentor');
 const subscriptions = require('./routes/subscription');
 
 // Add middleware files
-const {subscriptionErrorHandling} = require('./middlewares/subscriptionErrorHandling');
-const errorHandler = require('./middlewares/error')
-const {coursesErrorHandling} = require(`./middlewares/coursesErrorHandling`);
+/* const {subscriptionErrorHandling} = require('./middlewares/subscriptionErrorHandling');
+const errorHandler = require('./middlewares/error') */
+const {errorHandling} = require(`./middlewares/ErrorHandling`);
 
 // Add config files
 const connectDB = require(`./config/db`);
@@ -62,9 +62,9 @@ app.use(subscriptions);
 app.use(courses);
 
 // Use error handler
-app.use(coursesErrorHandling);
-app.use(errorHandler);
-app.use(subscriptionErrorHandling);
+app.use(errorHandling);
+/* app.use(errorHandler);
+app.use(subscriptionErrorHandling); */
 
 // Connect to server
 const port = process.env.PORT || 3000;
