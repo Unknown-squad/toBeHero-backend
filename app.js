@@ -58,7 +58,7 @@ app.use(require('express-session')({
 app.use(express.static(path.join(__dirname, 'public')));
 
 // use routes
-app.use(mentorRoutes)
+app.use(mentorRoutes);
 app.use(subscriptions);
 app.use(courses);
 app.use(guardian);

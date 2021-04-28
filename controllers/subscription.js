@@ -127,7 +127,7 @@ exports.addNewAppiontment = asyncHandler (async (req, res, next) => {
   }
   const { title, date, time } = req.body.params;
   if (!title || !date || !time) {
-    return next(new ErrorResponse('Params are missing.', 400));
+    return next(new ErrorResponse('Missing property in params.', 400));
   }
 
   // Check if day is valid

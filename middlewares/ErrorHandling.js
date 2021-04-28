@@ -6,6 +6,7 @@ exports.errorHandling = (err, req, res, next) => {
 
   // console error for dev
   console.log(err);
+  console.log(err.name);
 
   let error = {...err};
   error.message = err.message;
@@ -18,12 +19,20 @@ exports.errorHandling = (err, req, res, next) => {
 
       // check if kind of error is ObjectId
       if(val.kind === `ObjectId`) {
-        val.message = `invalid id at path ${val.path}`
+        val.message = `Invalid id at path ${val.path}`
       }
       
-      // check if kind of error is ObjectId
+      // check if invalid date or time
       if(val.kind === `date`) {
         val.message = `Invalid date or time.`;
+      }
+
+      // Check if mongoose validation error
+      if (val.path === `userName`) {
+        val.message = `userName must be at least 5 characters.`;
+      }
+      else {
+        val.message = `fullName must be at least 5 characters.`
       }
 
       return ` ${val.message}`;
