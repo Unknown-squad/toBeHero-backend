@@ -233,6 +233,9 @@ exports.postReview = asyncHandler(async (req, res, next) => {
   course.reviewsId.push(newReview._id);
   await course.save();
 
+  // find guardian by his id and get his data
+  const currentGuardian = await Guardian.findById(req.user.id);
+
   // send response
   res.status(201).json({
     success: true,
@@ -242,8 +245,8 @@ exports.postReview = asyncHandler(async (req, res, next) => {
       items: [{
         reviewId: newReview._id,
         guardian: {
-          fullName: req.user.fullName,
-          picture: req.user.picture
+          fullName: currentGuardian.fullName,
+          picture: currentGuardian.picture
         }
       }]
     }
