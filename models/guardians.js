@@ -35,8 +35,7 @@ const GuardianSchema = new mongoose.Schema({
     required: [true, 'Please select country code'],
   },
   address: {
-      type: String,
-      required: [true, 'Please enter address']
+      type: String
   },
   bankingInfo: [
     {

@@ -12,6 +12,7 @@ const fileUpload = require('express-fileupload');
 const courses = require(`./routes/course`);
 const mentorRoutes = require('./routes/mentor');
 const subscriptions = require('./routes/subscription');
+const authRoutes = require(`./routes/auth`);
 
 // Add middleware files
 /* const {subscriptionErrorHandling} = require('./middlewares/subscriptionErrorHandling');
@@ -50,7 +51,12 @@ app.use(require('express-session')({
     secret: process.env.SESSION_SECRET,
     store: store,
     resave: false,
-    saveUninitialized: true
+    saveUninitialized: false,
+    cookie: {
+      sameSite: 'Strict',
+      maxAge: 60000,
+      // secure: true
+  }
 }));
 
 // Access to public folder
@@ -60,6 +66,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(mentorRoutes)
 app.use(subscriptions);
 app.use(courses);
+app.use(authRoutes);
 
 // Use error handler
 app.use(errorHandling);
