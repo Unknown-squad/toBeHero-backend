@@ -1,20 +1,24 @@
 // module requirement
 const dotenv = require(`dotenv`);
+const bcrypt = require(`bcrypt`);
 
 // using dotenv
 dotenv.config({path: `../config/config.env`});
 
 // models files
 const guardianSchema = require(`../models/guardians`);
+const mentorSchema = require(`../models/mentors`);
+const chaildSchema = require(`../models/children`);
 
 // middlewares files
 const asyncHandler = require('../middlewares/async');
 
 // utils files
 const ErrorHandler = require('../utils/errorHandler');
-const sendMail = require(`../utils/sendmail`)
+const sendMail = require(`../utils/sendmail`);
+const { errorHandling } = require('../middlewares/ErrorHandling');
 
-// @desc    create sign up as guardian
+// @desc    sign up as guardian
 // @route   POST `/api/v1/guardian/signup`
 // @access  public
 exports.signUpAsGuardian = asyncHandler(async (req, res, next) => {
@@ -32,6 +36,9 @@ exports.signUpAsGuardian = asyncHandler(async (req, res, next) => {
         return next(new ErrorHandler(`invalid password`, 400));
     };
 
+    // incrypt password
+    data.password = await bcrypt.hash(data.password, 12);
+
     // create token to verify user account
     const randToken = Math.floor(100000 + Math.random() * 900000);
     data.varificationToken = randToken;
@@ -45,7 +52,6 @@ exports.signUpAsGuardian = asyncHandler(async (req, res, next) => {
     const newUser = await guardianSchema.create(data);
 
     // create session and cockies to sign up user
-    req.session.isLoggedIn = true;
     req.session.user = {
         id: newUser._id,
         person: `guardian`,
@@ -53,7 +59,7 @@ exports.signUpAsGuardian = asyncHandler(async (req, res, next) => {
     };
 
     // verify his/her account by send mail has 6 random digital
-    const email = {
+    const mail = {
         to: data.email,
         from: process.env.SENDER_MAIL,
         subject: 'Please verify your email',
@@ -61,11 +67,59 @@ exports.signUpAsGuardian = asyncHandler(async (req, res, next) => {
         html: randToken
     };
 
-    sendMail(email);
+    sendMail(mail);
 
     // send successfully response
-    res.status(200).json({
+    res.status(201).json({
             success: true,
             message: `email created successfully, please verify your email.`
+    });
+});
+
+// @desc    login user
+// @route   POST `/api/v1/guardian/login`
+// @access  public
+exports.loginUser= asyncHandler(async (req, res, next) => {
+    const data = req.body.params;
+    let user, personType;
+
+    // find user in database
+    if (data.person === 'mentor') {
+        user = await mentorSchema.findOne({email: data.email});
+        personType = 'mentor';
+    } else if (data.person === 'guardian') {
+        user = await guardianSchema.findOne({email: data.email});
+        personType = 'guardian';
+    } else {
+        user = await chaildSchema.findOne({userName: data.userName});
+        personType = 'children';
+    };
+
+    // check if didn't found user
+    if (!user) {
+        return next(new ErrorHandler(`there is no user with such email or username.`, 404));
+    };
+
+    // check if account isn't verify
+    if (user.isVerify === false) {
+        return next(new ErrorHandler(`this email isn't verified.`, 401));
+    };
+
+    // check user password is correct
+    const correctPassword = await bcrypt.compare(data.password, user.password);
+
+    if (!correctPassword) {
+        return next(new ErrorHandler(`there's an error occured with email or password.`, 400));
+    };
+
+    req.session.user = {
+        id: user.id,
+        person: personType,
+        isVerify: true
+    };
+
+    res.status(200).json({
+        success: true,
+        message: `user logged in successfully.`
     });
 });
