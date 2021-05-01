@@ -14,6 +14,6 @@ const {
 // @route   POST `/api/v1/guardian/signup`
 // @access  public
 router.route(`/api/v1/guardian/signup`)
-    .post(signUpAsGuardian)
+    .post(signUpAsGuardian);
 
 module.exports = router

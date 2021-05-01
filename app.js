@@ -53,8 +53,8 @@ app.use(require('express-session')({
     resave: false,
     saveUninitialized: false,
     cookie: {
-      sameSite: 'Strict',
-      maxAge: 60000,
+      // sameSite: 'Strict',
+      maxAge: 1000 * 60 * 60 * 24 * 90,
       // secure: true
   }
 }));
