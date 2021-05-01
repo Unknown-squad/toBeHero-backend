@@ -4,7 +4,8 @@ const router = express.Router();
 const {
   getChildrenDataForGuardian,
   getBasicInfoForGuardian,
-  updateChildBasicInfo
+  updateChildBasicInfo,
+  addNewChild
 } = require('../controllers/guardian');
 const { 
   mentorAuthorization,
@@ -26,7 +27,15 @@ router.get('/api/v1/guardian/children', guardianAuthorization, getChildrenDataFo
 // @access  private/guardian
 router.route('/api/v1/child/:childId')
   .get(guardianAuthorization, getBasicInfoForGuardian)
-  .put(guardianAuthorization, updateChildBasicInfo)
+  .put(guardianAuthorization, updateChildBasicInfo);
+
+
+
+// @desc    Add new child
+// @route   POST localhost:3000/api/v1/guardian/new-child
+// @access  private/guardian
+
+router.post('/api/v1/guardian/new-child', guardianAuthorization, addNewChild);
 
 
 module.exports = router;

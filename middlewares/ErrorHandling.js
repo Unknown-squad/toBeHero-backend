@@ -27,14 +27,7 @@ exports.errorHandling = (err, req, res, next) => {
         val.message = `Invalid date or time.`;
       }
 
-      // Check if mongoose validation error
-      if (val.path === `userName`) {
-        val.message = `userName must be at least 5 characters.`;
-      }
-      else {
-        val.message = `fullName must be at least 5 characters.`
-      }
-
+      
       return ` ${val.message}`;
 
     });

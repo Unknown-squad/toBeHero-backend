@@ -5,7 +5,7 @@ const ErrorResponse = require('../utils/errorResponse');
 // Mentor authorization
 exports.mentorAuthorization = (req, res, next) => {
 
-  // Suppose for testing
+  // For Testing
   req.user = {
     id: '607c470f37bbc66087e940fc',
     person: 'mentor'
@@ -22,7 +22,7 @@ exports.mentorAuthorization = (req, res, next) => {
 // Guardian authorization
 exports.guardianAuthorization = (req, res, next) => {
   
-    // Suppose for testing
+    // For Testing
     req.user = {
       id: '607c469437bbc66087e940fb',
       person: 'guardian'
@@ -39,7 +39,7 @@ exports.guardianAuthorization = (req, res, next) => {
 // Child authorization
 exports.childAuthorization = (req, res, next) => {
 
-  // Suppose for testing
+  // For Testing
   req.user = {
     id: '607c459b37bbc66087e940f9',
     person: 'child'
