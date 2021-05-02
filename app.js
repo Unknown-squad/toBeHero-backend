@@ -62,6 +62,14 @@ app.use(require('express-session')({
 // Access to public folder
 app.use(express.static(path.join(__dirname, 'public')));
 
+// save user session in req.user variable
+app.use((req, res, next) => {
+  if (req.session) {
+    req.user = req.session.user;
+  };
+  next();
+})
+
 // use routes
 app.use(mentorRoutes)
 app.use(subscriptions);

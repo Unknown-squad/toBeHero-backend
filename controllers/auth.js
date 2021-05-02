@@ -16,7 +16,6 @@ const asyncHandler = require('../middlewares/async');
 // utils files
 const ErrorHandler = require('../utils/errorHandler');
 const sendMail = require(`../utils/sendmail`);
-const { errorHandling } = require('../middlewares/ErrorHandling');
 
 // @desc    sign up as guardian
 // @route   POST `/api/v1/guardian/signup`
@@ -52,6 +51,7 @@ exports.signUpAsGuardian = asyncHandler(async (req, res, next) => {
     const newUser = await guardianSchema.create(data);
 
     // create session and cockies to sign up user
+    req.session.isLoggedIn = false;
     req.session.user = {
         id: newUser._id,
         person: `guardian`,
@@ -112,6 +112,7 @@ exports.loginUser= asyncHandler(async (req, res, next) => {
         return next(new ErrorHandler(`there's an error occured with email or password.`, 400));
     };
 
+    req.session.isLoggedIn = true;
     req.session.user = {
         id: user.id,
         person: personType,
@@ -121,5 +122,47 @@ exports.loginUser= asyncHandler(async (req, res, next) => {
     res.status(200).json({
         success: true,
         message: `user logged in successfully.`
+    });
+});
+
+// @desc    verify email of user
+// @route   POST `/api/v1/user/verify-email`
+// @access  public
+exports.verifyEmail = asyncHandler(async (req, res, next) => {
+    const data = req.body.params;
+    let user;
+
+    // find user in database
+    if (req.user.person === 'mentor') {
+        user = await mentorSchema.findById(req.user.id);
+    } else if (req.user.person === 'guardian') {
+        user = await guardianSchema.findById(req.user.id);
+    };
+    // console.log(req.user)
+    // check if didn't found user
+    if (!user) {
+        return next(new ErrorHandler(`there is no user with such email or username.`, 404));
+    };
+
+    // check token is expired
+    if (user.varificationTokenExpire <= new Date()) {
+        return next(new ErrorHandler(`expire token`, 401))
+    };
+
+    // check if token is correct
+    if (user.varificationToken !== data.token) {
+        return next(new ErrorHandler(`invalid token`, 400));
+    };
+
+    // let user account is verifyed
+    user.isVerify = true;
+    await user.save();
+
+    req.session.isLoggedIn = true;
+    req.session.user.isVerify = true;
+
+    res.status(200).json({
+        success: true,
+        message: `Account verified successfully.`
     });
 });
