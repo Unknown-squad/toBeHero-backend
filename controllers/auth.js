@@ -1,6 +1,9 @@
 // module requirement
 const dotenv = require(`dotenv`);
 const bcrypt = require(`bcrypt`);
+const mongoose = require(`mongoose`);
+const fs = require(`fs`);
+const path = require(`path`);
 
 // using dotenv
 dotenv.config({path: `../config/config.env`});
@@ -138,6 +141,7 @@ exports.verifyEmail = asyncHandler(async (req, res, next) => {
     } else if (req.user.person === 'guardian') {
         user = await guardianSchema.findById(req.user.id);
     };
+
     // console.log(req.user)
     // check if didn't found user
     if (!user) {
@@ -166,3 +170,89 @@ exports.verifyEmail = asyncHandler(async (req, res, next) => {
         message: `Account verified successfully.`
     });
 });
+
+// @desc    sign up as mentor
+// @route   POST `/api/v1/mentor/signUp`
+// @access  public
+exports.sginUpAsMenter = asyncHandler(async (req, res, next) => {
+    let data = req.body.params;
+    let fileName;
+
+    // check if user's email is exist
+    const checkEmail = await mentorSchema.findOne({email: data.email});
+
+    if (checkEmail) {
+        return next(new ErrorHandler(`this email already exists`, 409));
+    };
+
+    // validate password
+    if (!data.password && (data.password.length < 8)) {
+        return next(new ErrorHandler(`invalid password`, 400));
+    };
+
+    if (req.files && req.files.img) {
+        let img = req.files.img
+        // check if file is img
+        if (!img.mimetype.startsWith(`image`)) {
+            return next(new ErrorHandler(`please upload file`, 400));
+        };
+
+        // check size img
+        if (img.size > 5 * 1024 * 1024) {
+            return next(new ErrorHandler(`please upload file`, 400));
+        };
+
+        // upload img
+        fileName = `image-mentor-${Date.now()}${mongoose.Types.ObjectId()}${path.parse(img.name).ext}`;
+        img.mv(`./public/images/${fileName}`, function(err) {
+            // if error delete new img
+            if (err){
+                fs.unlinkSync(`./public/images/${fileName}`);
+                return next(err);
+            };
+        });
+    };
+
+    // save path picture profile in user database
+    data.picture = `/images/${fileName}`;
+
+    // incrypt password
+    data.password = await bcrypt.hash(data.password, 12);
+
+    // create token to verify user account
+    const randToken = Math.floor(100000 + Math.random() * 900000);
+    data.varificationToken = randToken;
+
+    // create expiry date of token
+    let dateNow = new Date()
+    const expiretokenDate = dateNow.setHours(dateNow.getHours() + 1);
+    data.varificationTokenExpire = expiretokenDate;
+
+    // save new user in database
+    const newUser = await mentorSchema.create(data);
+
+    // create session and cockies to sign up user
+    req.session.isLoggedIn = false;
+    req.session.user = {
+        id: newUser._id,
+        person: `mentor`,
+        isVerify: false
+    };
+
+    // verify his/her account by send mail has 6 random digital
+    const mail = {
+        to: data.email,
+        from: process.env.SENDER_MAIL,
+        subject: 'Please verify your email',
+        text: 'Awesome sauce',
+        html: randToken
+    };
+
+    sendMail(mail);
+
+    // send successfully response
+    res.status(201).json({
+            success: true,
+            message: `email created successfully, please verify your email.`
+    });
+})

@@ -42,7 +42,6 @@ const MentorSchema = new Schema({
     },
     address: {
         type: String,
-        required: [true, 'Please enter address']
     },
     gender: {
         type: String,
@@ -51,16 +50,16 @@ const MentorSchema = new Schema({
     },
     birthDate: {
         type: Date,
-        required: [true, 'enter your birthday']
+        required: [true, 'Please enter your birthDate'],
     },
     picture: {
         type: String,
-        required: [true, 'Please enter picture'],
         // match: [/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/, 'invalid url']
     },
     occupation: {
         type: [String],
-        validate: occupationValidation
+        validate: occupationValidation,
+        required: [true, 'Please enter your occupation'],
     },
     creatingDate: {
         type: Date,
@@ -69,11 +68,12 @@ const MentorSchema = new Schema({
     certificates: [String],
     languages: {
         type: [String],
-        validate: languagesValidation
+        validate: languagesValidation,
+        required: [true, `add at least one language`]
     },
     description: {
         type: String,
-        required: true
+        required: [true, 'Please enter description']
     },
     balance: {
         type: Number,

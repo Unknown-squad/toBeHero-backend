@@ -9,7 +9,8 @@ const authorizedMentor = require(`../middlewares/authorizedMentor`);
 const {
     signUpAsGuardian,
     loginUser,
-    verifyEmail
+    verifyEmail,
+    sginUpAsMenter
 } = require(`../controllers/auth.js`);
 
 // @desc    create sign up as guardian
@@ -30,4 +31,10 @@ router.route(`/api/v1/user/login`)
 router.route(`/api/v1/user/verify-email`)
     .post(verifyEmail);
 
+// @desc    sign up as mentor
+// @route   POST `/api/v1/mentor/signUp`
+// @access  public
+router.route(`/api/v1/mentor/signUp`)
+    .post(sginUpAsMenter);
+    
 module.exports = router
