@@ -403,4 +403,22 @@ exports.resetPasswordStepThree = asyncHandler(async (req, res, next) => {
         success: true,
         message: `successfully change passwaord`
     });
-}); 
+});
+
+// @desc    logout user
+// @route   DELETE `/api/v1/user/logout`
+// @access  private (user login)
+exports.logout = asyncHandler(async (req, res, next) => {
+    req.session.destroy(err => {
+        if (err) {
+            return next(new ErrorHandler(`server error`));
+        };
+
+        res.clearCookie("connect.sid")
+            .status(200)
+            .json({
+                success: true,
+                message: `logged out user`
+            })
+     })
+});
