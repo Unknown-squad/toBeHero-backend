@@ -14,7 +14,8 @@ const {
     resetPasswordStepOne,
     resetPasswordStepTwo,
     resetPasswordStepThree,
-    logout
+    logout,
+    loginStatus
 } = require(`../controllers/auth.js`);
 
 // @desc    create sign up as guardian
@@ -64,5 +65,11 @@ router.route(`/api/v1/user/reset-step-3`)
 // @access  private (user login)
 router.route(`/api/v1/user/logout`)
     .delete(logout);
+
+// @desc    get login status user
+// @route   GET `/api/v1/user/login/status`
+// @access  private (user login)
+router.route(`/api/v1/user/login/status`)
+    .get(loginStatus);
     
 module.exports = router

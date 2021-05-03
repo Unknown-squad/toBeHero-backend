@@ -11,7 +11,7 @@ dotenv.config({path: `../config/config.env`});
 // models files
 const guardianSchema = require(`../models/guardians`);
 const mentorSchema = require(`../models/mentors`);
-const chaildSchema = require(`../models/children`);
+const childSchema = require(`../models/children`);
 
 // middlewares files
 const asyncHandler = require('../middlewares/async');
@@ -94,8 +94,8 @@ exports.loginUser= asyncHandler(async (req, res, next) => {
         user = await guardianSchema.findOne({email: data.email});
         personType = 'guardian';
     } else {
-        user = await chaildSchema.findOne({userName: data.userName});
-        personType = 'children';
+        user = await childSchema.findOne({userName: data.userName});
+        personType = 'child';
     };
 
     // check if didn't found user
@@ -421,4 +421,43 @@ exports.logout = asyncHandler(async (req, res, next) => {
                 message: `logged out user`
             })
      })
+});
+
+// @desc    get login status user
+// @route   GET `/api/v1/user/login/status`
+// @access  private (user login)
+exports.loginStatus = asyncHandler(async (req, res, next) => {
+    let userInfo;
+
+    // find user in database
+    if (req.user.person === 'mentor') {
+        userInfo = await mentorSchema.findById(req.user.id);
+        personType = 'mentor';
+    } else if (req.user.person === 'guardian') {
+        userInfo = await guardianSchema.findById(req.user.id);
+        personType = 'guardian';
+    } else if (req.user.person === 'child') {
+        userInfo = await childSchema.findById(req.user.id);
+        personType = 'child';
+    };
+
+    if (!userInfo) {
+        res.status(404).json({
+            success: true,
+            message: `user not found in database`
+        });
+    };
+
+    // send successfully response
+    res.status(200).json({
+        success: true,
+        message: `mentor data`,
+        data: {
+            Kind: "user type",
+            items: {
+                isLoggedIn: true,
+                person: personType
+            }
+        }
+    });
 });
