@@ -127,7 +127,7 @@ const MentorSchema = new Schema({
     },
     verificationToken: String,
     verificationTokenExpire: Date,
-    authorizationModify: Date
+    authorizationModifyPasswordExpire: Date
 });
 
 module.exports = mongoose.model('Mentor', MentorSchema);

@@ -71,16 +71,15 @@ const GuardianSchema = new mongoose.Schema({
       _id: false
     }
   ],
-  varificationToken: String,
-  varificationTokenExpire: {
-    type: Date
-  },
   childrenId: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'children'
     }
-  ]
+  ],
+  verificationToken: String,
+  verificationTokenExpire: Date,
+  authorizationModifyPasswordExpire: Date
 });
 
 module.exports = mongoose.model('Guardian', GuardianSchema);

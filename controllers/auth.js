@@ -48,7 +48,7 @@ exports.signUpAsGuardian = asyncHandler(async (req, res, next) => {
     // create expiry date of token
     let dateNow = new Date()
     const expiretokenDate = dateNow.setHours(dateNow.getHours() + 1);
-    data.varificationTokenExpire = expiretokenDate;
+    data.verificationTokenExpire = expiretokenDate;
 
     // save new user in database
     const newUser = await guardianSchema.create(data);
@@ -149,7 +149,7 @@ exports.verifyEmail = asyncHandler(async (req, res, next) => {
     };
 
     // check token is expired
-    if (user.varificationTokenExpire <= new Date()) {
+    if (user.verificationTokenExpire <= new Date()) {
         return next(new ErrorHandler(`expire token`, 401))
     };
 
@@ -257,7 +257,7 @@ exports.sginUpAsMenter = asyncHandler(async (req, res, next) => {
     });
 });
 
-// @desc    reset password by first step, step 1: send token by mail to user allow him to change password
+// @desc    reset password by steps, step 1: send token by send mail to user 
 // @route   POST `/api/v1/user/reset-step-1`
 // @access  public
 exports.resetPasswordStepOne = asyncHandler(async (req, res, next) => {
@@ -314,3 +314,51 @@ exports.resetPasswordStepOne = asyncHandler(async (req, res, next) => {
         message: `please, check your email.`
     });
 });
+
+// @desc    reset password by steps, step 2: user will enter token to authrized him to change password
+// @route   POST `/api/v1/user/reset-step-2`
+// @access  private (authenticated user)
+exports.resetPasswordStepTwo = asyncHandler(async (req, res, next) => { 
+    const data = req.body.params;
+    let userInfo;
+
+    // find user in database
+    if (req.user.person === 'mentor') {
+        userInfo = await mentorSchema.findById(req.user.id);
+    } else if (req.user.person === 'guardian') {
+        userInfo = await guardianSchema.findById(req.user.id);
+    };
+
+    if (!userInfo) {
+        return next(new ErrorHandler(`this email not found`, 404));
+    };
+
+    // check if token expired
+    if (userInfo.verificationTokenExpire <= new Date()) {
+        return next(new ErrorHandler(`expire token`, 401))
+    };
+
+    // compare correct token with other token entered by user
+    if (data.token !== userInfo.verificationToken) {
+        return next(new ErrorHandler(`invalid token`, 400));
+    };
+
+    // expire token 
+    userInfo.verificationTokenExpire = new Date();
+
+    // authorizated user to change Password
+    let dateNow = new Date()
+    userInfo.authorizationModifyPasswordExpire = dateNow.setHours(dateNow.getHours() + 1);
+
+    await userInfo.save();
+
+    // send successfully response
+    res.status(200).json({
+        success: true,
+        message: `user authorized to change password`
+    });
+});
+
+// @desc    reset password by steps, step 3: wright password if user authorized
+// @route   PUT `/api/v1/user/reset-step-3`
+// @access  private (authenticated user)
