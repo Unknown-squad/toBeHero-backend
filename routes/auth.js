@@ -12,7 +12,8 @@ const {
     verifyEmail,
     sginUpAsMenter,
     resetPasswordStepOne,
-    resetPasswordStepTwo
+    resetPasswordStepTwo,
+    resetPasswordStepThree
 } = require(`../controllers/auth.js`);
 
 // @desc    create sign up as guardian
@@ -50,5 +51,11 @@ router.route(`/api/v1/user/reset-step-1`)
 // @access  private (authenticated user)
 router.route(`/api/v1/user/reset-step-2`)
     .post(resetPasswordStepTwo);
+
+// @desc    reset password by steps, step 3: write password if user authorized
+// @route   PUT `/api/v1/user/reset-step-3`
+// @access  private (authenticated user)
+router.route(`/api/v1/user/reset-step-3`)
+    .put(resetPasswordStepThree);
     
 module.exports = router

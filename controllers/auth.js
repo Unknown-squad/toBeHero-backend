@@ -359,6 +359,48 @@ exports.resetPasswordStepTwo = asyncHandler(async (req, res, next) => {
     });
 });
 
-// @desc    reset password by steps, step 3: wright password if user authorized
+// @desc    reset password by steps, step 3: write password if user authorized
 // @route   PUT `/api/v1/user/reset-step-3`
 // @access  private (authenticated user)
+exports.resetPasswordStepThree = asyncHandler(async (req, res, next) => {
+    const data = req.body.params;
+    let userInfo;
+
+    // find user in database
+    if (req.user.person === 'mentor') {
+        userInfo = await mentorSchema.findById(req.user.id);
+    } else if (req.user.person === 'guardian') {
+        userInfo = await guardianSchema.findById(req.user.id);
+    };
+
+    if (!userInfo) {
+        return next(new ErrorHandler(`this email not found`, 404));
+    };
+
+    // chekc if user authorized to change password
+    if (userInfo.authorizationModifyPasswordExpire <= new Date()) {
+        return next(new ErrorHandler(`user unauthorized to change password`, 403));
+    };
+
+    // validation password
+    if (data.password.length < 8) {
+        return next(new ErrorHandler(`add at least 8 length string`, 400));
+    };
+
+    // incrypt new password
+    const encryptPassword = await bcrypt.hash(data.password, 12);
+
+    // save new password
+    userInfo.password = encryptPassword;
+
+    // expire authorization change password
+    userInfo.authorizationModifyPasswordExpire = new Date();
+
+    await userInfo.save();
+
+    // send successfully response
+    res.status(200).json({
+        success: true,
+        message: `successfully change passwaord`
+    });
+}); 
