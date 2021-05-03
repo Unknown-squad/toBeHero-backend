@@ -3,7 +3,9 @@ const express = require(`express`);
 const router = express.Router();
 
 // middlewares files
-const authorizedMentor = require(`../middlewares/authorizedMentor`)
+const {
+    authorizedMentor
+} = require(`../middlewares/authorizedaccepted`)
 
 // controllers files
 const {

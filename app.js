@@ -64,7 +64,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // save user session in req.user variable
 app.use((req, res, next) => {
+  req.isLoggedIn = false;
+  
   if (req.session) {
+    req.isLoggedIn = req.session.isLoggedIn;
     req.user = req.session.user;
   };
   next();
