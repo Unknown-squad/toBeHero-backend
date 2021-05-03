@@ -10,7 +10,8 @@ const {
     signUpAsGuardian,
     loginUser,
     verifyEmail,
-    sginUpAsMenter
+    sginUpAsMenter,
+    resetPasswordStepOne
 } = require(`../controllers/auth.js`);
 
 // @desc    create sign up as guardian
@@ -36,5 +37,11 @@ router.route(`/api/v1/user/verify-email`)
 // @access  public
 router.route(`/api/v1/mentor/signUp`)
     .post(sginUpAsMenter);
+
+// @desc    reset password by first step, step 1: send token by mail to user allow him to change password
+// @route   POST `/api/v1/user/reset-step-1`
+// @access  public
+router.route(`/api/v1/user/reset-step-1`)
+    .post(resetPasswordStepOne);
     
 module.exports = router

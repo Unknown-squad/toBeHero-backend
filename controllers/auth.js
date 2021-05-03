@@ -221,12 +221,12 @@ exports.sginUpAsMenter = asyncHandler(async (req, res, next) => {
 
     // create token to verify user account
     const randToken = Math.floor(100000 + Math.random() * 900000);
-    data.varificationToken = randToken;
+    data.verificationToken = randToken;
 
     // create expiry date of token
     let dateNow = new Date()
     const expiretokenDate = dateNow.setHours(dateNow.getHours() + 1);
-    data.varificationTokenExpire = expiretokenDate;
+    data.verificationTokenTokenExpire = expiretokenDate;
 
     // save new user in database
     const newUser = await mentorSchema.create(data);
@@ -255,4 +255,62 @@ exports.sginUpAsMenter = asyncHandler(async (req, res, next) => {
             success: true,
             message: `email created successfully, please verify your email.`
     });
-})
+});
+
+// @desc    reset password by first step, step 1: send token by mail to user allow him to change password
+// @route   POST `/api/v1/user/reset-step-1`
+// @access  public
+exports.resetPasswordStepOne = asyncHandler(async (req, res, next) => {
+    const data = req.body.params;
+    let userInfo;
+
+    // find user in database
+    if (data.person === 'mentor') {
+        userInfo = await mentorSchema.findOne({email: data.email});
+        personType = 'mentor';
+    } else if (data.person === 'guardian') {
+        userInfo = await guardianSchema.findOne({email: data.email});
+        personType = 'guardian';
+    };
+
+    if (!userInfo) {
+        return next(new ErrorHandler(`this email not found`, 404));
+    };
+
+    // create token to verify user account
+    const randToken = Math.floor(100000 + Math.random() * 900000);
+    userInfo.verificationToken = randToken;
+
+    // create expiry date of token
+    let dateNow = new Date()
+    const expiretokenDate = dateNow.setHours(dateNow.getHours() + 1);
+    userInfo.verificationTokenExpire = expiretokenDate;
+
+    // save token in DB
+    await userInfo.save();
+ 
+    // verify his/her account by send mail has 6 random digital
+    const mail = {
+        to: data.email,
+        from: process.env.SENDER_MAIL,
+        subject: 'Reset your password',
+        text: 'Awesome sauce',
+        html: randToken
+    };
+ 
+    sendMail(mail); 
+
+    // create session and cockies to sign up user
+    req.session.isLoggedIn = false;
+    req.session.user = {
+        id: userInfo._id,
+        person: personType,
+        isVerify: true
+    };
+
+    // send successfully response
+    res.status(200).json({
+        success: true,
+        message: `please, check your email.`
+    });
+});
