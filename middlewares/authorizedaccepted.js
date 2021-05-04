@@ -16,7 +16,7 @@ exports.authorizedMentor = asyncHandler((req, res, next) => {
 });
 
 // accept any user logged in 
-exports.accectIfUserLoggedIn = asyncHandler((req, res, next) => {
+exports.acceptedIfUserLoggedIn = asyncHandler((req, res, next) => {
     if(!req.isLoggedIn) {
         return next(new ErrorHandler(`user unauthenticated`, 401));
     }
@@ -24,7 +24,7 @@ exports.accectIfUserLoggedIn = asyncHandler((req, res, next) => {
 });
 
 // accept any user logged out 
-exports.accectIfUserLoggedOut = asyncHandler((req, res, next) => {
+exports.acceptedtIfUserLoggedOut = asyncHandler((req, res, next) => {
     if(req.isLoggedIn) {
         return next(new ErrorHandler(`user is logged in`, 401));
     }
@@ -32,7 +32,7 @@ exports.accectIfUserLoggedOut = asyncHandler((req, res, next) => {
 });
 
 // accept any user have session cookie 
-exports.accectIfUserAddInfoInSsnCookie = asyncHandler((req, res, next) => {
+exports.acceptedIfUserAddInfoInSsnCookie = asyncHandler((req, res, next) => {
     if(!req.user) {
         return next(new ErrorHandler(`user unauthenticated`, 401));
     }

@@ -5,9 +5,9 @@ const router = express.Router();
 // middlewares files
 const {
     authorizedMentor,
-    accectIfUserLoggedIn,
-    accectIfUserLoggedOut,
-    accectIfUserAddInfoInSsnCookie
+    acceptedIfUserLoggedIn,
+    acceptedtIfUserLoggedOut,
+    acceptedIfUserAddInfoInSsnCookie
 } = require(`../middlewares/authorizedaccepted`);
 
 // controllers files
@@ -27,49 +27,49 @@ const {
 // @route   POST `/api/v1/guardian/signup`
 // @access  public
 router.route(`/api/v1/guardian/signup`)
-    .post(accectIfUserLoggedOut, signUpAsGuardian);
+    .post(acceptedtIfUserLoggedOut, signUpAsGuardian);
 
 // @desc    login user
 // @route   POST `/api/v1/user/verify-email`
 // @access  public
 router.route(`/api/v1/user/login`)
-    .post(accectIfUserLoggedOut, loginUser);
+    .post(acceptedtIfUserLoggedOut, loginUser);
 
 // @desc    verify email of user
 // @route   POST `/api/v1/user/login`
 // @access  public
 router.route(`/api/v1/user/verify-email`)
-    .post(accectIfUserLoggedOut, accectIfUserAddInfoInSsnCookie, verifyEmail);
+    .post(acceptedtIfUserLoggedOut, acceptedIfUserAddInfoInSsnCookie, verifyEmail);
 
 // @desc    sign up as mentor
 // @route   POST `/api/v1/mentor/signUp`
 // @access  public
 router.route(`/api/v1/mentor/signUp`)
-    .post(accectIfUserLoggedOut, sginUpAsMenter);
+    .post(acceptedtIfUserLoggedOut, sginUpAsMenter);
 
 // @desc    reset password by first step, step 1: send token by mail to user allow him to change password
 // @route   POST `/api/v1/user/reset-step-1`
 // @access  public
 router.route(`/api/v1/user/reset-step-1`)
-    .post(accectIfUserLoggedOut, resetPasswordStepOne);
+    .post(acceptedtIfUserLoggedOut, resetPasswordStepOne);
 
 // @desc    reset password by steps, step 2: user will enter token to authrized him to change password
 // @route   POST `/api/v1/user/reset-step-2`
 // @access  private (authenticated user)
 router.route(`/api/v1/user/reset-step-2`)
-    .post(accectIfUserLoggedOut, accectIfUserAddInfoInSsnCookie, resetPasswordStepTwo);
+    .post(acceptedtIfUserLoggedOut, acceptedIfUserAddInfoInSsnCookie, resetPasswordStepTwo);
 
 // @desc    reset password by steps, step 3: write password if user authorized
 // @route   PUT `/api/v1/user/reset-step-3`
 // @access  private (authenticated user)
 router.route(`/api/v1/user/reset-step-3`)
-    .put(accectIfUserLoggedOut, accectIfUserAddInfoInSsnCookie, resetPasswordStepThree);
+    .put(acceptedtIfUserLoggedOut, acceptedIfUserAddInfoInSsnCookie, resetPasswordStepThree);
 
 // @desc    logout user
 // @route   DELETE `/api/v1/user/logout`
 // @access  private (user login)
 router.route(`/api/v1/user/logout`)
-    .delete(accectIfUserLoggedIn, logout);
+    .delete(acceptedIfUserLoggedIn, logout);
 
 // @desc    get login status user
 // @route   GET `/api/v1/user/login/status`
