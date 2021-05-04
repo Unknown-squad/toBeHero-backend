@@ -57,8 +57,7 @@ exports.signUpAsGuardian = asyncHandler(async (req, res, next) => {
     req.session.isLoggedIn = false;
     req.session.user = {
         id: newUser._id,
-        person: `guardian`,
-        isVerify: false
+        person: `guardian`
     };
 
     // verify user account by send mail has 6 random digital
@@ -118,8 +117,7 @@ exports.loginUser= asyncHandler(async (req, res, next) => {
     req.session.isLoggedIn = true;
     req.session.user = {
         id: user.id,
-        person: personType,
-        isVerify: true
+        person: personType
     };
 
     res.status(200).json({
@@ -150,7 +148,7 @@ exports.verifyEmail = asyncHandler(async (req, res, next) => {
 
     // check token is expired
     if (user.verificationTokenExpire <= new Date()) {
-        return next(new ErrorHandler(`expire token`, 401))
+        return next(new ErrorHandler(`expire token`, 401));
     };
 
     // check if token is correct
@@ -164,7 +162,6 @@ exports.verifyEmail = asyncHandler(async (req, res, next) => {
     await user.save();
 
     req.session.isLoggedIn = true;
-    req.session.user.isVerify = true;
 
     res.status(200).json({
         success: true,
@@ -236,8 +233,7 @@ exports.sginUpAsMenter = asyncHandler(async (req, res, next) => {
     req.session.isLoggedIn = false;
     req.session.user = {
         id: newUser._id,
-        person: `mentor`,
-        isVerify: false
+        person: `mentor`
     };
 
     // verify his/her account by send mail has 6 random digital
@@ -305,8 +301,7 @@ exports.resetPasswordStepOne = asyncHandler(async (req, res, next) => {
     req.session.isLoggedIn = false;
     req.session.user = {
         id: userInfo._id,
-        person: personType,
-        isVerify: true
+        person: personType
     };
 
     // send successfully response
@@ -412,16 +407,12 @@ exports.resetPasswordStepThree = asyncHandler(async (req, res, next) => {
 exports.logout = asyncHandler(async (req, res, next) => {
     req.session.destroy(err => {
         if (err) {
-            return next(new ErrorHandler(`server error`));
+            return next(new ErrorHandler(`server error`, 500));
         };
 
         res.clearCookie("connect.sid")
-            .status(200)
-            .json({
-                success: true,
-                message: `logged out user`
-            })
-     })
+            .status(204);
+    });
 });
 
 // @desc    get login status user
@@ -429,6 +420,7 @@ exports.logout = asyncHandler(async (req, res, next) => {
 // @access  private (user login)
 exports.loginStatus = asyncHandler(async (req, res, next) => {
     let userInfo;
+    let personType;
 
     // find user in database
     if (req.user.person === 'mentor') {
@@ -443,16 +435,22 @@ exports.loginStatus = asyncHandler(async (req, res, next) => {
     };
 
     if (!userInfo) {
-        res.status(404).json({
+        res.status(200).json({
             success: true,
-            message: `user not found in database`
+            message: `user data`,
+            data: {
+                Kind: "user type",
+                items: {
+                    isLoggedIn: false
+                }
+            }
         });
     };
 
     // send successfully response
     res.status(200).json({
         success: true,
-        message: `mentor data`,
+        message: `user data`,
         data: {
             Kind: "user type",
             items: {
