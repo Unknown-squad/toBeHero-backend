@@ -5,7 +5,8 @@ const {
   getChildrenDataForGuardian,
   getBasicInfoForGuardian,
   updateChildBasicInfo,
-  addNewChild
+  addNewChild,
+  getGurdianBasicInfo
 } = require('../controllers/guardian');
 const { 
   mentorAuthorization,
@@ -34,8 +35,14 @@ router.route('/api/v1/child/:childId')
 // @desc    Add new child
 // @route   POST localhost:3000/api/v1/guardian/new-child
 // @access  private/guardian
-
 router.post('/api/v1/guardian/new-child', guardianAuthorization, addNewChild);
+
+
+
+// @desc    Get guardian basic information
+// @route   POST localhost:3000/api/v1/guardian/basic-info
+// @access  private/guardian
+router.get('/api/v1/guardian/basic-info', guardianAuthorization, getGurdianBasicInfo);
 
 
 module.exports = router;

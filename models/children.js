@@ -9,8 +9,7 @@ const childrenSchema = new Schema({
         required: [true, 'add username'],
         unique: true,
         minlength: [5, 'userName at least 5 charater'],
-        maxlength: [50, 'max 50 charater'],
-        match: [/^[a-zA-Z\-]+$/]
+        maxlength: [50, 'max 50 charater']
     },
     fullName: {
         type: String,

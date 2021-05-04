@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middlewares/async');
 const Children = require('../models/children');
+const Guardian = require('../models/guardians');
 const mongoose = require('mongoose');
 const fs = require('fs');
 
@@ -93,7 +94,7 @@ exports.updateChildBasicInfo = asyncHandler (async (req, res, next) => {
   /* req.body = {
     method: "child.basicInfo.put",
     params: {
-      userName: "Yousef Serag",
+      userName: "YousefSerag",
       fullName: "Mahmoud Serag Ismail",
       birthDate: "1999-03-25",
       password: "Yousef Srag dkjasljdaslk"
@@ -135,6 +136,13 @@ exports.updateChildBasicInfo = asyncHandler (async (req, res, next) => {
     return next(new ErrorResponse('User name is already exist', 400));
   }
 
+  // Check Match validation of userName
+  const regex = /^[a-zA-Z\-]+$/;
+  const match = userName.match(regex);
+  if (!match) {
+    return next(new ErrorResponse(`Your user name is not valid. Only characters A-Z, a-z and '-' are  acceptable.`, 400));
+  }
+
   // Check date validation
   if (birthDate.split('-').length < 3) {
     return next(new ErrorResponse('Invalid date.', 400));
@@ -174,6 +182,7 @@ exports.updateChildBasicInfo = asyncHandler (async (req, res, next) => {
         return next(new ErrorResponse(`Error: ${error.message}`, 500));
       }
     });
+
     // Replace old image
     const currentPicture = fs.readdirSync(filePath);
     const childPicture = child.picture.split('/')[2];
@@ -183,7 +192,6 @@ exports.updateChildBasicInfo = asyncHandler (async (req, res, next) => {
         fs.unlinkSync(`${filePath}/${currentPicture[i]}`);
       }
     }
-
 
     // Update data
     child.fullName = fullName;
@@ -242,7 +250,7 @@ exports.addNewChild = asyncHandler (async (req, res, next) => {
   /* req.body = {
     method: "child.basicInfo.put",
     params: {
-      userName: "mahmoud-serag",
+      userName: "Mahmoud-Serag",
       fullName: "Mahmoud Serag Ismail",
       birthDate: "1999-03-18",
       password: "Yousef Srag dkjasljdaslk",
@@ -264,6 +272,13 @@ exports.addNewChild = asyncHandler (async (req, res, next) => {
   const isExist = await Children.findOne({userName});
   if (isExist) {
     return next(new ErrorResponse('User name is already exist', 400));
+  }
+
+  // Check Match validation of userName
+  const regex = /^[a-zA-Z\-]+$/;
+  const match = userName.match(regex);
+  if (!match) {
+    return next(new ErrorResponse(`Your user name is not valid. Only characters A-Z, a-z and '-' are  acceptable.`, 400));
   }
 
   // Check date validation
@@ -337,5 +352,33 @@ exports.addNewChild = asyncHandler (async (req, res, next) => {
       success: true,
       message: 'Child data added successfully.'
     });
+  });
+});
+
+
+
+// @desc    Get guardian basic information
+// @route   POST localhost:3000/api/v1/guardian/basic-info
+// @access  private/guardian
+exports.getGurdianBasicInfo = asyncHandler (async (req, res, next) => {
+
+  // Get guardian info
+  const guardian = await Guardian
+  .findById(req.user.id)
+  .select('fullName email phone countryCode -_id');
+
+  // If no guardian data
+  if (!guardian) {
+    return next(new ErrorResponse('No guardian data.', 404));
+  }
+  
+  // Return data to client
+  res.status(200).json({
+    success: true,
+    message: `Guardian's basic info`,
+    data: {
+      kind: 'Guardian data',
+      items: [guardian]
+    }
   });
 });
