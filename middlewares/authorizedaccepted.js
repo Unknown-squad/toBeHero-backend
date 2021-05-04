@@ -32,7 +32,7 @@ exports.accectIfUserLoggedOut = asyncHandler((req, res, next) => {
 });
 
 // accept any user have session cookie 
-exports.accectIfUserAuthenticated = asyncHandler((req, res, next) => {
+exports.accectIfUserAddInfoInSsnCookie = asyncHandler((req, res, next) => {
     if(!req.user) {
         return next(new ErrorHandler(`user unauthenticated`, 401));
     }

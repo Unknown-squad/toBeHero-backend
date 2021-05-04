@@ -7,7 +7,7 @@ const {
     authorizedMentor,
     accectIfUserLoggedIn,
     accectIfUserLoggedOut,
-    accectIfUserAuthenticated
+    accectIfUserAddInfoInSsnCookie
 } = require(`../middlewares/authorizedaccepted`);
 
 // controllers files
@@ -39,7 +39,7 @@ router.route(`/api/v1/user/login`)
 // @route   POST `/api/v1/user/login`
 // @access  public
 router.route(`/api/v1/user/verify-email`)
-    .post(accectIfUserLoggedOut, accectIfUserAuthenticated, verifyEmail);
+    .post(accectIfUserLoggedOut, accectIfUserAddInfoInSsnCookie, verifyEmail);
 
 // @desc    sign up as mentor
 // @route   POST `/api/v1/mentor/signUp`
@@ -57,13 +57,13 @@ router.route(`/api/v1/user/reset-step-1`)
 // @route   POST `/api/v1/user/reset-step-2`
 // @access  private (authenticated user)
 router.route(`/api/v1/user/reset-step-2`)
-    .post(accectIfUserLoggedOut, accectIfUserAuthenticated, resetPasswordStepTwo);
+    .post(accectIfUserLoggedOut, accectIfUserAddInfoInSsnCookie, resetPasswordStepTwo);
 
 // @desc    reset password by steps, step 3: write password if user authorized
 // @route   PUT `/api/v1/user/reset-step-3`
 // @access  private (authenticated user)
 router.route(`/api/v1/user/reset-step-3`)
-    .put(accectIfUserLoggedOut, accectIfUserAuthenticated, resetPasswordStepThree);
+    .put(accectIfUserLoggedOut, accectIfUserAddInfoInSsnCookie, resetPasswordStepThree);
 
 // @desc    logout user
 // @route   DELETE `/api/v1/user/logout`
