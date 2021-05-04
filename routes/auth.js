@@ -79,9 +79,9 @@ router.route(`/api/v1/user/login/status`)
     .get(loginStatus);
 
 // @desc    check if email already exists
-// @route   POST `/api/v1/email/status`
+// @route   GET `/api/v1/email/status`
 // @access  public
-router.route(`/api/v1/email/status`)
-    .post(statusEmail);
+router.route(`/api/v1/email/status/:userEmail`)
+    .get(statusEmail);
     
 module.exports = router
