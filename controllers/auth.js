@@ -461,3 +461,33 @@ exports.loginStatus = asyncHandler(async (req, res, next) => {
         }
     });
 });
+
+// @desc    check if email already exists
+// @route   POST `/api/v1/email/status`
+// @access  public
+exports.statusEmail = asyncHandler(async (req, res, next) => {
+    const data = req.body.params;
+    let userInfo;
+
+    // find user in database
+    if (data.person === 'mentor') {
+        userInfo = await mentorSchema.findOne({email: data.email});
+        personType = 'mentor';
+    } else if (data.person === 'guardian') {
+        userInfo = await guardianSchema.findOne({email: data.email});
+        personType = 'guardian';
+    };
+
+    if (!userInfo) {
+        res.status(404).json({
+            success: true,
+            message: `this email not exists`
+        });
+    };
+
+    // send successfully response
+    res.status(409).json({
+        success: true,
+        message: `this emial is exists`
+    });
+});

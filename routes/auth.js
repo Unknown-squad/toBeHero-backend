@@ -20,7 +20,8 @@ const {
     resetPasswordStepTwo,
     resetPasswordStepThree,
     logout,
-    loginStatus
+    loginStatus,
+    statusEmail
 } = require(`../controllers/auth.js`);
 
 // @desc    create sign up as guardian
@@ -76,5 +77,11 @@ router.route(`/api/v1/user/logout`)
 // @access  private (user login)
 router.route(`/api/v1/user/login/status`)
     .get(loginStatus);
+
+// @desc    check if email already exists
+// @route   POST `/api/v1/email/status`
+// @access  public
+router.route(`/api/v1/email/status`)
+    .post(statusEmail);
     
 module.exports = router
