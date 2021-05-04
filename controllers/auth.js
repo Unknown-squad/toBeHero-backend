@@ -61,7 +61,7 @@ exports.signUpAsGuardian = asyncHandler(async (req, res, next) => {
         isVerify: false
     };
 
-    // verify his/her account by send mail has 6 random digital
+    // verify user account by send mail has 6 random digital
     const mail = {
         to: data.email,
         from: process.env.SENDER_MAIL,
@@ -154,11 +154,12 @@ exports.verifyEmail = asyncHandler(async (req, res, next) => {
     };
 
     // check if token is correct
-    if (user.varificationToken !== data.token) {
+    if (user.verificationToken !== data.token) {
         return next(new ErrorHandler(`invalid token`, 400));
     };
 
     // let user account is verifyed
+    user.verificationTokenExpire = new Date();
     user.isVerify = true;
     await user.save();
 
