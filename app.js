@@ -22,6 +22,14 @@ const {errorHandling} = require(`./middlewares/ErrorHandling`);
 // Add config files
 const connectDB = require(`./config/db`);
 
+// CORS security
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  next();
+});
+
 // Read body of request
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
