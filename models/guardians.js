@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 const GuardianSchema = new mongoose.Schema({
   fullName: {
     type: String,
-    required: [true, 'Please add a name'],
+    required: [true, 'Please add a full name'],
     minlength: [5, 'Min length is 5 character'],
     maxlength: [50, 'Max length is 50 character']
   },
@@ -21,9 +21,9 @@ const GuardianSchema = new mongoose.Schema({
   },
   picture: {
     type: String,
-    match: [/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/,
+    /* match: [/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/,
       `invalid url.`
-    ]
+    ] */
   },
   phone: {
     type: String,
@@ -36,7 +36,7 @@ const GuardianSchema = new mongoose.Schema({
   },
   address: {
       type: String,
-      required: [true, 'Please enter address']
+      /* required: [true, 'Please enter address'] */
   },
   bankingInfo: [
     {

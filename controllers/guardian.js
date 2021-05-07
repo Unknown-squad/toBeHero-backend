@@ -15,10 +15,14 @@ const fs = require('fs');
 exports.getChildrenDataForGuardian = asyncHandler (async (req, res, next) => {
 
   // Get children data for guardian
-  const childrenData = await Children
-  .find({guardianId: req.user.id})
-  .select('_id fullName picture');
-
+  const childrenData = await Guardian
+  .findById(req.user.id)
+  .select('-_id childrenId')
+  .populate({
+    path: 'childrenId',
+    select: 'fullName picture',
+    model: Children
+  });
   
   // Check if no content
   if (childrenData.length === 0) {
@@ -39,10 +43,10 @@ exports.getChildrenDataForGuardian = asyncHandler (async (req, res, next) => {
 
 
 
-// @desc    get all children date for spicific guardian
+// @desc    Get basic info of child for specific guardian
 // @route   Get localhost:3000/api/v1/child/childId
 // @access  private/guardian
-exports.getBasicInfoForGuardian = asyncHandler (async (req, res, next) => {
+exports.geChildDataForGuardian = asyncHandler (async (req, res, next) => {
 
   // Get basic info for spicific guardian
   const childData = await Children
@@ -94,7 +98,7 @@ exports.updateChildBasicInfo = asyncHandler (async (req, res, next) => {
   /* req.body = {
     method: "child.basicInfo.put",
     params: {
-      userName: "YousefSerag",
+      userName: "yousdef-srag",
       fullName: "Mahmoud Serag Ismail",
       birthDate: "1999-03-25",
       password: "Yousef Srag dkjasljdaslk"
@@ -133,7 +137,7 @@ exports.updateChildBasicInfo = asyncHandler (async (req, res, next) => {
   // Check uniqueness of userName
   const isExist = await Children.findOne({userName});
   if (isExist) {
-    return next(new ErrorResponse('User name is already exist', 400));
+    return next(new ErrorResponse('User name is already exist', 409));
   }
 
   // Check Match validation of userName
@@ -200,7 +204,7 @@ exports.updateChildBasicInfo = asyncHandler (async (req, res, next) => {
     child.birthDate = birthDate;
     child.picture = picturePath;
 
-    //Save data
+    // Save data
     await child.save(async (err) => {
       if (err) {
         fs.unlinkSync(pictureDir);
@@ -247,16 +251,16 @@ exports.updateChildBasicInfo = asyncHandler (async (req, res, next) => {
 exports.addNewChild = asyncHandler (async (req, res, next) => {
   
   // For testing
-  /* req.body = {
+  req.body = {
     method: "child.basicInfo.put",
     params: {
-      userName: "Mahmoud-Serag",
+      userName: "Iaaaddadslsadm",
       fullName: "Mahmoud Serag Ismail",
       birthDate: "1999-03-18",
       password: "Yousef Srag dkjasljdaslk",
-      gender: "female"
+      gender: "male"
     }
-  }; */
+  };
 
   // Check validation of req.body
   const { method, params } = req.body;
@@ -271,7 +275,7 @@ exports.addNewChild = asyncHandler (async (req, res, next) => {
   // Check uniqueness of userName
   const isExist = await Children.findOne({userName});
   if (isExist) {
-    return next(new ErrorResponse('User name is already exist', 400));
+    return next(new ErrorResponse('User name is already exist', 409));
   }
 
   // Check Match validation of userName
@@ -325,8 +329,8 @@ exports.addNewChild = asyncHandler (async (req, res, next) => {
     }
   });
 
-  // Create new child and save data
-  await Children.create({
+  // Create new child
+  const child = new Children({
     fullName: fullName,
     userName: userName,
     password: hashedPasword,
@@ -334,7 +338,12 @@ exports.addNewChild = asyncHandler (async (req, res, next) => {
     picture: picturePath,
     gender: gender,
     guardianId: req.user.id
-  }, async (err) => {
+  });
+
+  // Save data
+  await child.save(async (err) => {
+
+    // Check if error
     if (err) {
       fs.unlinkSync(pictureDir);
       const result = [];
@@ -347,6 +356,11 @@ exports.addNewChild = asyncHandler (async (req, res, next) => {
       return next(new ErrorResponse(`${error}`, 500));
     }
 
+    // Save childId in guardian property in guardian schema
+    const guardian = await Guardian.findById(req.user.id);
+    guardian.childrenId.push(child._id);
+    await guardian.save();
+
     // Return json data
     res.status(201).json({
       success: true,
@@ -358,7 +372,7 @@ exports.addNewChild = asyncHandler (async (req, res, next) => {
 
 
 // @desc    Get guardian basic information
-// @route   POST localhost:3000/api/v1/guardian/basic-info
+// @route   GET localhost:3000/api/v1/guardian/basic-info
 // @access  private/guardian
 exports.getGurdianBasicInfo = asyncHandler (async (req, res, next) => {
 
@@ -380,5 +394,149 @@ exports.getGurdianBasicInfo = asyncHandler (async (req, res, next) => {
       kind: 'Guardian data',
       items: [guardian]
     }
+  });
+});
+
+
+
+// @desc    Update guardian basic information
+// @route   PUT localhost:3000/api/v1/guardian/basic-info
+// @access  private/guardian
+exports.updateGuardianBasicInfo = asyncHandler (async (req, res, next) => {
+
+  // Fetching the data to be updated
+  const guardian = await Guardian
+  .findById(req.user.id)
+  .select('fullName email phone countryCode password');
+
+  // Check if no data
+  if (!guardian) {
+    return next(new ErrorResponse('No guardian data.', 404));
+  }
+
+  // Check validation of req.body
+  const { method, params } = req.body;
+  if (!method || !params) {
+    return next(new ErrorResponse('Method of params are missing.', 400));
+  }
+  const { fullName, email, phone, countryCode, password } = req.body.params;
+  if (!fullName || !email || !phone || !countryCode || !password) {
+    return next(new ErrorResponse('Missing property in params.', 400));
+  }
+
+  // Encrypt password
+  const salt = await bcrypt.genSalt(10);
+  const hashedPasword = await bcrypt.hash(password, salt);
+
+  // Check uniqueness of email
+  const isExist = await Guardian.findOne({email});
+  if (isExist) {
+    return next(new ErrorResponse('Email is already exist.', 409));
+  }
+  
+  // Update data
+  guardian.fullName = fullName;
+  guardian.email = email;
+  guardian.phone = phone;
+  guardian.countryCode = countryCode;
+  guardian.password = hashedPasword;
+
+  // Save data
+  await guardian.save(async (err) => {
+    if (err) {
+      const result = [];
+      const arrayOfErrors = err.message.split(':');
+      for (let i = 1; i < arrayOfErrors.length; i++) {
+        result.push(arrayOfErrors[i]);
+      }
+      const error = result.join(':');
+      return next(new ErrorResponse(`${error}`, 500));
+    }
+
+    // Return json data
+    res.status(201).json({
+      success: true,
+      message: `Guardian's basic info updated successfully.`
+    });
+  });
+});
+
+
+
+// @desc    Update guardian Picture
+// @route   PUT localhost:3000/api/v1/guardian/basic-info/picture
+// @access  private/guardian
+exports.updateGuardianPicture = asyncHandler (async (req, res, next) => {
+  
+  // Fetching data to be updated
+  const guardian = await Guardian.findById(req.user.id);
+
+  // Check if no file uploaded
+  if (!req.files) {
+    return next(new ErrorResponse('No image uploaded.', 400));
+  }
+
+  // Global variable
+  const file = req.files.file;
+
+  // Check if more than one image
+  if (Array.isArray(file)) {
+    return next(new ErrorResponse('One image can be uploaded.', 400));
+  }
+
+  // Check mimetype
+  if (!file.mimetype.startsWith('image')) {
+    return next(new ErrorResponse('Only image can be uploaded.', 400));
+  }
+
+  // Check size
+  const size  = 5* 1024 * 1024;
+  if (file.size > size) {
+    return next(new ErrorResponse(`Image max size is ${size / 1024 / 1024} MB.`, 400));
+  }
+
+  // Uploade image
+  const pictureName = `image-${req.user.person}-${Date.now()}${mongoose.Types.ObjectId()}${file.name}`;
+  const picturePath = `/images/${pictureName}`;
+  const pictureDir = `${__dirname}/../public/images/${pictureName}`;
+  const filePath = `${__dirname}/../public/images`;
+
+  file.mv(pictureDir, async (error) => {
+    if (error) {
+      return next(new ErrorResponse(`Error: ${error}.`, 500));
+    }
+  });
+
+  // Replace old image
+  const currentPicture = fs.readdirSync(filePath);
+  const guardianPicture = guardian.picture.split('/')[2];
+  // fs.unlinkSync(`${__dirname}/../public/images/${childPicture}`);
+  for (let i = 0; i < currentPicture.length; i++) {
+    if (currentPicture[i] === guardianPicture) {
+      fs.unlinkSync(`${filePath}/${currentPicture[i]}`);
+    }
+  }
+
+  // Update guardian picture
+  guardian.picture = picturePath;
+
+  // Save data
+  await guardian.save(async (err) => {
+    if (err) {
+      fs.unlinkSync(pictureDir);
+      const result = [];
+      const arrayOfErrors = err.message.split(':');
+      for (let i = 2; i < arrayOfErrors.length; i++) {
+        result.push(arrayOfErrors[i]);
+      }
+      const error = result.join(':');
+      return next(new ErrorResponse(`${error}`, 500));
+    }
+
+    // Return json data
+    res.status(201).json({
+      success: true,
+      message: 'Guardian picture updated successfully.'
+    });
   });
 });

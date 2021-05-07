@@ -5,8 +5,8 @@ const ErrorResponse = require(`../utils/errorResponse`);
 exports.errorHandling = (err, req, res, next) => {
 
   // console error for dev
-  console.log(err);
-  console.log(err.name);
+/*   console.log(err);
+  console.log(err.name); */
 
   let error = {...err};
   error.message = err.message;

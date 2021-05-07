@@ -18,7 +18,7 @@ exports.getMentorSubscriptions = asyncHandler (async (req, res, next) => {
   // Get all subscriptions for mentor
   const subscriptions = await Subscription
   .find({mentorId: req.user.id})
-  .select({_id: 1, appiontments: 1, guardianId: 1, childId: 1, courseId: 1})
+  .select({_id: 1, appointments: 1, guardianId: 1, childId: 1, courseId: 1})
   .populate({
     path: 'guardianId',
     select: "fullName phone countryCode -_id",
