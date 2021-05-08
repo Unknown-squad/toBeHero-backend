@@ -66,7 +66,8 @@ const subscriptionSchema = new mongoose.Schema({
         type: String,
         required: [true, `please add description to note`]
       },
-    }]
+    }],
+    _id: false
   },
   liveUrl: {
     type: String,

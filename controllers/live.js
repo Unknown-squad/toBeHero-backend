@@ -56,3 +56,67 @@ exports.postNote = asyncHandler(async (req, res, next) => {
   });
 
 });
+
+// @route   POST `/api/v1/subscription/:subscriptionId/appointment/:appointmentId/notes`
+// @desc    get live notes to mentor or child
+// @access  private (only mentor or child can get notes)
+exports.getNotes = asyncHandler(async (req, res ,next) => {
+  
+  // globas array to store notes
+  const notes = [];
+  
+  // global variable to check if notes found
+  let found = false;
+  
+  // find subscription
+  const currentSubscription = await Subscription.findById(req.params.subscriptionId);
+  
+    // check if mentor has access to notes
+    if(req.user.person == `mentor`) {
+      if(req.user.id != currentSubscription.mentorId) {
+        return next(new ErrorResponse(`forbidden.`, 403));
+      }
+    }
+
+    // check if child has access to notes
+    else if(req.user.person == `child`) {
+      if(req.user.id != currentSubscription.childId) {
+        return next(new ErrorResponse(`forbidden.`, 403));
+      }
+    }
+
+  // check if subscription exists
+  if(!currentSubscription) {
+    return next(new ErrorResponse(`there's no such subscription found with given id.`, 404));
+  }
+
+  // find notes using appointment id
+  currentSubscription.notes.forEach((element) => {
+
+    if(element.appointmentId == req.params.appointmentId) {
+      
+      // push found notes into notes array
+      notes.push({noteDescription: element.description});
+      found = true;
+
+    }
+
+  });
+
+  // check if note exists
+  if(!found) {
+    return next(new ErrorResponse(`there's no such appointment notes.`, 404));
+  }
+
+  // send response
+  res.status(200).json({
+    success: true,
+    message: `found live notes successfully.`,
+    count: notes.length,
+    data: {
+      kind: `subscription data (notes)`,
+      items: notes
+    } 
+  });
+
+});
