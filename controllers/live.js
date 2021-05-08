@@ -40,7 +40,7 @@ exports.postNote = asyncHandler(async (req, res, next) => {
 
   // check date of note
   // be sure that note can't be added before appointment date
-  if(currentAppointment.date < Date.now()) {
+  if(currentAppointment.date.getTime() < Date.now()) {
     return next(new ErrorResponse(`appointment not come yet.`, 400));
   }
 
