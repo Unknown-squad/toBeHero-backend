@@ -33,6 +33,12 @@ exports.postNote = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse(`please send description of note.`, 400));
   }
 
+  // check date of note
+  // be sure that note can't be added before appointment date
+  if(currentAppointment.date < Date.now()) {
+    return next(new ErrorResponse(`appointment not come yet.`, 400));
+  }
+
   // push note data into subscription
   currentSubscription.notes.push({
     appointmentId: currentAppointment._id,
