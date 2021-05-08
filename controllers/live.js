@@ -62,7 +62,7 @@ exports.postNote = asyncHandler(async (req, res, next) => {
 
 });
 
-// @route   POST `/api/v1/subscription/:subscriptionId/appointment/:appointmentId/notes`
+// @route   GET `/api/v1/subscription/:subscriptionId/appointment/:appointmentId/notes`
 // @desc    get live notes to mentor or child
 // @access  private (only mentor or child can get notes)
 exports.getNotes = asyncHandler(async (req, res ,next) => {
@@ -122,6 +122,69 @@ exports.getNotes = asyncHandler(async (req, res ,next) => {
       kind: `subscription data (notes)`,
       items: notes
     } 
+  });
+
+});
+
+// @route   PUT `/api/v1/mentor/subscription/:subscriptionId/appointment/:appointmentId/cancel`
+// @desc    cancel appointment as mentor
+// @access  private (only mentor can cancel appointment)
+exports.putCancelAppointment = asyncHandler(async (req, res, next) => {
+
+  // global variable to store appointment index
+  let appointmentIndex = -1;
+
+  // find subscription
+  const currentSubscription = await Subscription.findById(req.params.subscriptionId);
+
+  // check if mentor has access to current subscription
+  if(req.user.id != currentSubscription.mentorId) {
+    return next(new ErrorResponse(`forbidden.`, 403));
+  }
+
+  // check if subscription exists
+  if(!currentSubscription) {
+    return next(new ErrorResponse(`there's no such subscription found with given id.`, 404));
+  }
+
+  // find appointment
+  const currentAppointment = currentSubscription.appointments.find((element) => {
+    appointmentIndex++;
+    if(element._id == req.params.appointmentId) {
+      return element;
+    }
+  });
+
+  // check if appointment exists
+  if(!currentAppointment) {
+    return next(new ErrorResponse(`there's no such appointment found with given id.`, 404));
+  }
+  
+    // check if appointment is already gone
+    if(currentAppointment.date.getTime() < Date.now()) {
+      return next(new ErrorResponse(`can't cancel appointment that already gone.`, 400));
+    }
+  
+  // check if subscription completed
+  if(currentSubscription.complete) {
+    return next(new ErrorResponse(`can't cancel appointment of subscription that already completed.`, 400));
+  }
+  
+  // check if appointment already canceled
+  if(currentAppointment.cancel == true) {
+    return next(new ErrorResponse(`can't cancel appointment that already canceled.`, 400));
+  }
+
+  // cancel the appointment
+  currentSubscription.appointments[appointmentIndex].cancel = true;
+
+  // save
+  currentSubscription.save();
+
+  // send response
+  res.status(200).json({
+    success: true,
+    message: `appointment cancelled successfully.`
   });
 
 });
