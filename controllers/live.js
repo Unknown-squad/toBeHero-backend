@@ -11,6 +11,11 @@ exports.postNote = asyncHandler(async (req, res, next) => {
   // find subscription
   const currentSubscription = await Subscription.findById(req.params.subscriptionId);
 
+  // check if mentor has access to current subscription
+  if(req.user.id != currentSubscription.mentorId) {
+    return next(new ErrorResponse(`forbidden.`, 403));
+  }
+
   // check if subscription exists
   if(!currentSubscription) {
     return next(new ErrorResponse(`there's no such subscription found with given id.`, 404));
