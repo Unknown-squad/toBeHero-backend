@@ -89,6 +89,12 @@ exports.getCourses = asyncHandler(async (req, res, next) => {
     page = 1;
   }
   
+  // get count of all document in course collection
+  const courseCount = await Course.countDocuments();
+
+  // get numbet of total pages
+  const totalPages = Math.ceil(courseCount/limit);
+  
   // find and filter courses
   const courses = await Course
     .find({genre: req.query.genre, rate: {$gte: filter}})
@@ -111,6 +117,8 @@ exports.getCourses = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     success: true,
     message: `successfully get courses data of page ${page}`,
+    currentPage: page,
+    totalPages,
     data: {
       kind: `courses`,
       count: courses.length,
