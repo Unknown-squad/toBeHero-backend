@@ -520,7 +520,7 @@ exports.postCourse = asyncHandler(async (req, res, next) => {
 });
 
 // @route   PUT `/api/v1/courses/:id`
-// @desc    update paricular course
+// @desc    update particular course
 // @access  private (only mentor can update his own courses)
 exports.putCourse = asyncHandler(async (req, res, next) => {
 
@@ -548,6 +548,11 @@ exports.putCourse = asyncHandler(async (req, res, next) => {
   } */
   // end of testing
   
+    // check if there's no body with request
+    if(!req.body || !req.body.params) {
+      return next(new ErrorResponse(`The body of request and params is required.`));
+    }
+  
   // find course with given id
   const currentCourse = await Course.findById(req.params.id);
   
@@ -556,9 +561,9 @@ exports.putCourse = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse(`there's no such course found with given id.`, 404));
   }
 
-  // check if there's no body with request
-  if(!req.body || !req.body.params) {
-    return next(new ErrorResponse(`The body of request and params is required.`));
+  // check if mentor is authorized to update this course
+  if(req.user.id != currentCourse.mentorId) {
+    return next(new ErrorResponse(`forbidden.`, 403));
   }
   
   // set maximum number of uploaded files
