@@ -64,7 +64,7 @@ const subscriptionSchema = new mongoose.Schema({
       },
       date: {
         type: Date,
-        required: [true, `please add date to note`]
+        default: Date.now()
       },
       description: {
         type: String,

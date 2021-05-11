@@ -7,6 +7,11 @@ const ErrorResponse = require(`../utils/errorResponse`);
 // @desc    add notes to appointment preparing to start live call
 // @access  private (only mentor can add notes)
 exports.postNote = asyncHandler(async (req, res, next) => {
+  
+    // check note description
+    if(!req.body || !req.body.params || !req.body.params.noteDescription) {
+      return next(new ErrorResponse(`please send description of note.`, 400));
+    }
 
   // find subscription
   const currentSubscription = await Subscription.findById(req.params.subscriptionId);
@@ -33,21 +38,25 @@ exports.postNote = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse(`there's no such appointment found with given id.`, 404));
   }
 
-  // check note description
-  if(!req.body || !req.body.params || !req.body.params.noteDescription) {
-    return next(new ErrorResponse(`please send description of note.`, 400));
+  // check if appointment is canceled
+  if(currentAppointment.cancel) {
+    return next(new ErrorResponse(`this appointment is already canceled.`, 400));
   }
 
   // check date of note
   // be sure that note can't be added before appointment date
-  if(currentAppointment.date.getTime() < Date.now()) {
+  if(currentAppointment.date.getTime() > Date.now()) {
     return next(new ErrorResponse(`appointment not come yet.`, 400));
+  }
+
+  // be sure that appointment isn't outdated (3 hours)
+  if(Date.now() > currentAppointment.date.getTime() + (3 * 60 * 60 * 1000) /* 3 hours */) {
+    return next(new ErrorResponse(`this appointment is outdated.`, 400));
   }
 
   // push note data into subscription
   currentSubscription.notes.push({
     appointmentId: currentAppointment._id,
-    date: currentAppointment.date,
     description: req.body.params.noteDescription
   });
 
