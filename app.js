@@ -12,6 +12,7 @@ const fileUpload = require('express-fileupload');
 const courses = require(`./routes/course`);
 const mentorRoutes = require('./routes/mentor');
 const subscriptions = require('./routes/subscription');
+const live = require(`./routes/live`);
 
 // Add middleware files
 /* const {subscriptionErrorHandling} = require('./middlewares/subscriptionErrorHandling');
@@ -57,9 +58,10 @@ app.use(require('express-session')({
 app.use(express.static(path.join(__dirname, 'public')));
 
 // use routes
-app.use(mentorRoutes)
+app.use(mentorRoutes);
 app.use(subscriptions);
 app.use(courses);
+app.use(live);
 
 // Use error handler
 app.use(errorHandling);

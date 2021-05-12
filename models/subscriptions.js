@@ -42,6 +42,10 @@ const subscriptionSchema = new mongoose.Schema({
         requried: [true, `please add date to appointment`]
       },
       title: String,
+      cancel: {
+        type: Boolean,
+        default: false
+      },
       mentor: {
         type: Boolean,
         default: false
@@ -60,13 +64,14 @@ const subscriptionSchema = new mongoose.Schema({
       },
       date: {
         type: Date,
-        required: [true, `please add date to note`]
+        default: Date.now()
       },
       description: {
         type: String,
         required: [true, `please add description to note`]
       },
-    }]
+    }],
+    _id: false
   },
   liveUrl: {
     type: String,
