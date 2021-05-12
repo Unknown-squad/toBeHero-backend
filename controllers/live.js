@@ -8,22 +8,22 @@ const ErrorResponse = require(`../utils/errorResponse`);
 // @access  private (only mentor can add notes)
 exports.postNote = asyncHandler(async (req, res, next) => {
   
-    // check note description
-    if(!req.body || !req.body.params || !req.body.params.noteDescription) {
-      return next(new ErrorResponse(`please send description of note.`, 400));
-    }
+  // check note description
+  if(!req.body || !req.body.params || !req.body.params.noteDescription) {
+    return next(new ErrorResponse(`please send description of note.`, 400));
+  }
 
   // find subscription
   const currentSubscription = await Subscription.findById(req.params.subscriptionId);
+  
+    // check if subscription exists
+    if(!currentSubscription) {
+      return next(new ErrorResponse(`there's no such subscription found with given id.`, 404));
+    }
 
   // check if mentor has access to current subscription
   if(req.user.id != currentSubscription.mentorId) {
     return next(new ErrorResponse(`forbidden.`, 403));
-  }
-
-  // check if subscription exists
-  if(!currentSubscription) {
-    return next(new ErrorResponse(`there's no such subscription found with given id.`, 404));
   }
 
   // find appointment
@@ -43,14 +43,14 @@ exports.postNote = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse(`this appointment is already canceled.`, 400));
   }
 
-  // check date of note
-  // be sure that note can't be added before appointment date
+  /* // be sure that note can't be added before appointment date
   if(currentAppointment.date.getTime() > Date.now()) {
     return next(new ErrorResponse(`appointment not come yet.`, 400));
-  }
-
+  } */
+  
+  // check date of note
   // be sure that appointment isn't outdated (3 hours)
-  if(Date.now() > currentAppointment.date.getTime() + (3 * 60 * 60 * 1000) /* 3 hours */) {
+  if(Date.now() > currentAppointment.date.getTime() + (5 * 60 * 60 * 1000) /* 5 hours */) {
     return next(new ErrorResponse(`this appointment is outdated.`, 400));
   }
 
@@ -85,6 +85,11 @@ exports.getNotes = asyncHandler(async (req, res ,next) => {
   // find subscription
   const currentSubscription = await Subscription.findById(req.params.subscriptionId);
   
+    // check if subscription exists
+    if(!currentSubscription) {
+      return next(new ErrorResponse(`there's no such subscription found with given id.`, 404));
+    }
+  
     // check if mentor has access to notes
     if(req.user.person == `mentor`) {
       if(req.user.id != currentSubscription.mentorId) {
@@ -98,11 +103,6 @@ exports.getNotes = asyncHandler(async (req, res ,next) => {
         return next(new ErrorResponse(`forbidden.`, 403));
       }
     }
-
-  // check if subscription exists
-  if(!currentSubscription) {
-    return next(new ErrorResponse(`there's no such subscription found with given id.`, 404));
-  }
 
   // find notes using appointment id
   currentSubscription.notes.forEach((element) => {
@@ -145,15 +145,15 @@ exports.putCancelAppointment = asyncHandler(async (req, res, next) => {
 
   // find subscription
   const currentSubscription = await Subscription.findById(req.params.subscriptionId);
+  
+  // check if subscription exists
+  if(!currentSubscription) {
+    return next(new ErrorResponse(`there's no such subscription found with given id.`, 404));
+  }
 
   // check if mentor has access to current subscription
   if(req.user.id != currentSubscription.mentorId) {
     return next(new ErrorResponse(`forbidden.`, 403));
-  }
-
-  // check if subscription exists
-  if(!currentSubscription) {
-    return next(new ErrorResponse(`there's no such subscription found with given id.`, 404));
   }
 
   // find appointment
@@ -181,14 +181,14 @@ exports.putCancelAppointment = asyncHandler(async (req, res, next) => {
   
   // check if appointment already canceled
   if(currentAppointment.cancel == true) {
-    return next(new ErrorResponse(`can't cancel appointment that already canceled.`, 400));
+    return next(new ErrorResponse(`can't cancel appointment that already canceled.`, 409));
   }
 
   // cancel the appointment
   currentSubscription.appointments[appointmentIndex].cancel = true;
 
   // save
-  currentSubscription.save();
+  await currentSubscription.save();
 
   // send response
   res.status(200).json({
