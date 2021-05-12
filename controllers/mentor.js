@@ -180,7 +180,7 @@ exports.getMentorProfile = asyncHandler(async (req, res, next) => {
 });
 
 // @desc    get mentor's courses
-// @route   Get '/api/v1/mentor/courses/mentorId?page='
+// @route   Get '/api/v1/mentor/courses/:mentorId?page='
 // @access  public
 exports.getMentorCourses = asyncHandler(async (req, res, next) => {
     // add pagenation
@@ -194,7 +194,12 @@ exports.getMentorCourses = asyncHandler(async (req, res, next) => {
         .populate({
             path: `coursesId`,
             model: `Course`,
-            select: `_id title picture description`
+            select: `_id title price description picture rate reviewCounter`,
+            populate: {
+                path: `mentorId`,
+                model: `Mentor`,
+                select: `_id fullName picture isAvailable`
+            }
         });
 
     // console.log(coursesOfMentor)
