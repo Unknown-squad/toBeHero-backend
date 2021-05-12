@@ -36,6 +36,10 @@ const MentorSchema = new Schema({
         required: [true, 'Please enter phone number'],
         match: [/^\d{10}$/, 'Invalid phone number']
     },
+    isVerify: {
+        type: Boolean,
+        default: false
+    },
     countryCode: {
         type: String,
         required: [true, 'Please select country code'],
@@ -91,7 +95,7 @@ const MentorSchema = new Schema({
         type: [mongoose.Schema.Types.ObjectId],
         ref: 'courses'
     },
-    SubscriptionIDs: {
+    subscriptionIDs: {
         type: [mongoose.Schema.Types.ObjectId],
         ref: 'subscriptions'
     },

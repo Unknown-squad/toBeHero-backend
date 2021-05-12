@@ -43,7 +43,7 @@ exports.signUpAsGuardian = asyncHandler(async (req, res, next) => {
 
     // create token to verify user account
     const randToken = Math.floor(100000 + Math.random() * 900000);
-    data.varificationToken = randToken;
+    data.verificationToken = randToken;
 
     // create expiry date of token
     let dateNow = new Date()
@@ -224,7 +224,7 @@ exports.sginUpAsMenter = asyncHandler(async (req, res, next) => {
     // create expiry date of token
     let dateNow = new Date()
     const expiretokenDate = dateNow.setHours(dateNow.getHours() + 1);
-    data.verificationTokenTokenExpire = expiretokenDate;
+    data.verificationTokenExpire = expiretokenDate;
 
     // save new user in database
     const newUser = await mentorSchema.create(data);
@@ -392,6 +392,9 @@ exports.resetPasswordStepThree = asyncHandler(async (req, res, next) => {
     // expire authorization change password
     userInfo.authorizationModifyPasswordExpire = new Date();
 
+    // verified user account
+    userInfo.isVerify = true;
+
     await userInfo.save();
 
     // send successfully response
@@ -410,8 +413,9 @@ exports.logout = asyncHandler(async (req, res, next) => {
             return next(new ErrorHandler(`server error`, 500));
         };
 
-        res.clearCookie("connect.sid")
-            .status(204);
+        res
+            .clearCookie('connect.sid')
+            .sendStatus(204);
     });
 });
 
@@ -423,16 +427,18 @@ exports.loginStatus = asyncHandler(async (req, res, next) => {
     let personType;
 
     // find user in database
-    if (req.user.person === 'mentor') {
-        userInfo = await mentorSchema.findById(req.user.id);
-        personType = 'mentor';
-    } else if (req.user.person === 'guardian') {
-        userInfo = await guardianSchema.findById(req.user.id);
-        personType = 'guardian';
-    } else if (req.user.person === 'child') {
-        userInfo = await childSchema.findById(req.user.id);
-        personType = 'child';
-    };
+    if (req.session && req.isLoggedIn) {
+        if (req.user.person === 'mentor') {
+            userInfo = await mentorSchema.findById(req.user.id);
+            personType = 'mentor';
+        } else if (req.user.person === 'guardian') {
+            userInfo = await guardianSchema.findById(req.user.id);
+            personType = 'guardian';
+        } else if (req.user.person === 'child') {
+            userInfo = await childSchema.findById(req.user.id);
+            personType = 'child';
+        };
+    }
 
     if (!userInfo) {
         res.status(200).json({
@@ -441,7 +447,8 @@ exports.loginStatus = asyncHandler(async (req, res, next) => {
             data: {
                 Kind: "user type",
                 items: {
-                    isLoggedIn: false
+                    isLoggedIn: false,
+                    personType: 'unknown'
                 }
             }
         });
