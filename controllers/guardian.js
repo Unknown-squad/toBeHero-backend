@@ -4,8 +4,11 @@ const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middlewares/async');
 const Children = require('../models/children');
 const Guardian = require('../models/guardians');
+const Subscription = require('../models/subscriptions');
+const Course = require('../models/courses');
 const mongoose = require('mongoose');
 const fs = require('fs');
+const stripe = require('stripe')('sk_test_51Ipv0NAq98pIrueXPNChnWXW3YOSsyNHbpOuM0SDJsQl9ZwLS9VDTuYRp21eP1e4bzyNNcc0yMjvrYqXqWw2Lkyr00NQMVdzx8');
 
 
 
@@ -26,7 +29,7 @@ exports.getChildrenDataForGuardian = asyncHandler (async (req, res, next) => {
   
   // Check if no content
   if (childrenData.length === 0) {
-    return next(new ErrorResponse('No children data.', 404));
+    return next(new ErrorResponse(`No children data with given id ${req.user.id}.`, 404));
   }
   
 
@@ -56,7 +59,7 @@ exports.geChildDataForGuardian = asyncHandler (async (req, res, next) => {
 
   // Check if no content
   if (!childData) {
-    return next(new ErrorResponse('No child data.', 404));
+    return next(new ErrorResponse(`No child data with given id ${req.params.childId}.`, 404));
   }
 
 
@@ -112,7 +115,7 @@ exports.updateChildBasicInfo = asyncHandler (async (req, res, next) => {
 
   // Check if no data
   if (!child) {
-    return next(new ErrorResponse('No child data.', 404));
+    return next(new ErrorResponse(`No child data with given id ${req.params.childId}.`, 404));
   }
 
   // Check if guardian authorized to update these data
@@ -251,7 +254,7 @@ exports.updateChildBasicInfo = asyncHandler (async (req, res, next) => {
 exports.addNewChild = asyncHandler (async (req, res, next) => {
   
   // For testing
-  req.body = {
+  /* req.body = {
     method: "child.basicInfo.put",
     params: {
       userName: "Iaaaddadslsadm",
@@ -260,7 +263,7 @@ exports.addNewChild = asyncHandler (async (req, res, next) => {
       password: "Yousef Srag dkjasljdaslk",
       gender: "male"
     }
-  };
+  }; */
 
   // Check validation of req.body
   const { method, params } = req.body;
@@ -383,7 +386,7 @@ exports.getGurdianBasicInfo = asyncHandler (async (req, res, next) => {
 
   // If no guardian data
   if (!guardian) {
-    return next(new ErrorResponse('No guardian data.', 404));
+    return next(new ErrorResponse(`No guardian data with given id ${req.user.id}.`, 404));
   }
   
   // Return data to client
@@ -411,7 +414,7 @@ exports.updateGuardianBasicInfo = asyncHandler (async (req, res, next) => {
 
   // Check if no data
   if (!guardian) {
-    return next(new ErrorResponse('No guardian data.', 404));
+    return next(new ErrorResponse(`No guardian data with given id ${req.user.id}.`, 404));
   }
 
   // Check validation of req.body
@@ -538,5 +541,96 @@ exports.updateGuardianPicture = asyncHandler (async (req, res, next) => {
       success: true,
       message: 'Guardian picture updated successfully.'
     });
+  });
+});
+
+
+
+// @desc    Create subscription and create payment
+// @route   POST localhost:3000/api/v1/guardian/:courseId/checkout
+// @access  private/guardian
+exports.createSubscription = asyncHandler (async (req, res, next) => {
+
+  // For testing
+  /* req.body = {
+    method: 'Create.subscription.POST',
+    params: {
+      childId: '608d8963975b697849c6c46c'
+    },
+    stripeToken: req.body.stripeToken,
+    stripeEmail: req.body.stripeEmail
+  } */
+
+  // Get course
+  const course = await Course
+  .findById(req.params.courseId)
+  .select('price mentorId description title');
+
+  // Check if no course
+  if (!course) {
+    return next(new ErrorResponse(`No course data with given id ${req.params.courseId}`, 400));
+  }
+
+  // Check validation of req.body
+  const { method, params, stripeToken, stripeEmail } = req.body;
+  if (!method || !params || !stripeToken || !stripeEmail) {
+    return next(new ErrorResponse('Method or params are missing.', 400));
+  }
+  const { childId } = req.body.params;
+  if (!childId) {
+    return next(new ErrorResponse('Missing property in params.', 400));
+  }
+  
+  // Get child data from database
+  const child = await Children
+  .findById(childId)
+  .select('guardianId');
+
+  // Check if no child data
+  if (!child) {
+    return next(new ErrorResponse(`No child data with given id ${childId}.`, 404));
+  }
+
+  // Check if guardian not authorized
+  if (child.guardianId.toString() != req.user.id.toString()) {
+    return next(new ErrorResponse('Forbidden', 403));
+  }
+
+  // Create customer payment process
+  const customer = await stripe.customers.create({
+    email: req.body.stripeEmail,
+		source: req.body.stripeToken
+  });
+
+  // Create customer charge in stripe.com in payment field
+  await stripe.charges.create({
+    amount: course.price,
+    receipt_email: req.body.stripeEmail,
+    description: course.description,
+    currency: 'EGP',
+    shipping: {
+      address: {
+        line1: 'Address 1',
+        city: 'cairo',
+        country: 'egypt'
+      },
+      name: course.title
+    },
+    customer: customer.id
+  });
+
+  // Create subscription and save it in database
+  await Subscription.create({
+    guardianId: req.user.id,
+    childId: childId,
+    mentorId: course.mentorId,
+    courseId: req.params.courseId,
+    balance: course.price
+  });
+
+  // Return response to the client
+  res.status(201).json({
+    success: true,
+    charge: 'You successfully subscribe to this course.'
   });
 });

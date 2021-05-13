@@ -21,13 +21,15 @@
     "bcrypt": "^5.0.0",
     "connect-mongodb-session": "^2.4.1",
     "dotenv": "^8.2.0",
+    "ejs": "^3.1.6",
     "express": "^4.17.1",
     "express-fileupload": "^1.2.1",
     "express-session": "^1.17.1",
     "mongoose": "^5.11.13",
     "morgan": "^1.10.0",
     "nodemailer": "^6.4.17",
-    "nodemailer-sendgrid-transport": "^0.2.0"
+    "nodemailer-sendgrid-transport": "^0.2.0",
+    "stripe": "^8.148.0"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",

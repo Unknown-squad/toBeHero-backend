@@ -8,7 +8,9 @@ const {
   addNewChild,
   getGurdianBasicInfo,
   updateGuardianBasicInfo,
-  updateGuardianPicture
+  updateGuardianPicture,
+  createSubscription,
+  getHomePage
 } = require('../controllers/guardian');
 const { 
   mentorAuthorization,
@@ -74,6 +76,13 @@ router.route('/api/v1/guardian/basic-info')
 // @route   PUT localhost:3000/api/v1/guardian/basic-info/picture
 // @access  private/guardian
 router.put('/api/v1/guardian/basic-info/picture', guardianAuthorization, updateGuardianPicture);
+
+
+
+// @desc    Create subscription and create payment process
+// @route   POST localhost:3000/api/v1/guardian/:courseId/checkout
+// @access  private/guardian
+router.post('/api/v1/guardian/:courseId/checkout', guardianAuthorization, createSubscription);
 
 
 
