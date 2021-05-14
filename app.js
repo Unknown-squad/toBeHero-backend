@@ -87,6 +87,16 @@ app.use(subscriptions);
 app.use(courses);
 app.use(authRoutes);
 
+app.use((req, res, next) => {
+  return res.status(404).json({
+    success: false,
+    error: {
+      code: 404,
+      message: `this url not found`
+    }
+  })
+});
+
 // Use error handler
 app.use(errorHandling);
 /* app.use(errorHandler);
