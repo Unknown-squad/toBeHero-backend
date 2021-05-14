@@ -56,6 +56,11 @@ exports.signUpAsGuardian = asyncHandler(async (req, res, next) => {
     const expiretokenDate = dateNow.setHours(dateNow.getHours() + 1);
     data.verificationTokenExpire = expiretokenDate;
 
+    // let user account is being verified
+    if (data.isVerify) {
+        data.isVerify = false;
+    }
+
     // save new user in database
     const newUser = await guardianSchema.create(data);
 
@@ -141,13 +146,13 @@ exports.loginUser= asyncHandler(async (req, res, next) => {
 // @route   POST `/api/v1/user/verify-email`
 // @access  public
 exports.verifyEmail = asyncHandler(async (req, res, next) => {
-    const data = req.body.params;
-    let user;
-
     // validation shape of request 
     if (!req.body || !req.body.params || !req.body.method) {
         return next(new ErrorHandler(`invalid shape of requrest`, 400));
     };
+    
+    const data = req.body.params;
+    let user;
 
     // find user in database
     if (req.user.person === 'mentor') {
@@ -189,13 +194,13 @@ exports.verifyEmail = asyncHandler(async (req, res, next) => {
 // @route   POST `/api/v1/mentor/signUp`
 // @access  public
 exports.sginUpAsMenter = asyncHandler(async (req, res, next) => {
-    let data = req.body.params;
-    let fileName;
-
     // validation shape of request 
     if (!req.body || !req.body.params || !req.body.method) {
         return next(new ErrorHandler(`invalid shape of requrest`, 400));
     };
+
+    let data = req.body.params;
+    let fileName;
 
     // check if user's email is exist
     const checkEmail = await mentorSchema.findOne({email: data.email});
@@ -247,6 +252,11 @@ exports.sginUpAsMenter = asyncHandler(async (req, res, next) => {
     const expiretokenDate = dateNow.setHours(dateNow.getHours() + 1);
     data.verificationTokenExpire = expiretokenDate;
 
+    // let user account is being not verified
+    if (data.isVerify) {
+        data.isVerify = false;
+    }
+
     // save new user in database
     const newUser = await mentorSchema.create(data);
 
@@ -279,13 +289,13 @@ exports.sginUpAsMenter = asyncHandler(async (req, res, next) => {
 // @route   POST `/api/v1/user/password/reset-step-1`
 // @access  public
 exports.resetPasswordStepOne = asyncHandler(async (req, res, next) => {
-    const data = req.body.params;
-    let userInfo;
-
     // validation shape of request 
     if (!req.body || !req.body.params || !req.body.method) {
         return next(new ErrorHandler(`invalid shape of requrest`, 400));
     };
+
+    const data = req.body.params;
+    let userInfo;
 
     // find user in database
     if (data.person === 'mentor') {
@@ -341,13 +351,13 @@ exports.resetPasswordStepOne = asyncHandler(async (req, res, next) => {
 // @route   POST `/api/v1/user/password/reset-step-2`
 // @access  private (authenticated user)
 exports.resetPasswordStepTwo = asyncHandler(async (req, res, next) => { 
-    const data = req.body.params;
-    let userInfo;
-
     // validation shape of request 
     if (!req.body || !req.body.params || !req.body.method) {
         return next(new ErrorHandler(`invalid shape of requrest`, 400));
     };
+
+    const data = req.body.params;
+    let userInfo;
 
     // find user in database
     if (req.user.person === 'mentor') {
@@ -390,13 +400,13 @@ exports.resetPasswordStepTwo = asyncHandler(async (req, res, next) => {
 // @route   PUT `/api/v1/user/password/reset-step-3`
 // @access  private (authenticated user)
 exports.resetPasswordStepThree = asyncHandler(async (req, res, next) => {
-    const data = req.body.params;
-    let userInfo;
-
     // validation shape of request 
     if (!req.body || !req.body.params || !req.body.method) {
         return next(new ErrorHandler(`invalid shape of requrest`, 400));
     };
+
+    const data = req.body.params;
+    let userInfo;
 
     // find user in database
     if (req.user.person === 'mentor') {
