@@ -20,7 +20,7 @@ const {
     resetPasswordStepTwo,
     resetPasswordStepThree,
     logout,
-    loginStatus,
+    userStatus,
     statusEmail
 } = require(`../controllers/auth.js`);
 
@@ -49,21 +49,21 @@ router.route(`/api/v1/mentor/signUp`)
     .post(acceptedtIfUserLoggedOut, sginUpAsMenter);
 
 // @desc    send token in mail to user email to verify user account
-// @route   POST `/api/v1/user/send-mail`
+// @route   POST `/api/v1/user/password/reset-step-1`
 // @access  public
-router.route(`/api/v1/user/send-email`)
+router.route(`/api/v1/user/password/reset-step-1`)
     .post(acceptedtIfUserLoggedOut, resetPasswordStepOne);
 
 // @desc    allow user to change password
-// @route   POST `/api/v1/user/passowrd/authorization`
+// @route   POST `/api/v1/user/password/reset-step-2`
 // @access  private (authenticated user)
-router.route(`/api/v1/user/passowrd/authorization`)
+router.route(`/api/v1/user/password/reset-step-2`)
     .post(acceptedtIfUserLoggedOut, acceptedIfUserAddInfoInSsnCookie, resetPasswordStepTwo);
 
 // @desc    user change pasword if authorized
-// @route   PUT `/api/v1/user/passowrd/change-password`
+// @route   PUT `/api/v1/user/password/reset-step-3`
 // @access  private (authenticated user)
-router.route(`/api/v1/user/passowrd/change-password`)
+router.route(`/api/v1/user/password/reset-step-3`)
     .put(acceptedtIfUserLoggedOut, acceptedIfUserAddInfoInSsnCookie, resetPasswordStepThree);
 
 // @desc    logout user
@@ -73,10 +73,10 @@ router.route(`/api/v1/user/logout`)
     .delete(acceptedIfUserLoggedIn, logout);
 
 // @desc    get login status user
-// @route   GET `/api/v1/user/login/status`
+// @route   GET `/api/v1/user/status`
 // @access  private (user login)
-router.route(`/api/v1/user/login/status`)
-    .get(loginStatus);
+router.route(`/api/v1/user/status`)
+    .get(userStatus);
 
 // @desc    check if email already exists
 // @route   GET `/api/v1/email/status`
