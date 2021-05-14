@@ -19,6 +19,7 @@ const asyncHandler = require('../middlewares/async');
 // utils files
 const ErrorHandler = require('../utils/errorHandler');
 const sendMail = require(`../utils/sendmail`);
+const { Console } = require('console');
 
 // @desc    sign up as guardian
 // @route   POST `/api/v1/guardian/signup`
@@ -254,8 +255,8 @@ exports.sginUpAsMenter = asyncHandler(async (req, res, next) => {
     });
 });
 
-// @desc    reset password by steps, step 1: send token by send mail to user 
-// @route   POST `/api/v1/user/reset-step-1`
+// @desc    reset password step one: send token in mail to user email to verify user account
+// @route   POST `/api/v1/user/send-mail`
 // @access  public
 exports.resetPasswordStepOne = asyncHandler(async (req, res, next) => {
     const data = req.body.params;
@@ -276,12 +277,12 @@ exports.resetPasswordStepOne = asyncHandler(async (req, res, next) => {
 
     // create token to verify user account
     const randToken = Math.floor(100000 + Math.random() * 900000);
-    userInfo.verificationToken = randToken;
+    userInfo.resetPasswordToken = randToken;
 
     // create expiry date of token
-    let dateNow = new Date()
+    let dateNow = new Date();
     const expiretokenDate = dateNow.setHours(dateNow.getHours() + 1);
-    userInfo.verificationTokenExpire = expiretokenDate;
+    userInfo.resetPasswordTokenExpires = expiretokenDate;
 
     // save token in DB
     await userInfo.save();
@@ -311,8 +312,8 @@ exports.resetPasswordStepOne = asyncHandler(async (req, res, next) => {
     });
 });
 
-// @desc    reset password by steps, step 2: user will enter token to authrized him to change password
-// @route   POST `/api/v1/user/reset-step-2`
+// @desc    reset password step two: allow user to change password
+// @route   POST `/api/v1/user/passowrd/authorization`
 // @access  private (authenticated user)
 exports.resetPasswordStepTwo = asyncHandler(async (req, res, next) => { 
     const data = req.body.params;
@@ -330,17 +331,17 @@ exports.resetPasswordStepTwo = asyncHandler(async (req, res, next) => {
     };
 
     // check if token expired
-    if (userInfo.verificationTokenExpire <= new Date()) {
-        return next(new ErrorHandler(`expire token`, 401))
+    if (userInfo.resetPasswordTokenExpires <= new Date()) {
+        return next(new ErrorHandler(`expire token`, 401));
     };
 
     // compare correct token with other token entered by user
-    if (data.token !== userInfo.verificationToken) {
+    if (data.token !== userInfo.resetPasswordToken) {
         return next(new ErrorHandler(`invalid token`, 400));
     };
 
     // expire token 
-    userInfo.verificationTokenExpire = new Date();
+    userInfo.resetPasswordTokenExpires = new Date();
 
     // authorizated user to change Password
     let dateNow = new Date()
@@ -355,8 +356,8 @@ exports.resetPasswordStepTwo = asyncHandler(async (req, res, next) => {
     });
 });
 
-// @desc    reset password by steps, step 3: write password if user authorized
-// @route   PUT `/api/v1/user/reset-step-3`
+// @desc    reset password step three: user change pasword if authorized
+// @route   PUT `/api/v1/user/passowrd/change-password`
 // @access  private (authenticated user)
 exports.resetPasswordStepThree = asyncHandler(async (req, res, next) => {
     const data = req.body.params;
@@ -374,10 +375,11 @@ exports.resetPasswordStepThree = asyncHandler(async (req, res, next) => {
     };
 
     // chekc if user authorized to change password
-    if (userInfo.authorizationModifyPasswordExpire <= new Date()) {
+    if (!userInfo.authorizationModifyPasswordExpire || userInfo.authorizationModifyPasswordExpire <= new Date()) {
         return next(new ErrorHandler(`user unauthorized to change password`, 403));
     };
-
+    console.log(userInfo.authorizationModifyPasswordExpire)
+    console.log(new Date())
     // validation password
     if (data.password.length < 8) {
         return next(new ErrorHandler(`add at least 8 length string`, 400));
@@ -441,7 +443,7 @@ exports.loginStatus = asyncHandler(async (req, res, next) => {
     }
 
     if (!userInfo) {
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             message: `user data`,
             data: {
@@ -478,15 +480,36 @@ exports.statusEmail = asyncHandler(async (req, res, next) => {
     userInfo = await mentorSchema.findOne({email: req.params.userEmail});
 
     if (!userInfo) {
-        res.status(404).json({
+        return res.status(404).json({
             success: true,
             message: `this email not exists`
         });
     };
 
     // send successfully response
-    res.status(409).json({
+    res.status(200).json({
         success: true,
         message: `this email is exists`
     });
 });
+
+/* // @desc    resend token of verify email
+// @route   POST `/api/v1/user/verify-email/resend-token`
+// @access  public
+exports.resendEmailToken = asyncHandler(async (req, res, next) => {
+    let data = req.body.params;
+    let userInfo;
+
+    // find user in database
+    if (data.person === 'mentor') {
+        userInfo = await mentorSchema.findById(req.user.id);
+    } else if (data.person === 'guardian') {
+        userInfo = await guardianSchema.findById(data.email);
+    };
+
+    if (!userInfo) {
+        return next(new ErrorHandler(`this email not found`, 404));
+    };
+
+
+}); */

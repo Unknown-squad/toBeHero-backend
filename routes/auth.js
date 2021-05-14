@@ -48,22 +48,22 @@ router.route(`/api/v1/user/verify-email`)
 router.route(`/api/v1/mentor/signUp`)
     .post(acceptedtIfUserLoggedOut, sginUpAsMenter);
 
-// @desc    reset password by first step, step 1: send token by mail to user allow him to change password
-// @route   POST `/api/v1/user/reset-step-1`
+// @desc    send token in mail to user email to verify user account
+// @route   POST `/api/v1/user/send-mail`
 // @access  public
-router.route(`/api/v1/user/reset-step-1`)
+router.route(`/api/v1/user/send-email`)
     .post(acceptedtIfUserLoggedOut, resetPasswordStepOne);
 
-// @desc    reset password by steps, step 2: user will enter token to authrized him to change password
-// @route   POST `/api/v1/user/reset-step-2`
+// @desc    allow user to change password
+// @route   POST `/api/v1/user/passowrd/authorization`
 // @access  private (authenticated user)
-router.route(`/api/v1/user/reset-step-2`)
+router.route(`/api/v1/user/passowrd/authorization`)
     .post(acceptedtIfUserLoggedOut, acceptedIfUserAddInfoInSsnCookie, resetPasswordStepTwo);
 
-// @desc    reset password by steps, step 3: write password if user authorized
-// @route   PUT `/api/v1/user/reset-step-3`
+// @desc    user change pasword if authorized
+// @route   PUT `/api/v1/user/passowrd/change-password`
 // @access  private (authenticated user)
-router.route(`/api/v1/user/reset-step-3`)
+router.route(`/api/v1/user/passowrd/change-password`)
     .put(acceptedtIfUserLoggedOut, acceptedIfUserAddInfoInSsnCookie, resetPasswordStepThree);
 
 // @desc    logout user

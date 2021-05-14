@@ -79,7 +79,9 @@ const GuardianSchema = new mongoose.Schema({
   ],
   verificationToken: String,
   verificationTokenExpire: Date,
-  authorizationModifyPasswordExpire: Date
+  authorizationModifyPasswordExpire: Date,
+  resetPasswordToken: String,
+  resetPasswordExpires: Date
 });
 
 module.exports = mongoose.model('Guardian', GuardianSchema);
