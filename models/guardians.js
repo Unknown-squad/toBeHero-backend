@@ -81,7 +81,7 @@ const GuardianSchema = new mongoose.Schema({
   verificationTokenExpire: Date,
   authorizationModifyPasswordExpire: Date,
   resetPasswordToken: String,
-  resetPasswordExpires: Date
+  resetPasswordTokenExpires: Date
 });
 
 module.exports = mongoose.model('Guardian', GuardianSchema);
