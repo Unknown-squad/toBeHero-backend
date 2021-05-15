@@ -8,7 +8,7 @@ const {
     acceptedIfUserLoggedIn,
     acceptedtIfUserLoggedOut,
     acceptedIfUserAddInfoInSsnCookie
-} = require(`../middlewares/authorizedaccepted`);
+} = require(`../middlewares/authorizedAccepted`);
 
 // controllers files
 const {

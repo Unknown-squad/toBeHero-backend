@@ -19,7 +19,6 @@ const asyncHandler = require('../middlewares/async');
 // utils files
 const ErrorHandler = require('../utils/errorHandler');
 const sendMail = require(`../utils/sendmail`);
-const { Console } = require('console');
 
 // @desc    sign up as guardian
 // @route   POST `/api/v1/guardian/signup`
