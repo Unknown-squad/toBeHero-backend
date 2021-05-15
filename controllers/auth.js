@@ -191,7 +191,7 @@ exports.verifyEmail = asyncHandler(async (req, res, next) => {
 });
 
 // @desc    sign up as mentor
-// @route   POST `/api/v1/mentor/signUp`
+// @route   POST `/api/v1/mentor/signup`
 // @access  public
 exports.sginUpAsMenter = asyncHandler(async (req, res, next) => {
     // validation shape of request 
@@ -527,6 +527,7 @@ exports.statusEmail = asyncHandler(async (req, res, next) => {
     if (!userInfo) {
         return res.status(404).json({
             success: true,
+            statusCode: 404,
             message: `this email not exists`
         });
     };
@@ -534,6 +535,7 @@ exports.statusEmail = asyncHandler(async (req, res, next) => {
     // send successfully response
     res.status(200).json({
         success: true,
+        statusCode: 200,
         message: `email is already exist.`
     });
 });

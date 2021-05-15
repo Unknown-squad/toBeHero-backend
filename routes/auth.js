@@ -43,9 +43,9 @@ router.route(`/api/v1/user/verify-email`)
     .post(acceptedtIfUserLoggedOut, acceptedIfUserAddInfoInSsnCookie, verifyEmail);
 
 // @desc    sign up as mentor
-// @route   POST `/api/v1/mentor/signUp`
+// @route   POST `/api/v1/mentor/signup`
 // @access  public
-router.route(`/api/v1/mentor/signUp`)
+router.route(`/api/v1/mentor/signup`)
     .post(acceptedtIfUserLoggedOut, sginUpAsMenter);
 
 // @desc    send token in mail to user email to verify user account
