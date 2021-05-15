@@ -12,6 +12,7 @@ const fileUpload = require('express-fileupload');
 const courses = require(`./routes/course`);
 const mentorRoutes = require('./routes/mentor');
 const subscriptions = require('./routes/subscription');
+const authRoutes = require(`./routes/auth`);
 const live = require(`./routes/live`);
 
 // Add middleware files
@@ -21,6 +22,14 @@ const {errorHandling} = require(`./middlewares/ErrorHandling`);
 
 // Add config files
 const connectDB = require(`./config/db`);
+
+// CORS security
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  next();
+});
 
 // Read body of request
 app.use(express.urlencoded({ extended: false }));
@@ -51,17 +60,44 @@ app.use(require('express-session')({
     secret: process.env.SESSION_SECRET,
     store: store,
     resave: false,
-    saveUninitialized: true
+    saveUninitialized: false,
+    cookie: {
+      // sameSite: 'Strict',
+      maxAge: 1000 * 60 * 60 * 24 * 90,
+      // secure: true
+  }
 }));
 
 // Access to public folder
 app.use(express.static(path.join(__dirname, 'public')));
 
+// save user session in req.user variable
+app.use((req, res, next) => {
+  req.isLoggedIn = false;
+  
+  if (req.session) {
+    req.isLoggedIn = req.session.isLoggedIn;
+    req.user = req.session.user;
+  };
+  next();
+})
+
 // use routes
 app.use(mentorRoutes);
 app.use(subscriptions);
 app.use(courses);
+app.use(authRoutes);
 app.use(live);
+
+app.use((req, res, next) => {
+  return res.status(404).json({
+    success: false,
+    error: {
+      code: 404,
+      message: `this url not found`
+    }
+  })
+});
 
 // Use error handler
 app.use(errorHandling);
