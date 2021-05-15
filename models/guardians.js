@@ -25,9 +25,9 @@ const GuardianSchema = new mongoose.Schema({
   },
   picture: {
     type: String,
-    match: [/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/,
+    /* match: [/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/,
       `invalid url.`
-    ]
+    ] */
   },
   phone: {
     type: String,

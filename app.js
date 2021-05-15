@@ -13,6 +13,7 @@ const courses = require(`./routes/course`);
 const mentorRoutes = require('./routes/mentor');
 const subscriptions = require('./routes/subscription');
 const authRoutes = require(`./routes/auth`);
+const live = require(`./routes/live`);
 
 // Add middleware files
 /* const {subscriptionErrorHandling} = require('./middlewares/subscriptionErrorHandling');
@@ -82,10 +83,11 @@ app.use((req, res, next) => {
 })
 
 // use routes
-app.use(mentorRoutes)
+app.use(mentorRoutes);
 app.use(subscriptions);
 app.use(courses);
 app.use(authRoutes);
+app.use(live);
 
 app.use((req, res, next) => {
   return res.status(404).json({

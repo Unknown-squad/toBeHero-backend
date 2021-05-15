@@ -180,7 +180,7 @@ exports.getMentorProfile = asyncHandler(async (req, res, next) => {
 });
 
 // @desc    get mentor's courses
-// @route   Get '/api/v1/mentor/courses/mentorId?page='
+// @route   Get '/api/v1/mentor/courses/:mentorId?page='
 // @access  public
 exports.getMentorCourses = asyncHandler(async (req, res, next) => {
     // add pagenation
@@ -193,10 +193,22 @@ exports.getMentorCourses = asyncHandler(async (req, res, next) => {
         .slice('coursesId', [((page - 1) * limit), limit])
         .populate({
             path: `coursesId`,
-            model: `Course`
+            model: `Course`,
+            select: `_id title price description picture rate reviewCounter`,
+            populate: {
+                path: `mentorId`,
+                model: `Mentor`,
+                select: `_id fullName picture isAvailable`
+            }
         });
 
-    console.log(coursesOfMentor)
+    // console.log(coursesOfMentor)
+
+    // check if there are courses
+    if (!coursesOfMentor) {
+        return next(new ErrorHandler(`no such mentor with given id ${req.params.mentorId}`, 404));
+    };
+
     // check if there are courses
     if (coursesOfMentor.coursesId.length === 0) {
         return next(new ErrorHandler(`there's no such courses with given mentor id ${req.params.mentorId}`, 404));

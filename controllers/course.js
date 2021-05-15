@@ -89,6 +89,12 @@ exports.getCourses = asyncHandler(async (req, res, next) => {
     page = 1;
   }
   
+  // get count of all document in course collection
+  const courseCount = await Course.countDocuments();
+
+  // get numbet of total pages
+  const totalPages = Math.ceil(courseCount/limit);
+  
   // find and filter courses
   const courses = await Course
     .find({genre: req.query.genre, rate: {$gte: filter}})
@@ -111,6 +117,8 @@ exports.getCourses = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     success: true,
     message: `successfully get courses data of page ${page}`,
+    currentPage: page,
+    totalPages,
     data: {
       kind: `courses`,
       count: courses.length,
@@ -233,6 +241,9 @@ exports.postReview = asyncHandler(async (req, res, next) => {
   course.reviewsId.push(newReview._id);
   await course.save();
 
+  // find guardian by his id and get his data
+  const currentGuardian = await Guardian.findById(req.user.id);
+
   // send response
   res.status(201).json({
     success: true,
@@ -242,8 +253,8 @@ exports.postReview = asyncHandler(async (req, res, next) => {
       items: [{
         reviewId: newReview._id,
         guardian: {
-          fullName: req.user.fullName,
-          picture: req.user.picture
+          fullName: currentGuardian.fullName,
+          picture: currentGuardian.picture
         }
       }]
     }
@@ -509,7 +520,7 @@ exports.postCourse = asyncHandler(async (req, res, next) => {
 });
 
 // @route   PUT `/api/v1/courses/:id`
-// @desc    update paricular course
+// @desc    update particular course
 // @access  private (only mentor can update his own courses)
 exports.putCourse = asyncHandler(async (req, res, next) => {
 
@@ -537,6 +548,11 @@ exports.putCourse = asyncHandler(async (req, res, next) => {
   } */
   // end of testing
   
+    // check if there's no body with request
+    if(!req.body || !req.body.params) {
+      return next(new ErrorResponse(`The body of request and params is required.`));
+    }
+  
   // find course with given id
   const currentCourse = await Course.findById(req.params.id);
   
@@ -545,9 +561,9 @@ exports.putCourse = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse(`there's no such course found with given id.`, 404));
   }
 
-  // check if there's no body with request
-  if(!req.body || !req.body.params) {
-    return next(new ErrorResponse(`The body of request and params is required.`));
+  // check if mentor is authorized to update this course
+  if(req.user.id != currentCourse.mentorId) {
+    return next(new ErrorResponse(`forbidden.`, 403));
   }
   
   // set maximum number of uploaded files
