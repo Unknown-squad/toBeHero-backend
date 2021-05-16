@@ -160,8 +160,12 @@ exports.getMentorProfile = asyncHandler(async (req, res, next) => {
     // get mentor info.
     const mentorInfo = await MentorSchema
         .findById(req.params.mentorId)
-        .select(`-coursesId -SubscriptionIDs -bankingInfo -verificationToken -verificationTokenExpire`)
-        .populate('topReviewsId');
+        .select(`_id fullName email countryCode languages description occupation certificates picture birthDate phone gender topReviewsId`)
+        .populate({
+            path: 'topReviewsId',
+            model: `reviews`,
+            select: `rate creatingDate description guardianName guardianPicture`,
+        });
 
     // check if mentor info is found or not
     if (!mentorInfo) {
@@ -174,7 +178,7 @@ exports.getMentorProfile = asyncHandler(async (req, res, next) => {
         message: `mentor data`,
         data: {
             Kind: `mentor`,
-            items:  mentorInfo
+            items:  [mentorInfo]
         }
     });
 });
@@ -260,11 +264,13 @@ exports.updateMentorInfo = asyncHandler( async (req, res, next) => {
 // @route   POST '/api/v1/mentor/dashboard/authorization'
 // @access  privet(mentor)
 exports.authorzithedUpdateAdvSetting = asyncHandler(async (req, res, next) => {
-    let oldPassword = req.body.params.oldPassword;
-
-    req.user = {
-        id: '60696acb19985a03a36d00ba'
+    // validation shape of request 
+    if (!req.body || !req.body.params || !req.body.method) {
+        return next(new ErrorHandler(`invalid shape of requrest`, 400));
     };
+
+    let oldPassword = req.body.params.password;
+
     // get mentor info
     const user = await MentorSchema
         .findById(req.user.id);
@@ -296,19 +302,28 @@ exports.authorzithedUpdateAdvSetting = asyncHandler(async (req, res, next) => {
 });
 
 // @desc    change password
-// @route   PUT '/api/v1/mentor/dashboard/password'
+// @route   PUT '/api/v1/mentor/dashboard/change-password'
 // @access  privet(mentor)
 exports.changeMentorPassword = asyncHandler(async (req, res, next) => {
-    const newPassword = req.body.params.newPassword;
-    req.user = {
-        id: '60696acb19985a03a36d00ba'
+    // validation shape of request 
+    if (!req.body || !req.body.params || !req.body.method) {
+        return next(new ErrorHandler(`invalid shape of requrest`, 400));
     };
+    
+
+    const newPassword = req.body.params.newPassword;
+
     // get mentor data
     const user = await MentorSchema.findById(req.user.id);
 
+    // check if found user
+    if (!user) {
+        return next(new ErrorHandler(`there's no such mentor with given id ${req.user.id}`, 404));
+    };
+
     // chack if user authorized to change data
     const date = new Date()
-    if (user.authorizationModify <= date) {
+    if (!user.authorizationModify || user.authorizationModify <= date) {
         return next(new ErrorHandler(`forbaddin`, 403));
     }
 
@@ -382,11 +397,6 @@ exports.changeMentorPassword = asyncHandler(async (req, res, next) => {
 // @route   PUT '/api/v1/mentor/dashboard/picture'
 // @access  privet(mentor)
 exports.changeMentorPicture = asyncHandler(async (req, res, next) => {
-    req.user = {
-        id: '60696acb19985a03a36d00ba',
-        person: 'mentor'
-    };
-
     // found user
     let user = await MentorSchema.findById(req.user.id);
     
@@ -395,19 +405,19 @@ exports.changeMentorPicture = asyncHandler(async (req, res, next) => {
     };
 
     // check if file sent 
-    if (!req.files) {
-        return next(new ErrorHandler(`please upload file`, 400));
+    if (!req.files || !req.files.img) {
+        return next(new ErrorHandler(`upload file`, 400));
     };
 
     let img = req.files.img
     // check if file is img
     if (!img.mimetype.startsWith(`image`)) {
-        return next(new ErrorHandler(`please upload file`, 400));
+        return next(new ErrorHandler(`upload image`, 400));
     };
 
     // check size img
     if (img.size > 5 * 1024 * 1024) {
-        return next(new ErrorHandler(`please upload file`, 400));
+        return next(new ErrorHandler(`image size at least 5 mb.`, 400));
     };
 
     // upload img
@@ -427,13 +437,13 @@ exports.changeMentorPicture = asyncHandler(async (req, res, next) => {
             if (err) {
                 console.log(err)
                 fs.unlinkSync(`./public/images/${fileName}`);
-                return next(`didn't save new image`, 500);
+                return next(new ErrorHandler(`file: didn't save new image`, 500));
             };
 
             // delete old picture
             fs.unlink(`./public${oldPicture}`, (err) => {
                 if (err) {
-                    return next(`server error`, 500);
+                    return next(new ErrorHandler(`server error`, 500));
                 };
 
                 // send successfully response
@@ -450,9 +460,9 @@ exports.changeMentorPicture = asyncHandler(async (req, res, next) => {
 // @route   PUT '/api/v1/mentor/dashboard/phone'
 // @access  privet(mentor)
 exports.changeMentorPhone = asyncHandler(async (req, res, next) => {
-    req.user = {
-        id: '60696acb19985a03a36d00ba',
-        person: 'mentor'
+    // validation shape of request 
+    if (!req.body || !req.body.params || !req.body.method) {
+        return next(new ErrorHandler(`invalid shape of requrest`, 400));
     };
 
     // get user info 
@@ -462,6 +472,13 @@ exports.changeMentorPhone = asyncHandler(async (req, res, next) => {
         return next(new ErrorHandler(`id not found`, 400));
     }
 
+    // chack if user authorized to change data
+    const date = new Date()
+    if (!user.authorizationModify || user.authorizationModify <= date) {
+        return next(new ErrorHandler(`forbaddin`, 403));
+    }
+
+    user.authorizationModify = Date.now();
     // save new data
     user.countryCode = req.body.params.countryCode;
     user.phone = req.body.params.phone;
