@@ -515,7 +515,7 @@ exports.userStatus = asyncHandler(async (req, res, next) => {
 });
 
 // @desc    check if email already exists
-// @route   GET `/api/v1/email/status/:userEmail`
+// @route   GET `/api/v1/mentor/email/status/:userEmail`
 // @access  public
 exports.statusEmail = asyncHandler(async (req, res, next) => {
     let userInfo;
