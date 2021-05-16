@@ -11,6 +11,9 @@ const {getOneCourse,
 const {
        acceptIfGuardian,
        acceptIfMentor} = require(`../middlewares/acceptIfAuthorized`);
+const {
+       acceptedIfUserLoggedIn
+} = require(`../middlewares/authorizedAccepted`);
 
 // @route   GET `/api/v1/courses/:id`
 // @desc    get one course
@@ -30,21 +33,21 @@ router.get(`/api/v1/reviews/:courseId`, getReviews);
 // @route   GET `/api/v1/mentor/dashboard/courses`
 // @desc    get courses that created by mentor
 // @access  private (just mentor can see it)
-router.get(`/api/v1/mentor/dashboard/courses`, acceptIfMentor, getMentorCourses);
+router.get(`/api/v1/mentor/dashboard/courses`, acceptedIfUserLoggedIn, acceptIfMentor, getMentorCourses);
 
 // @route   POST `/api/v1/add-review`
 // @desc    add new review to course
 // @access  private (only guardian can add reviews)
-router.post(`/api/v1/add-review`, acceptIfGuardian, postReview);
+router.post(`/api/v1/add-review`, acceptedIfUserLoggedIn, acceptIfGuardian, postReview);
 
 // @route   POST `/api/v1/mentor/dashboard/new-course`
 // @desc    add new course by mentor
 // @access  private (only mentor can add new course)
-router.post(`/api/v1/mentor/dashboard/new-course`, acceptIfMentor, postCourse);
+router.post(`/api/v1/mentor/dashboard/new-course`, acceptedIfUserLoggedIn, acceptIfMentor, postCourse);
 
 // @route   GET `/api/v1/courses/:id`
 // @desc    update paricular course
 // @access  private (only mentor can update his own courses)
-router.put(`/api/v1/courses/:id`, acceptIfMentor, putCourse);
+router.put(`/api/v1/courses/:id`, acceptedIfUserLoggedIn, acceptIfMentor, putCourse);
 
 module.exports = router;

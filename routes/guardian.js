@@ -18,12 +18,15 @@ const {
   childAuthorization
 } = require('../middlewares/guardianAuth');
 
-
+// middlewares files
+const {
+  acceptedIfUserLoggedIn
+} = require(`../middlewares/authorizedAccepted`);
 
 // @desc    get all children date for spicific guardian
 // @route   Get localhost:3000/api/v1/guardian/children
 // @access  private/guardian
-router.get('/api/v1/guardian/children', guardianAuthorization, getChildrenDataForGuardian);
+router.get('/api/v1/guardian/children', acceptedIfUserLoggedIn, guardianAuthorization, getChildrenDataForGuardian);
 
 
 
@@ -41,15 +44,15 @@ router.get('/api/v1/guardian/children', guardianAuthorization, getChildrenDataFo
   @access  private/guardian
 */
 router.route('/api/v1/child/:childId')
-  .get(guardianAuthorization, geChildDataForGuardian)
-  .put(guardianAuthorization, updateChildBasicInfo);
+  .get(acceptedIfUserLoggedIn, guardianAuthorization, geChildDataForGuardian)
+  .put(acceptedIfUserLoggedIn, guardianAuthorization, updateChildBasicInfo);
 
 
 
 // @desc    Add new child
 // @route   POST localhost:3000/api/v1/guardian/new-child
 // @access  private/guardian
-router.post('/api/v1/guardian/new-child', guardianAuthorization, addNewChild);
+router.post('/api/v1/guardian/new-child', acceptedIfUserLoggedIn, guardianAuthorization, addNewChild);
 
 
 
@@ -67,22 +70,22 @@ router.post('/api/v1/guardian/new-child', guardianAuthorization, addNewChild);
   @access  private/guardian
 */
 router.route('/api/v1/guardian/basic-info')
-  .get(guardianAuthorization, getGurdianBasicInfo)
-  .put(guardianAuthorization, updateGuardianBasicInfo);
+  .get(acceptedIfUserLoggedIn, guardianAuthorization, getGurdianBasicInfo)
+  .put(acceptedIfUserLoggedIn, guardianAuthorization, updateGuardianBasicInfo);
 
 
 
 // @desc    Update guardian Picture
 // @route   PUT localhost:3000/api/v1/guardian/basic-info/picture
 // @access  private/guardian
-router.put('/api/v1/guardian/basic-info/picture', guardianAuthorization, updateGuardianPicture);
+router.put('/api/v1/guardian/basic-info/picture', acceptedIfUserLoggedIn, guardianAuthorization, updateGuardianPicture);
 
 
 
 // @desc    Create subscription and create payment process
 // @route   POST localhost:3000/api/v1/guardian/:courseId/checkout
 // @access  private/guardian
-router.post('/api/v1/guardian/:courseId/checkout', guardianAuthorization, createSubscription);
+router.post('/api/v1/guardian/:courseId/checkout', acceptedIfUserLoggedIn, guardianAuthorization, createSubscription);
 
 
 

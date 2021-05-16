@@ -4,8 +4,9 @@ const router = express.Router();
 
 // middlewares files
 const {
-    authorizedMentor
-} = require(`../middlewares/authorizedAccepted`)
+    authorizedMentor,
+    acceptedIfUserLoggedIn
+} = require(`../middlewares/authorizedAccepted`);
 
 // controllers files
 const {
@@ -28,21 +29,21 @@ const {
 // @access  private(mentor)
 router
     .route('/api/v1/mentor/dashboard/basic-info')
-    .get(authorizedMentor, getBasicInfoOfMentor)
+    .get(acceptedIfUserLoggedIn, authorizedMentor, getBasicInfoOfMentor)
 
 // @desc    get mentor's balance
 // @route   Get '/api/v1/mentor/dashboard/balance'
 // @access  private(mentor)
 router
     .route('/api/v1/mentor/dashboard/balance')
-    .get(authorizedMentor, getMentorBalace)
+    .get(acceptedIfUserLoggedIn, authorizedMentor, getMentorBalace)
 
 // @desc    get mentor's analytics
 // @route   Get '/api/v1/mentor/dashboard/analytics'
 // @access  private(mentor)
 router
     .route('/api/v1/mentor/dashboard/analytics')
-    .get(authorizedMentor, getMentorAnalytics)
+    .get(acceptedIfUserLoggedIn, authorizedMentor, getMentorAnalytics)
 
 // @desc  get mentor's Mentor availability status
 // @desc   update mentor's availability status
@@ -51,8 +52,8 @@ router
 // @access  private(mentor)
 router
     .route('/api/v1/mentor/availability')
-    .get(authorizedMentor, getMentorIsAvailable)
-    .put(authorizedMentor, putMentorIsAvailable)
+    .get(acceptedIfUserLoggedIn, authorizedMentor, getMentorIsAvailable)
+    .put(acceptedIfUserLoggedIn, authorizedMentor, putMentorIsAvailable)
 
 // @desc    get mentor's profile
 // @route   Get '/api/v1/mentor/profile/:mentorId'
@@ -73,21 +74,21 @@ router
 // @access  privet(mentor)
 router
     .route('/api/v1/mentor/dashboard/basic-info')
-    .put(authorizedMentor, updateMentorInfo);
+    .put(acceptedIfUserLoggedIn, authorizedMentor, updateMentorInfo);
 
 // @desc    authorizithed user to change emial or password or phone number
 // @route   POST '/api/v1/mentor/dashboard/authorization'
 // @access  privet(mentor)
 router
     .route('/api/v1/mentor/dashboard/authorization')
-    .post(authorizedMentor, authorzithedUpdateAdvSetting);
+    .post(acceptedIfUserLoggedIn, authorizedMentor, authorzithedUpdateAdvSetting);
 
 // @desc    change password
 // @route   PUT '/api/v1/mentor/dashboard/change-password'
 // @access  privet(mentor)
 router
     .route('/api/v1/mentor/dashboard/change-password')
-    .put(authorizedMentor, changeMentorPassword);
+    .put(acceptedIfUserLoggedIn, authorizedMentor, changeMentorPassword);
 
 /* // @desc    change email
 // @route   PUT '/api/v1/mentor/dashboard/change-email'
@@ -101,13 +102,13 @@ router
 // @access  privet(mentor)
 router
     .route('/api/v1/mentor/dashboard/picture')
-    .put(authorizedMentor, changeMentorPicture);
+    .put(acceptedIfUserLoggedIn, authorizedMentor, changeMentorPicture);
 
 // @desc    change user phone number
 // @route   PUT '/api/v1/mentor/dashboard/phone'
 // @access  privet(mentor)
 router
     .route('/api/v1/mentor/dashboard/phone')
-    .put(authorizedMentor, changeMentorPhone);
+    .put(acceptedIfUserLoggedIn, authorizedMentor, changeMentorPhone);
         
 module.exports = router
