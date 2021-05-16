@@ -131,6 +131,7 @@ const MentorSchema = new Schema({
     },
     verificationToken: String,
     verificationTokenExpire: Date,
+    authorizationModify: Date,
     authorizationModifyPasswordExpire: Date,
     resetPasswordToken: String,
     resetPasswordTokenExpires: Date
