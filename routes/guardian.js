@@ -9,8 +9,7 @@ const {
   getGurdianBasicInfo,
   updateGuardianBasicInfo,
   updateGuardianPicture,
-  createSubscription,
-  getHomePage
+  createSubscription
 } = require('../controllers/guardian');
 const { 
   mentorAuthorization,

@@ -35,6 +35,7 @@ exports.getMentorSubscriptions = asyncHandler (async (req, res, next) => {
     model: Course
   });
 
+  console.log(subscriptions);
   // Check if no subscriptions yet
   if (subscriptions.length === 0) {
     return next(new ErrorResponse(`No Content.`, 404));

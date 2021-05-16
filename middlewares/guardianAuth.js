@@ -6,11 +6,11 @@ const ErrorResponse = require('../utils/errorResponse');
 exports.mentorAuthorization = (req, res, next) => {
 
   // For Testing
-  req.user = {
+  /* req.user = {
     id: '607c470f37bbc66087e940fc',
     person: 'mentor'
   }
-
+ */
   // Check if authorized
   if (req.user.person != 'mentor') {
     return next(new ErrorResponse('Forbidden', 403));
@@ -23,11 +23,11 @@ exports.mentorAuthorization = (req, res, next) => {
 exports.guardianAuthorization = (req, res, next) => {
   
     // For Testing
-    req.user = {
+    /* req.user = {
       id: '607c469437bbc66087e940fb',
       person: 'guardian'
     }
-
+ */
     // Check if authorized
     if (req.user.person != 'guardian') {
       return next(new ErrorResponse('Forbidden', 403));
@@ -40,10 +40,10 @@ exports.guardianAuthorization = (req, res, next) => {
 exports.childAuthorization = (req, res, next) => {
 
   // For Testing
-  req.user = {
+  /* req.user = {
     id: '607c459b37bbc66087e940f9',
     person: 'child'
-  }
+  } */
 
   // Check if authorized
   if (req.user.person != 'child') {

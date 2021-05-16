@@ -96,10 +96,10 @@ exports.updateChildBasicInfo = asyncHandler (async (req, res, next) => {
   /* req.body = {
     method: "child.basicInfo.put",
     params: {
-      userName: "yousseff-serag",
+      userName: "Mahmoud",
       fullName: "Mahmoud Serag Ismail",
       birthDate: "1999-03-25",
-      password: "Yousef Srag dkjasljdaslk"
+      password: "asdfasdfasdfasdfasdf"
     }
   }; */
   
@@ -252,7 +252,7 @@ exports.addNewChild = asyncHandler (async (req, res, next) => {
   /* req.body = {
     method: "child.basicInfo.put",
     params: {
-      userName: "Mahmoud",
+      userName: "Mahmoud-Seerag",
       fullName: "Mahmoud Serag Ismail",
       birthDate: "1999-03-18",
       password: "Yousef Srag dkjasljdaslk",
@@ -488,7 +488,7 @@ exports.updateGuardianPicture = asyncHandler (async (req, res, next) => {
   }
 
   // Check size
-  const size  = 5* 1024 * 1024;
+  const size  = 5 * 1024 * 1024;
   if (file.size > size) {
     return next(new ErrorResponse(`Image max size is ${size / 1024 / 1024} MB.`, 400));
   }
@@ -507,6 +507,7 @@ exports.updateGuardianPicture = asyncHandler (async (req, res, next) => {
 
   // Replace old image
   const currentPicture = fs.readdirSync(filePath);
+  console.log(guardian.picture);
   const guardianPicture = guardian.picture.split('/')[2];
   // fs.unlinkSync(`${__dirname}/../public/images/${childPicture}`);
   for (let i = 0; i < currentPicture.length; i++) {
@@ -541,6 +542,7 @@ exports.updateGuardianPicture = asyncHandler (async (req, res, next) => {
 
 
 
+
 // @desc    Create subscription and create payment
 // @route   POST localhost:3000/api/v1/guardian/:courseId/checkout
 // @access  private/guardian
@@ -568,19 +570,19 @@ exports.createSubscription = asyncHandler (async (req, res, next) => {
   }
 
   // Check validation of req.body
-  const { method, params, address } = req.body;
-  if (!method || !params || !address) {
+  const { method, params } = req.body;
+  if (!method || !params) {
     return next(new ErrorResponse('Method or params are missing.', 400));
   }
-  const { childId } = req.body.params;
-  if (!childId) {
+  const { childId, address } = req.body.params;
+  if (!childId || !address) {
     return next(new ErrorResponse('Missing property in params.', 400));
   }
   
   // Get child data from database
   const child = await Children
   .findById(childId)
-  .select('guardianId');
+  .select('guardianId Subscriptions');
 
   // Check if no child data
   if (!child) {
@@ -614,7 +616,7 @@ exports.createSubscription = asyncHandler (async (req, res, next) => {
   });
 
   // Create subscription and save it in database
-  await Subscription.create({
+  const subscription = await Subscription.create({
     guardianId: req.user.id,
     childId: childId,
     mentorId: course.mentorId,
@@ -622,6 +624,9 @@ exports.createSubscription = asyncHandler (async (req, res, next) => {
     balance: course.price
   });
 
+  // Save subscription id into child schema
+  child.Subscriptions.push(subscription._id);
+  await child.save();
   // Return response to the client
   res.status(201).json({
     success: true,

@@ -6,10 +6,10 @@ const ErrorResponse = require('../utils/errorResponse');
 const mentorAuthorization = (req, res, next) => {
 
   // Suppose for testing
-  req.user = {
+  /* req.user = {
     id: '607c470f37bbc66087e940fc',
     person: 'mentor'
-  }
+  } */
 
   // Check if authorized
   if (req.user.person != 'mentor') {
@@ -23,10 +23,10 @@ const mentorAuthorization = (req, res, next) => {
 const guardianAuthorization = (req, res, next) => {
   
     // Suppose for testing
-    req.user = {
+    /* req.user = {
       id: '607c469437bbc66087e940fb',
       person: 'guardian'
-    }
+    } */
 
     // Check if authorized
     if (req.user.person != 'guardian') {
@@ -40,10 +40,10 @@ const guardianAuthorization = (req, res, next) => {
 const childAuthorization = (req, res, next) => {
 
   // Suppose for testing
-  req.user = {
+  /* req.user = {
     id: '608d8963975b697849c6c46c',
     person: 'child'
-  }
+  } */
 
   // Check if authorized
   if (req.user.person != 'child') {
