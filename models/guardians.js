@@ -19,6 +19,10 @@ const GuardianSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Please add a password']
   },
+  isVerify: {
+    type: Boolean,
+    default: false
+  },
   picture: {
     type: String,
     /* match: [/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/,
@@ -35,8 +39,7 @@ const GuardianSchema = new mongoose.Schema({
     required: [true, 'Please select country code'],
   },
   address: {
-      type: String,
-      /* required: [true, 'Please enter address'] */
+      type: String
   },
   bankingInfo: [
     {
@@ -68,16 +71,17 @@ const GuardianSchema = new mongoose.Schema({
       _id: false
     }
   ],
-  varificationToken: String,
-  varificationTokenExpire: {
-    type: Date
-  },
   childrenId: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'children'
     }
-  ]
+  ],
+  verificationToken: String,
+  verificationTokenExpire: Date,
+  authorizationModifyPasswordExpire: Date,
+  resetPasswordToken: String,
+  resetPasswordTokenExpires: Date
 });
 
 module.exports = mongoose.model('Guardian', GuardianSchema);

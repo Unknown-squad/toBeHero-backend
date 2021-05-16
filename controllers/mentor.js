@@ -24,8 +24,8 @@ exports.getBasicInfoOfMentor = asyncHandler( async (req, res, next) => {
 
     // check if mentor info is found or not
     if(!mentorInfo){
-        return next(new ErrorHandler(`mentor is not found`, 404))
-    }
+        return next(new ErrorHandler(`mentor is not found`, 404));
+    };
     
     return res.status(200).json({
         success: true,
@@ -36,8 +36,8 @@ exports.getBasicInfoOfMentor = asyncHandler( async (req, res, next) => {
                 mentorInfo
             ]
         }
-    })
-})
+    });
+});
 
 // @desc    get mentor's balance
 // @route   Get '/api/v1/mentor/dashboard/balance'
@@ -49,8 +49,8 @@ exports.getMentorBalace = asyncHandler(async (req, res, next) => {
     
     // check if mentor info is found or not
     if(!result){
-        return next(new ErrorHandler(`mentor is not found`, 404))
-    }
+        return next(new ErrorHandler(`mentor is not found`, 404));
+    };
 
     return res.status(200).json({
         success: true,
@@ -61,8 +61,8 @@ exports.getMentorBalace = asyncHandler(async (req, res, next) => {
                 result
             ]
         }
-    })
-})
+    });
+});
 
 // @desc    get mentor's analytics
 // @route   Get '/api/v1/mentor/dashboard/analytics'
@@ -71,14 +71,15 @@ exports.getMentorAnalytics = asyncHandler(async (req, res, next) => {
     const subscriptionCount = await Subscriptions
         .count({mentorId: req.user.id});
     const courses = await MentorSchema
-        .findById(req.user.id)
+        .findById(req.user.id);
 
     // check if mentor info is found or not
-    if(!courses){
-        return next(new ErrorHandler(`mentor is not found`, 404))
-    }
+    if (!courses) {
+        return next(new ErrorHandler(`mentor is not found`, 404));
+    };
+
     // enter number of courses into coursesNumber
-    const coursesNumber = courses.coursesId.length
+    const coursesNumber = courses.coursesId.length;
 
     return res.status(200).json({
         success: true,
@@ -92,8 +93,8 @@ exports.getMentorAnalytics = asyncHandler(async (req, res, next) => {
                 }
             ]
         }
-    })
-})
+    });
+});
 
 // @desc    get mentor's Mentor availability status
 // @route   Get '/api/v1/mentor/availability'
@@ -104,9 +105,9 @@ exports.getMentorIsAvailable = asyncHandler( async (req, res, next) => {
         .select('isAvailable -_id');
 
     // check if mentor info is found or not
-    if(!mentorInfo){
-        return next(new ErrorHandler(`mentor is not found`, 404))
-    }
+    if (!mentorInfo) {
+        return next(new ErrorHandler(`mentor is not found`, 404));
+    };
 
     return res.status(200).json({
         success: true,
@@ -117,8 +118,8 @@ exports.getMentorIsAvailable = asyncHandler( async (req, res, next) => {
                 mentorInfo
             ]
         }
-    })
-})
+    });
+});
 
 // @desc   update mentor's availability status
 // @route   Put '/api/v1/mentor/availability'
@@ -130,7 +131,7 @@ exports.putMentorIsAvailable = asyncHandler( async (req, res, next) => {
     // check if mentor info is found or not
     if (!mentorInfo) {
         return next(new ErrorHandler(`there's no such mentor with given id.`, 404));
-    }
+    };
 
     mentorInfo.isAvailable = !mentorInfo.isAvailable;
     await mentorInfo.save();
@@ -163,9 +164,9 @@ exports.getMentorProfile = asyncHandler(async (req, res, next) => {
         .populate('topReviewsId');
 
     // check if mentor info is found or not
-    if(!mentorInfo){
+    if (!mentorInfo) {
         return next(new ErrorHandler(`there's no such mentor with given id.`, 404));
-    }
+    };
 
     // send respone to cliant
     res.status(200).json({
@@ -175,11 +176,11 @@ exports.getMentorProfile = asyncHandler(async (req, res, next) => {
             Kind: `mentor`,
             items:  mentorInfo
         }
-    })
+    });
 });
 
 // @desc    get mentor's courses
-// @route   Get '/api/v1/mentor/courses/mentorId?page='
+// @route   Get '/api/v1/mentor/courses/:mentorId?page='
 // @access  public
 exports.getMentorCourses = asyncHandler(async (req, res, next) => {
     // add pagenation
@@ -192,10 +193,22 @@ exports.getMentorCourses = asyncHandler(async (req, res, next) => {
         .slice('coursesId', [((page - 1) * limit), limit])
         .populate({
             path: `coursesId`,
-            model: `Course`
+            model: `Course`,
+            select: `_id title price description picture rate reviewCounter`,
+            populate: {
+                path: `mentorId`,
+                model: `Mentor`,
+                select: `_id fullName picture isAvailable`
+            }
         });
 
-    console.log(coursesOfMentor)
+    // console.log(coursesOfMentor)
+
+    // check if there are courses
+    if (!coursesOfMentor) {
+        return next(new ErrorHandler(`no such mentor with given id ${req.params.mentorId}`, 404));
+    };
+
     // check if there are courses
     if (coursesOfMentor.coursesId.length === 0) {
         return next(new ErrorHandler(`there's no such courses with given mentor id ${req.params.mentorId}`, 404));
@@ -209,7 +222,7 @@ exports.getMentorCourses = asyncHandler(async (req, res, next) => {
             Kind: `mentor`,
             items: coursesOfMentor.coursesId
         }
-    })
+    });
 });
 
 // @desc    update mentor's courses
@@ -223,7 +236,7 @@ exports.updateMentorInfo = asyncHandler( async (req, res, next) => {
     // check if found user
     if (!user) {
         return next(new ErrorHandler(`there's no such mentor with given id ${req.params.mentorId}`, 404));
-    }
+    };
 
     // save new update
     user.fullName       = req.body.params.fullName;
@@ -240,7 +253,7 @@ exports.updateMentorInfo = asyncHandler( async (req, res, next) => {
     res.status(201).json({
         success: true,
         message: `mentor basic information is updated successfully.`
-    })
+    });
 });
 
 // @desc    authorizithed user to change emial or password or phone number
@@ -259,19 +272,19 @@ exports.authorzithedUpdateAdvSetting = asyncHandler(async (req, res, next) => {
     // check if found user
     if (!user) {
         return next(new ErrorHandler(`there's no such mentor with given id ${req.user.id}`, 404));
-    }
+    };
 
     // compare insert password with password saved in database
     const chackPassword = await bcrypt.compare(oldPassword, user.password);
-    console.log(chackPassword)
+    console.log(chackPassword);
     if (!chackPassword) {
         return next(new ErrorHandler(`incorrect old password`, 400));
-    }
+    };
 
     // create expire time to authourized mentor to modify email or password or phone number
     let expireDate = new Date();
     expireDate.setDate(expireDate.getDate() + 1);
-    console.log(expireDate)
+    console.log(expireDate);
     user.authorizationModify = expireDate;
     await user.save();
 
@@ -279,8 +292,8 @@ exports.authorzithedUpdateAdvSetting = asyncHandler(async (req, res, next) => {
     res.status(200).json({
         success: true,
         message: `user authorized to modify data`
-    })
-})
+    });
+});
 
 // @desc    change password
 // @route   PUT '/api/v1/mentor/dashboard/password'
@@ -314,7 +327,7 @@ exports.changeMentorPassword = asyncHandler(async (req, res, next) => {
     user.authorizationModify = Date.now();
 
     // save data
-    await user.save()
+    await user.save();
 
     // send successfully response
     res.status(200).json({
@@ -378,24 +391,24 @@ exports.changeMentorPicture = asyncHandler(async (req, res, next) => {
     let user = await MentorSchema.findById(req.user.id);
     
     if (!user) {
-        return next(new ErrorHandler(`id not found`, 400))
-    }
+        return next(new ErrorHandler(`id not found`, 400));
+    };
 
     // check if file sent 
     if (!req.files) {
-        return next(new ErrorHandler(`please upload file`, 400))
-    }
+        return next(new ErrorHandler(`please upload file`, 400));
+    };
 
     let img = req.files.img
     // check if file is img
     if (!img.mimetype.startsWith(`image`)) {
-        return next(new ErrorHandler(`please upload file`, 400))
-    }
+        return next(new ErrorHandler(`please upload file`, 400));
+    };
 
     // check size img
     if (img.size > 5 * 1024 * 1024) {
-        return next(new ErrorHandler(`please upload file`, 400))
-    }
+        return next(new ErrorHandler(`please upload file`, 400));
+    };
 
     // upload img
     const fileName = `image-${req.user.person}-${Date.now()}${mongoose.Types.ObjectId()}${path.parse(img.name).ext}`;
@@ -415,13 +428,13 @@ exports.changeMentorPicture = asyncHandler(async (req, res, next) => {
                 console.log(err)
                 fs.unlinkSync(`./public/images/${fileName}`);
                 return next(`didn't save new image`, 500);
-            }
+            };
 
             // delete old picture
             fs.unlink(`./public${oldPicture}`, (err) => {
                 if (err) {
                     return next(`server error`, 500);
-                }
+                };
 
                 // send successfully response
                 res.status(200).json({
