@@ -18,14 +18,9 @@ const stripe = require('stripe')('sk_test_51Ipv0NAq98pIrueXPNChnWXW3YOSsyNHbpOuM
 exports.getChildrenDataForGuardian = asyncHandler (async (req, res, next) => {
 
   // Get children data for guardian
-  const childrenData = await Guardian
-  .findById(req.user.id)
-  .select('-_id childrenId')
-  .populate({
-    path: 'childrenId',
-    select: 'fullName picture',
-    model: Children
-  });
+  const childrenData = await Children
+  .find({guardianId: req.user.id})
+  .select('fullName picture');
   
   // Check if no content
   if (childrenData.length === 0) {
@@ -54,7 +49,7 @@ exports.geChildDataForGuardian = asyncHandler (async (req, res, next) => {
   // Get basic info for spicific guardian
   const childData = await Children
   .findById(req.params.childId)
-  .select('_id fullName userName birthDate picture guardianId');
+  .select('fullName userName birthDate picture guardianId');
 
 
   // Check if no content
@@ -101,7 +96,7 @@ exports.updateChildBasicInfo = asyncHandler (async (req, res, next) => {
   /* req.body = {
     method: "child.basicInfo.put",
     params: {
-      userName: "yousdef-srag",
+      userName: "yousseff-serag",
       fullName: "Mahmoud Serag Ismail",
       birthDate: "1999-03-25",
       password: "Yousef Srag dkjasljdaslk"
@@ -257,7 +252,7 @@ exports.addNewChild = asyncHandler (async (req, res, next) => {
   /* req.body = {
     method: "child.basicInfo.put",
     params: {
-      userName: "Iaaaddadslsadm",
+      userName: "Mahmoud",
       fullName: "Mahmoud Serag Ismail",
       birthDate: "1999-03-18",
       password: "Yousef Srag dkjasljdaslk",
@@ -555,11 +550,12 @@ exports.createSubscription = asyncHandler (async (req, res, next) => {
   /* req.body = {
     method: 'Create.subscription.POST',
     params: {
-      childId: '608d8963975b697849c6c46c'
+      childId: '608d8963975b697849c6c46c',
+      address: 'da5s4d5as4das5d4as-cairo-egypt'
     },
     stripeToken: req.body.stripeToken,
     stripeEmail: req.body.stripeEmail
-  } */
+  }; */
 
   // Get course
   const course = await Course
@@ -572,8 +568,8 @@ exports.createSubscription = asyncHandler (async (req, res, next) => {
   }
 
   // Check validation of req.body
-  const { method, params, stripeToken, stripeEmail } = req.body;
-  if (!method || !params || !stripeToken || !stripeEmail) {
+  const { method, params, address } = req.body;
+  if (!method || !params || !address) {
     return next(new ErrorResponse('Method or params are missing.', 400));
   }
   const { childId } = req.body.params;
@@ -610,9 +606,7 @@ exports.createSubscription = asyncHandler (async (req, res, next) => {
     currency: 'EGP',
     shipping: {
       address: {
-        line1: 'Address 1',
-        city: 'cairo',
-        country: 'egypt'
+        line1: address
       },
       name: course.title
     },

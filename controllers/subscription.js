@@ -88,13 +88,22 @@ exports.getOneMentorSubscription = asyncHandler (async (req, res, next) => {
     return next(new ErrorResponse(`Forbidden.`, 403));
   }
 
+  // Return data which needed
+  let subscriptionData = {
+    _id: subscription._id,
+    guardianId: subscription.guardianId,
+    childId: subscription.childId,
+    courseId: subscription.courseId,
+    appontments: subscription.appointments
+  }
+
   // return data to mentor
   res.status(200).json({
     success: true,
     message: 'subscription data',
     data: {
       kind: 'subscription',
-      items: [subscription]
+      items: [subscriptionData]
     }
   });
 });
@@ -165,7 +174,7 @@ exports.addNewAppiontment = asyncHandler (async (req, res, next) => {
 exports.getAllChildSubscriptions = asyncHandler (async (req, res, next) => {
 
   // Get all child subscription
-  const subscription = await Subscription
+  const subscriptions = await Subscription
   .find({childId: req.user.id})
   .select({_id: 1, mentorId: 1, courseId: 1, appointments: 1})
   .populate({
@@ -180,17 +189,34 @@ exports.getAllChildSubscriptions = asyncHandler (async (req, res, next) => {
   });
 
   // Check if no content
-  if (subscription.length === 0) {
+  if (subscriptions.length === 0) {
     return next(new ErrorResponse(`No Content.`, 404));
   }
-
+  
+  // Get specific data from appointments
+  let subscriptionsData = [];
+  subscriptions.forEach(el => {
+    let appointments = [];
+    el.appointments.forEach(el => {
+      appointments.push({
+        title: el.title,
+        date: el.date
+      });
+    });
+    subscriptionsData.push({
+      _id: el._id,
+      mentorId: el.mentorId,
+      courseId: el.courseId,
+      appointments: appointments
+    });
+  });
   // return data to child
   res.status(200).json({
     success: true,
     message: 'subscriptions data',
     data: {
       kind: 'subscriptions',
-      items: subscription
+      items: subscriptionsData
     }
   });
 });
