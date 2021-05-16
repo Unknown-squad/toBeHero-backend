@@ -6,15 +6,15 @@ const Schema = mongoose.Schema;
 const childrenSchema = new Schema({
     userName: {
         type: String,
-        requierd: [true, 'add username'],
+        required: [true, 'add username'],
         unique: true,
-        minlength: [5, 'at least 5 charater'],
+        minlength: [5, 'userName at least 5 charater'],
         maxlength: [50, 'max 50 charater']
     },
     fullName: {
         type: String,
         required: [true, 'add full name'],
-        minlength: [5, 'at least 5 charater'],
+        minlength: [5, 'fullName at least 5 charater'],
         maxlength: [50, 'max 50 charater']
     },
     password: {

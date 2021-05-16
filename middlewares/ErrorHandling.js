@@ -1,10 +1,12 @@
+// Load required packages
 const fs = require(`fs`);
 const ErrorResponse = require(`../utils/errorResponse`);
 
 exports.errorHandling = (err, req, res, next) => {
 
   // console error for dev
-  console.log(err);
+/*   console.log(err);
+  console.log(err.name); */
 
   let error = {...err};
   error.message = err.message;
@@ -17,20 +19,21 @@ exports.errorHandling = (err, req, res, next) => {
 
       // check if kind of error is ObjectId
       if(val.kind === `ObjectId`) {
-        val.message = `invalid id at path ${val.path}`
+        val.message = `Invalid id at path ${val.path}`
       }
       
-      // check if kind of error is ObjectId
+      // check if invalid date or time
       if(val.kind === `date`) {
-        val.message = `Invalid date or time`;
+        val.message = `Invalid date or time.`;
       }
 
+      
       return ` ${val.message}`;
 
     });
 
     error = new ErrorResponse(message, 400);
-  } 
+  }
   
   // id of content not valid
   if(err.name === `CastError`) {
@@ -75,9 +78,8 @@ exports.errorHandling = (err, req, res, next) => {
   res.status(error.statusCode || 500).json({
     success: false,
     error: {
-      code: error.statusCode,
+      code: error.statusCode || 500,
       message: error.message || `Server error.`
     }
   });
-
 };

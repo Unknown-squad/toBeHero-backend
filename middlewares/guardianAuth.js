@@ -3,9 +3,9 @@ const ErrorResponse = require('../utils/errorResponse');
 
 
 // Mentor authorization
-const mentorAuthorization = (req, res, next) => {
+exports.mentorAuthorization = (req, res, next) => {
 
-  // Suppose for testing
+  // For Testing
   req.user = {
     id: '607c470f37bbc66087e940fc',
     person: 'mentor'
@@ -20,9 +20,9 @@ const mentorAuthorization = (req, res, next) => {
 
 
 // Guardian authorization
-const guardianAuthorization = (req, res, next) => {
+exports.guardianAuthorization = (req, res, next) => {
   
-    // Suppose for testing
+    // For Testing
     req.user = {
       id: '607c469437bbc66087e940fb',
       person: 'guardian'
@@ -30,18 +30,18 @@ const guardianAuthorization = (req, res, next) => {
 
     // Check if authorized
     if (req.user.person != 'guardian') {
-    return next(new ErrorResponse('Forbidden', 403));
-  }
+      return next(new ErrorResponse('Forbidden', 403));
+    }
   next();
 }
 
 
 // Child authorization
-const childAuthorization = (req, res, next) => {
+exports.childAuthorization = (req, res, next) => {
 
-  // Suppose for testing
+  // For Testing
   req.user = {
-    id: '608d8963975b697849c6c46c',
+    id: '607c459b37bbc66087e940f9',
     person: 'child'
   }
 
@@ -51,9 +51,3 @@ const childAuthorization = (req, res, next) => {
   }
   next();
 }
-
-
-// Export middleware functions
-module.exports.mentorAuthorization = mentorAuthorization;
-module.exports.guardianAuthorization = guardianAuthorization;
-module.exports.childAuthorization = childAuthorization;
