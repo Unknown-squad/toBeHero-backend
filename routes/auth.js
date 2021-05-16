@@ -4,7 +4,6 @@ const router = express.Router();
 
 // middlewares files
 const {
-    authorizedMentor,
     acceptedIfUserLoggedIn,
     acceptedtIfUserLoggedOut,
     acceptedIfUserAddInfoInSsnCookie
