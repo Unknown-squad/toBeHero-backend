@@ -524,17 +524,17 @@ exports.statusEmail = asyncHandler(async (req, res, next) => {
     userInfo = await mentorSchema.findOne({email: req.params.userEmail});
 
     if (!userInfo) {
-        return res.status(409).json({
+        return res.status(200).json({
             success: true,
-            statusCode: 409,
+            statusCode: 200,
             message: `this email not exists`
         });
     };
 
     // send successfully response
-    res.status(200).json({
+    res.status(409).json({
         success: true,
-        statusCode: 200,
+        statusCode: 409,
         message: `email is already exist.`
     });
 });
