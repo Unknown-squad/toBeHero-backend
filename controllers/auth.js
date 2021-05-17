@@ -514,7 +514,7 @@ exports.userStatus = asyncHandler(async (req, res, next) => {
     });
 });
 
-// @desc    check if email already exists
+// @desc    check if email already exists in mentor collection
 // @route   GET `/api/v1/mentor/email/status/:userEmail`
 // @access  public
 exports.statusEmail = asyncHandler(async (req, res, next) => {
@@ -524,9 +524,9 @@ exports.statusEmail = asyncHandler(async (req, res, next) => {
     userInfo = await mentorSchema.findOne({email: req.params.userEmail});
 
     if (!userInfo) {
-        return res.status(404).json({
+        return res.status(409).json({
             success: true,
-            statusCode: 404,
+            statusCode: 409,
             message: `this email not exists`
         });
     };
