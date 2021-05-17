@@ -178,7 +178,7 @@ exports.getMentorProfile = asyncHandler(async (req, res, next) => {
         message: `mentor data`,
         data: {
             Kind: `mentor`,
-            items:  [mentorInfo]
+            items:  mentorInfo
         }
     });
 });
