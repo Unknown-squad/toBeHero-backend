@@ -77,7 +77,7 @@ router.route(`/api/v1/user/logout`)
 router.route(`/api/v1/user/status`)
     .get(userStatus);
 
-// @desc    check if email already exists
+// @desc    check if email already exists in mentor collection
 // @route   GET `/api/v1/mentor/email/status/:userEmail`
 // @access  public
 router.route(`/api/v1/mentor/email/status/:userEmail`)
