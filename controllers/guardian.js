@@ -549,21 +549,21 @@ exports.updateGuardianPicture = asyncHandler (async (req, res, next) => {
 exports.createSubscription = asyncHandler (async (req, res, next) => {
 
   // For testing
-  /* req.body = {
+  req.body = {
     method: 'Create.subscription.POST',
     params: {
-      childId: '608d8963975b697849c6c46c',
+      childId: '60a8213d30c71700927829d8',
       address: 'da5s4d5as4das5d4as-cairo-egypt'
     },
     stripeToken: req.body.stripeToken,
     stripeEmail: req.body.stripeEmail
-  }; */
+  };
 
   // Get course
   const course = await Course
   .findById(req.params.courseId)
-  .select('price mentorId description title');
-
+  .select('price mentorId description title subscriptionNumber');
+  console.log(course);
   // Check if no course
   if (!course) {
     return next(new ErrorResponse(`No course data with given id ${req.params.courseId}`, 400));
@@ -627,6 +627,11 @@ exports.createSubscription = asyncHandler (async (req, res, next) => {
   // Save subscription id into child schema
   child.Subscriptions.push(subscription._id);
   await child.save();
+  
+  // Increase subscriptionNumber
+  course.subscriptionNumber++;
+  course.save();
+
   // Return response to the client
   res.status(201).json({
     success: true,
