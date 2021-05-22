@@ -292,18 +292,17 @@ exports.postReview = asyncHandler(async (req, res, next) => {
 exports.postCourse = asyncHandler(async (req, res, next) => {
 
   // just for testing
-  /* req.body = {
+ /*  req.body = {
     method: 'post.course',
     params: {
-      title: 'title',
-      price: 6969,
-      description: 'Alien Alien',
+      title: 'learn quran for kids',
+      price: 8888,
+      description: 'Learning Quran is a very noble act, which every Muslim should be performing daily. It gives him/her knowledge about all aspects of life, also brings him/her near to the Creator, and will be a proof of the rewards of his/her good deeds on the Day of Judgment.',
       topicsList: [
-        'Alien Alien-1',
-        'Alien Alien-2',
-        'Alien Alien-3'
+        'recitation',
+        'Preservation'
       ],
-      genre: 'Mathematics'
+      genre: 'Quran'
     }
   } */
   // end of testing

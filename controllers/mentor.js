@@ -160,13 +160,18 @@ exports.getMentorProfile = asyncHandler(async (req, res, next) => {
     // get mentor info.
     const mentorInfo = await MentorSchema
         .findById(req.params.mentorId)
-        .select(`_id fullName email countryCode languages description occupation certificates picture birthDate phone gender topReviewsId`)
+        .select('_id fullName email countryCode languages description occupation certificates picture birthDate phone gender topReviewsId')
         .populate({
             path: 'topReviewsId',
-            model: `reviews`,
-            select: `rate creatingDate description guardianName guardianPicture`,
+            model: 'reviews',
+            select: 'rate creatingDate description',
+            populate: {
+                path: 'guardianId',
+                model: 'Guardian',
+                select: 'fullName -_id'
+            }
         });
-
+        
     // check if mentor info is found or not
     if (!mentorInfo) {
         return next(new ErrorHandler(`there's no such mentor with given id.`, 404));
