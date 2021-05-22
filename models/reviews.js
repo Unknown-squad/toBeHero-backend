@@ -44,7 +44,7 @@ reviewSchema.statics.getAverageRate = async function(courseId) {
   ]);
   
   // taking 2 numbers after the decimal point
-  const avgRate = obj[0].rate.toFixed(2);
+  const avgRate = parseFloat(obj[0].rate.toFixed(2));
 
   try {
 
