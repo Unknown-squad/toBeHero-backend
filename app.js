@@ -27,9 +27,10 @@ const connectDB = require(`./config/db`);
 
 // CORS security
 app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-  res.setHeader('Access-Control-Allow-Headers', '*');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, mentorInfo, chaildInfo, guardianInfo');
   next();
 });
 
@@ -66,7 +67,7 @@ app.use(require('express-session')({
     cookie: {
       // sameSite: 'Strict',
       maxAge: 1000 * 60 * 60 * 24 * 90,
-      // secure: true
+      secure: false
   }
 }));
 

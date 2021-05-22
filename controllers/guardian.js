@@ -249,13 +249,13 @@ exports.updateChildBasicInfo = asyncHandler (async (req, res, next) => {
 exports.addNewChild = asyncHandler (async (req, res, next) => {
   
   // For testing
-  /* req.body = {
+/*   req.body = {
     method: "child.basicInfo.put",
     params: {
-      userName: "Mahmoud-Seerag",
-      fullName: "Mahmoud Serag Ismail",
-      birthDate: "1999-03-18",
-      password: "Yousef Srag dkjasljdaslk",
+      userName: "ahmed-srag",
+      fullName: "ahmed serag",
+      birthDate: "2002-03-18",
+      password: "asdfasdf",
       gender: "male"
     }
   }; */
@@ -594,7 +594,7 @@ exports.createSubscription = asyncHandler (async (req, res, next) => {
     return next(new ErrorResponse('Forbidden', 403));
   }
 
-  // Create customer payment process
+  /* // Create customer payment process
   const customer = await stripe.customers.create({
     email: req.body.stripeEmail,
 		source: req.body.stripeToken
@@ -614,7 +614,7 @@ exports.createSubscription = asyncHandler (async (req, res, next) => {
     },
     customer: customer.id
   });
-
+ */
   // Create subscription and save it in database
   const subscription = await Subscription.create({
     guardianId: req.user.id,
