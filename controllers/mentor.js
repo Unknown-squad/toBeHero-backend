@@ -234,10 +234,14 @@ exports.getMentorCourses = asyncHandler(async (req, res, next) => {
     });
 });
 
-// @desc    update mentor's courses
+// @desc    update mentor basic info
 // @route   PUT '/api/v1/mentor/dashboard/basic-info'
 // @access  privet(mentor)
 exports.updateMentorInfo = asyncHandler( async (req, res, next) => {   
+    if (!req.body || !req.body.params || !req.body.method) {
+        return next(new ErrorHandler(`invalid shape of requrest`, 400));
+    };
+
     // get user data
     const user = await MentorSchema
         .findById(req.user.id);
@@ -256,6 +260,25 @@ exports.updateMentorInfo = asyncHandler( async (req, res, next) => {
     user.certificates   = req.body.params.certificates;
     user.description    = req.body.params.description;
     user.languages      = req.body.params.languages;
+    user.phone          = req.body.params.phone;
+    user.email          = req.body.params.email;
+   
+    // update new password if user insert new password
+    if (req.body.params.password) {
+        const newPassword = req.body.params.password;
+    
+        // validation new password
+        if (newPassword.length < 8) {
+            return next(new ErrorHandler(`invalid password`, 400));
+        };
+    
+        // encrypt new password
+        const encryptPassword = await bcrypt.hash(newPassword, 12);
+    
+        // save new password
+        user.password = encryptPassword;
+    };
+
     await user.save();
 
     // send successfully response
@@ -265,7 +288,7 @@ exports.updateMentorInfo = asyncHandler( async (req, res, next) => {
     });
 });
 
-// @desc    authorizithed user to change emial or password or phone number
+/* // @desc    authorizithed user to change emial or password or phone number
 // @route   POST '/api/v1/mentor/dashboard/authorization'
 // @access  privet(mentor)
 exports.authorzithedUpdateAdvSetting = asyncHandler(async (req, res, next) => {
@@ -304,9 +327,9 @@ exports.authorzithedUpdateAdvSetting = asyncHandler(async (req, res, next) => {
         success: true,
         message: `user authorized to modify data`
     });
-});
+}); */
 
-// @desc    change password
+/* // @desc    change password
 // @route   PUT '/api/v1/mentor/dashboard/change-password'
 // @access  privet(mentor)
 exports.changeMentorPassword = asyncHandler(async (req, res, next) => {
@@ -354,7 +377,7 @@ exports.changeMentorPassword = asyncHandler(async (req, res, next) => {
         success: true,
         message: `updated user password`
     });
-});
+}); */
 
 // @desc    change email
 // @route   PUT '/api/v1/mentor/dashboard/email'
@@ -461,7 +484,7 @@ exports.changeMentorPicture = asyncHandler(async (req, res, next) => {
     });
 });
 
-// @desc    change user phone number
+/* // @desc    change user phone number
 // @route   PUT '/api/v1/mentor/dashboard/phone'
 // @access  privet(mentor)
 exports.changeMentorPhone = asyncHandler(async (req, res, next) => {
@@ -494,4 +517,4 @@ exports.changeMentorPhone = asyncHandler(async (req, res, next) => {
         success: true,
         message: `save phone number of user`
     });
-})
+}) */

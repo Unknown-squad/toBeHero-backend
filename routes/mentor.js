@@ -24,12 +24,18 @@ const {
     changeMentorPhone
 } = require(`../controllers/mentor`)
 
-// @desc    get mentor's basic info 
-// @route   Get '/api/v1/mentor/dashboard/basic-info'
-// @access  private(mentor)
+
 router
     .route('/api/v1/mentor/dashboard/basic-info')
+    // @desc    get mentor's basic info 
+    // @route   Get '/api/v1/mentor/dashboard/basic-info'
+    // @access  private(mentor)
     .get(acceptedIfUserLoggedIn, authorizedMentor, getBasicInfoOfMentor)
+
+    // @desc    update mentor's courses
+    // @route   PUT '/api/v1/mentor/dashboard/basic-info'
+    // @access  privet(mentor)
+    .put(acceptedIfUserLoggedIn, authorizedMentor, updateMentorInfo);
 
 // @desc    get mentor's balance
 // @route   Get '/api/v1/mentor/dashboard/balance'
@@ -68,27 +74,21 @@ router
 router
     .route('/api/v1/mentor/courses/:mentorId')
     .get(getMentorCourses)
+ 
 
-// @desc    update mentor's courses
-// @route   PUT '/api/v1/mentor/dashboard/basic-info'
-// @access  privet(mentor)
-router
-    .route('/api/v1/mentor/dashboard/basic-info')
-    .put(acceptedIfUserLoggedIn, authorizedMentor, updateMentorInfo);
-
-// @desc    authorizithed user to change emial or password or phone number
+/* // @desc    authorizithed user to change emial or password or phone number
 // @route   POST '/api/v1/mentor/dashboard/authorization'
 // @access  privet(mentor)
 router
     .route('/api/v1/mentor/dashboard/authorization')
-    .post(acceptedIfUserLoggedIn, authorizedMentor, authorzithedUpdateAdvSetting);
+    .post(acceptedIfUserLoggedIn, authorizedMentor, authorzithedUpdateAdvSetting); */
 
-// @desc    change password
+/* // @desc    change password
 // @route   PUT '/api/v1/mentor/dashboard/change-password'
 // @access  privet(mentor)
 router
     .route('/api/v1/mentor/dashboard/change-password')
-    .put(acceptedIfUserLoggedIn, authorizedMentor, changeMentorPassword);
+    .put(acceptedIfUserLoggedIn, authorizedMentor, changeMentorPassword); */
 
 /* // @desc    change email
 // @route   PUT '/api/v1/mentor/dashboard/change-email'
@@ -104,11 +104,11 @@ router
     .route('/api/v1/mentor/dashboard/picture')
     .put(acceptedIfUserLoggedIn, authorizedMentor, changeMentorPicture);
 
-// @desc    change user phone number
+/* // @desc    change user phone number
 // @route   PUT '/api/v1/mentor/dashboard/phone'
 // @access  privet(mentor)
 router
     .route('/api/v1/mentor/dashboard/phone')
-    .put(acceptedIfUserLoggedIn, authorizedMentor, changeMentorPhone);
+    .put(acceptedIfUserLoggedIn, authorizedMentor, changeMentorPhone); */
         
 module.exports = router
