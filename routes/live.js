@@ -6,7 +6,8 @@ const {acceptIfChildOrMentor,
 const {
        postNote,
        getNotes,
-       putCancelAppointment
+       putCancelAppointment,
+       deleteAppointment
 } = require(`../controllers/live`);
 const {
        acceptedIfUserLoggedIn
@@ -31,6 +32,13 @@ router.get(`/api/v1/subscription/:subscriptionId/appointment/:appointmentId/note
 // @access  private (only mentor can cancel appointment)
 router.put(`/api/v1/mentor/subscription/:subscriptionId/appointment/:appointmentId/cancel`,
        acceptedIfUserLoggedIn, acceptIfMentor, putCancelAppointment
+);
+
+// @route   Delete `/api/v1/mentor/subscription/:subscriptionId/appointment/:appointmentId/delete`
+// @desc    delete appointment as mentor
+// @access  private (only mentor can delete appointment)
+router.get(`/api/v1/mentor/subscription/:subscriptionId/appointment/:appointmentId/delete`,
+       acceptedIfUserLoggedIn, acceptIfMentor, deleteAppointment
 );
 
 // export router
