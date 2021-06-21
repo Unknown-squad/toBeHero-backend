@@ -169,10 +169,10 @@ exports.putCancelAppointment = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse(`there's no such appointment found with given id.`, 404));
   }
   
-    // check if appointment is already gone
-    if(currentAppointment.date.getTime() < Date.now()) {
-      return next(new ErrorResponse(`can't cancel appointment that already gone.`, 400));
-    }
+  // check if appointment is already gone
+  if(currentAppointment.date.getTime() < Date.now()) {
+    return next(new ErrorResponse(`can't cancel appointment that already gone.`, 400));
+  }
   
   // check if subscription completed
   if(currentSubscription.complete) {
@@ -194,6 +194,64 @@ exports.putCancelAppointment = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     success: true,
     message: `appointment cancelled successfully.`
+  });
+
+});
+
+// @route   Delete `/api/v1/mentor/subscription/:subscriptionId/appointment/:appointmentId/delete`
+// @desc    delete appointment as mentor
+// @access  private (only mentor can delete appointment)
+exports.deleteAppointment = asyncHandler(async (req, res, next) => {
+
+  // global variable to store appointment index
+  let appointmentIndex = -1;
+
+  // find subscription
+  const currentSubscription = await Subscription.findById(req.params.subscriptionId);
+
+  // check if subscription exists
+  if(!currentSubscription) {
+    return next(new ErrorResponse(`there's no such subscription found with given id.`, 404));
+  }
+
+  // check if mentor has access to current subscription
+  if(req.user.id != currentSubscription.mentorId) {
+    return next(new ErrorResponse(`forbidden.`, 403));
+  }
+
+  // find appointment
+  const currentAppointment = currentSubscription.appointments.find((element) => {
+    appointmentIndex++;
+    if(element._id == req.params.appointmentId) {
+      return element;
+    }
+  });
+
+  // check if appointment exists
+  if(!currentAppointment) {
+    return next(new ErrorResponse(`there's no such appointment found with given id.`, 404));
+  }
+  
+  // check if subscription completed
+  if(currentSubscription.complete) {
+    return next(new ErrorResponse(`can't delete appointment of subscription that already completed.`, 400));
+  }
+
+  // check if appointment canceled or not
+  if(currentAppointment.cancel != true) {
+    return next(new ErrorResponse(`can't delete appointment that doesn't canceled yet.`, 404));
+  }
+
+  // delete appointment
+  currentSubscription.appointments.splice(appointmentIndex, 1);
+
+  // save
+  await currentSubscription.save();
+
+  // return response
+  res.status(200).json({
+    success: true,
+    message: `appointment deleted successfully.`
   });
 
 });
