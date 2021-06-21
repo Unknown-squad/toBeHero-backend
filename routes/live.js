@@ -37,7 +37,7 @@ router.put(`/api/v1/mentor/subscription/:subscriptionId/appointment/:appointment
 // @route   Delete `/api/v1/mentor/subscription/:subscriptionId/appointment/:appointmentId/delete`
 // @desc    delete appointment as mentor
 // @access  private (only mentor can delete appointment)
-router.get(`/api/v1/mentor/subscription/:subscriptionId/appointment/:appointmentId/delete`,
+router.delete(`/api/v1/mentor/subscription/:subscriptionId/appointment/:appointmentId/delete`,
        acceptedIfUserLoggedIn, acceptIfMentor, deleteAppointment
 );
 
