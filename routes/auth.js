@@ -14,7 +14,7 @@ const {
     signUpAsGuardian,
     loginUser,
     verifyEmail,
-    sginUpAsMenter,
+    signUpAsMenter,
     resetPasswordStepOne,
     resetPasswordStepTwo,
     resetPasswordStepThree,
@@ -45,7 +45,7 @@ router.route(`/api/v1/user/verify-email`)
 // @route   POST `/api/v1/mentor/signup`
 // @access  public
 router.route(`/api/v1/mentor/signup`)
-    .post(acceptedtIfUserLoggedOut, sginUpAsMenter);
+    .post(acceptedtIfUserLoggedOut, signUpAsMenter);
 
 // @desc    send token in mail to user email to verify user account
 // @route   POST `/api/v1/user/password/reset-step-1`
