@@ -465,13 +465,13 @@ exports.postCourse = asyncHandler(async (req, res, next) => {
 
   // create new course
   await Course.create({
-    title: req.body.params.title,
-    price: req.body.params.price,
-    description: req.body.params.description,
+    title: req.body.title,
+    price: req.body.price,
+    description: req.body.description,
     picture: picturePath,
-    topicsList: req.body.params.topicsList,
+    topicsList: req.body.topicsList,
     mediaURLS: mediaURLSPath,
-    genre: req.body.params.genre,
+    genre: req.body.genre,
     mentorId: req.user.id
   }, async (err, user) => {
 
@@ -548,7 +548,7 @@ exports.putCourse = asyncHandler(async (req, res, next) => {
   // end of testing
   
     // check if there's no body with request
-    if(!req.body || !req.body.params) {
+    if(!req.body || !req.body) {
       return next(new ErrorResponse(`The body of request and params is required.`));
     }
   
@@ -566,7 +566,7 @@ exports.putCourse = asyncHandler(async (req, res, next) => {
   }
   
   // set maximum number of uploaded files
-  if(req.body.params.mediaUrls.length > 5) {
+  if(req.body.mediaUrls.length > 5) {
     return next(new ErrorResponse(`max number of media files is 5`, 400));
   }
 
@@ -574,7 +574,7 @@ exports.putCourse = asyncHandler(async (req, res, next) => {
   let oldPicturePath = currentCourse.picture;
   let newPicturePath;
   let picturePath;
-  let oldMediaURLSPath = req.body.params.mediaUrls;
+  let oldMediaURLSPath = req.body.mediaUrls;
   let newMediaURLSPath = [];
   let deletedPicture;
   let deletedMedia = [];
@@ -586,15 +586,15 @@ exports.putCourse = asyncHandler(async (req, res, next) => {
     picturePath = oldPicturePath;
 
     // check if there's no media and prepare to remove the old
-    if(!req.body.params.mediaUrls || req.body.params.mediaUrls.length == 0) {
+    if(!req.body.mediaUrls || req.body.mediaUrls.length == 0) {
 
       // add media in course to deleted media and prepare to delete them
       deletedMedia = currentCourse.mediaURLS;
 
-    } else if(req.body.params.mediaUrls || req.body.params.mediaUrls != 0) {
+    } else if(req.body.mediaUrls || req.body.mediaUrls != 0) {
 
       // get diffrent paths between course media paths and request media paths
-      deletedMedia = filterArray(currentCourse.mediaURLS, req.body.params.mediaUrls);
+      deletedMedia = filterArray(currentCourse.mediaURLS, req.body.mediaUrls);
 
     }
 
@@ -602,7 +602,7 @@ exports.putCourse = asyncHandler(async (req, res, next) => {
   else {
 
     // check if there's no media with body on the request
-    if(!req.body.params.mediaUrls || req.body.params.mediaUrls.length == 0) {
+    if(!req.body.mediaUrls || req.body.mediaUrls.length == 0) {
       deletedMedia = currentCourse.mediaURLS;
     }
 
@@ -610,7 +610,7 @@ exports.putCourse = asyncHandler(async (req, res, next) => {
     else {
 
       // get diffrent paths between course media paths and request media paths
-      deletedMedia = filterArray(currentCourse.mediaURLS, req.body.params.mediaUrls);
+      deletedMedia = filterArray(currentCourse.mediaURLS, req.body.mediaUrls);
 
     }
 
@@ -672,7 +672,7 @@ exports.putCourse = asyncHandler(async (req, res, next) => {
       }
 
       // set maximum number of uploaded files
-      if((req.body.params.mediaUrls.length + mediaLength) > 5) {
+      if((req.body.mediaUrls.length + mediaLength) > 5) {
 
         // send new course picture to next middleware to delete it
         req.filesPath = {
@@ -767,13 +767,13 @@ exports.putCourse = asyncHandler(async (req, res, next) => {
 
   // update current course
   await currentCourse.updateOne({
-    title: req.body.params.title,
-    price: req.body.params.price,
-    description: req.body.params.description,
+    title: req.body.title,
+    price: req.body.price,
+    description: req.body.description,
     picture: picturePath,
-    topicsList: req.body.params.topicsList,
+    topicsList: req.body.topicsList,
     mediaURLS: mediaURLSPath,
-    genre: req.body.params.genre
+    genre: req.body.genre
   }, (err) => {
 
     if(err) {
