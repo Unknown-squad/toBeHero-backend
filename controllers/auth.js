@@ -192,13 +192,13 @@ exports.verifyEmail = asyncHandler(async (req, res, next) => {
 // @desc    sign up as mentor
 // @route   POST `/api/v1/mentor/signup`
 // @access  public
-exports.sginUpAsMenter = asyncHandler(async (req, res, next) => {
+exports.signUpAsMenter = asyncHandler(async (req, res, next) => {
     // validation shape of request 
-    if (!req.body || !req.body.params || !req.body.method) {
+    if (!req.body) {
         return next(new ErrorHandler(`invalid shape of requrest`, 400));
     };
 
-    let data = req.body.params;
+    let data = req.body;
     let fileName;
 
     // check if user's email is exist
