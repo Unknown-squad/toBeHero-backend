@@ -29,11 +29,11 @@ const childrenSchema = new Schema({
         type: String,
         // match: [/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/, 'invalid url']
     },
-    gender: {
+    /* gender: {
         type: String,
         required: [true, 'select gender'],
         enum: ['male', 'female']
-    },
+    }, */
     guardianId: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,

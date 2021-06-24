@@ -41,6 +41,12 @@ exports.errorHandling = (err, req, res, next) => {
     error = new ErrorResponse(message, 400);
   }
 
+  if (err.code === 11000) {
+    const message = 'Email is already exist.';
+    error = new ErrorResponse(message, 400);
+  }
+
+  
   // file errors
   // just to be sure that no file will uploaded and not store its path in database
   if(error.message.startsWith(`file`)) {
