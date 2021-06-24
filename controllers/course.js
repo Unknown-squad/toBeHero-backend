@@ -89,8 +89,8 @@ exports.getCourses = asyncHandler(async (req, res, next) => {
     page = 1;
   }
   
-  // get count of all document in course collection
-  const courseCount = await Course.countDocuments();
+  // get count of all document that come after filtering
+  const courseCount = await Course.countDocuments({genre: req.query.genre, rate: {$gte: filter}});
 
   // get numbet of total pages
   const totalPages = Math.ceil(courseCount/limit);
