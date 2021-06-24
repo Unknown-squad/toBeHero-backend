@@ -96,13 +96,16 @@ exports.updateChildBasicInfo = asyncHandler (async (req, res, next) => {
   /* req.body = {
     method: "child.basicInfo.put",
     params: {
-      userName: "Mahmoud",
+      userName: "malek",
       fullName: "Mahmoud Serag Ismail",
-      birthDate: "1999-03-25",
+      birthDate: "1999/03/25",
       password: "asdfasdfasdfasdfasdf"
     }
   }; */
-  
+
+  // Get data from user
+  const { fullName, userName, password, birthDate } = req.body;
+
   // Fetching the data to be updated
   const child = await Children
   .findById(req.params.childId)
@@ -118,36 +121,28 @@ exports.updateChildBasicInfo = asyncHandler (async (req, res, next) => {
     return next(new ErrorResponse('Forbidden.', 403));
   }
 
-  // Check validation of req.body
-  const { method, params } = req.body;
-  if (!method || !params) {
-    return next(new ErrorResponse('Method or params are missing.', 400));
+  // Validate and encrypt updated password
+  let newPassword;
+  let hashedPassword;
+  if (!password) {
+    newPassword = child.password;
+    console.log(newPassword);
   }
-  const { fullName, userName, password, birthDate } = req.body.params;
-  if (!fullName || !userName || !password || !birthDate) {
-    return next(new ErrorResponse('Missing property in params.', 400));
-  }
-
-  // Encrypt updated password
-  const salt = await bcrypt.genSalt(10);
-  const hashedPasword = await bcrypt.hash(password, salt);
-
-  // Check uniqueness of userName
-  const isExist = await Children.findOne({userName});
-  if (isExist) {
-    return next(new ErrorResponse('User name is already exist', 409));
+  else {
+    if (password.length < 8) {
+      return next(new ErrorResponse(`Password min length is 8`, 400));
+    }
+    const salt = await bcrypt.genSalt(10);
+    hashedPassword = await bcrypt.hash(password, salt);
+    newPassword = hashedPassword;
+    console.log(newPassword);
   }
 
-  // Check Match validation of userName
+  // Check Matching validation of userName
   const regex = /^[a-zA-Z\-]+$/;
   const match = userName.match(regex);
   if (!match) {
     return next(new ErrorResponse(`Your user name is not valid. Only characters A-Z, a-z and '-' are  acceptable.`, 400));
-  }
-
-  // Check date validation
-  if (birthDate.split('-').length < 3) {
-    return next(new ErrorResponse('Invalid date.', 400));
   }
 
   /* Working on picture property on children schema */
@@ -198,7 +193,7 @@ exports.updateChildBasicInfo = asyncHandler (async (req, res, next) => {
     // Update data
     child.fullName = fullName;
     child.userName = userName;
-    child.password = hashedPasword;
+    child.password = newPassword;
     child.birthDate = birthDate;
     child.picture = picturePath;
 
@@ -208,11 +203,11 @@ exports.updateChildBasicInfo = asyncHandler (async (req, res, next) => {
         fs.unlinkSync(pictureDir);
         const result = [];
         const arrayOfErrors = err.message.split(':');
-        for (let i = 2; i < arrayOfErrors.length; i++) {
+        for (let i = 1; i < arrayOfErrors.length; i++) {
           result.push(arrayOfErrors[i]);
         }
         const error = result.join(':');
-        return next(new ErrorResponse(`${error}`, 500));
+        return next(new ErrorResponse(`${error}`, 400));
       }
   
       // Return json data
@@ -227,7 +222,7 @@ exports.updateChildBasicInfo = asyncHandler (async (req, res, next) => {
     // Update data without changes in image
     child.fullName = fullName;
     child.userName = userName;
-    child.password = hashedPasword;
+    child.password = newPassword;
     child.birthDate = birthDate;
 
     // Save data
@@ -254,27 +249,13 @@ exports.addNewChild = asyncHandler (async (req, res, next) => {
     params: {
       userName: "ahmed-srag",
       fullName: "ahmed serag",
-      birthDate: "2002-03-18",
-      password: "asdfasdf",
-      gender: "male"
+      birthDate: "2002/03/18",
+      password: "asdfasdf"
     }
   }; */
 
-  // Check validation of req.body
-  const { method, params } = req.body;
-  if (!method || !params) {
-    return next(new ErrorResponse('Method or params are missing.', 400));
-  }
-  const { fullName, userName, password, birthDate, gender } = req.body.params;
-  if (!fullName || !userName || !password || !birthDate || !gender) {
-    return next(new ErrorResponse('Missing property in params.', 400));
-  }
-  
-  // Check uniqueness of userName
-  const isExist = await Children.findOne({userName});
-  if (isExist) {
-    return next(new ErrorResponse('User name is already exist', 409));
-  }
+  // Get data from user
+  const { fullName, userName, password, birthDate } = req.body;
 
   // Check Match validation of userName
   const regex = /^[a-zA-Z\-]+$/;
@@ -283,12 +264,10 @@ exports.addNewChild = asyncHandler (async (req, res, next) => {
     return next(new ErrorResponse(`Your user name is not valid. Only characters A-Z, a-z and '-' are  acceptable.`, 400));
   }
 
-  // Check date validation
-  if (birthDate.split('-').length < 3) {
-    return next(new ErrorResponse('Invalid date', 400));
+  // Validate and encrypt password
+  if (password.length < 8) {
+    return next(new ErrorResponse(`Password min length is 8`, 400));
   }
-
-  // Encrypt password
   const salt = await bcrypt.genSalt(10);
   const hashedPasword = await bcrypt.hash(password, salt);
   
@@ -334,7 +313,6 @@ exports.addNewChild = asyncHandler (async (req, res, next) => {
     password: hashedPasword,
     birthDate: birthDate, 
     picture: picturePath,
-    gender: gender,
     guardianId: req.user.id
   });
 
@@ -346,12 +324,12 @@ exports.addNewChild = asyncHandler (async (req, res, next) => {
       fs.unlinkSync(pictureDir);
       const result = [];
       const arrayOfErrors = err.message.split(':');
-      for (let i = 2; i < arrayOfErrors.length; i++) {
+      for (let i = 1; i < arrayOfErrors.length; i++) {
         result.push(arrayOfErrors[i]);
       }
       const error = result.join(':');
       console.log(error);
-      return next(new ErrorResponse(`${error}`, 500));
+      return next(new ErrorResponse(`${error}`, 400));
     }
 
     // Save childId in guardian property in guardian schema
@@ -417,19 +395,25 @@ exports.updateGuardianBasicInfo = asyncHandler (async (req, res, next) => {
   if (!method || !params) {
     return next(new ErrorResponse('Method of params are missing.', 400));
   }
+
+  // Get data from the user
   const { fullName, email, phone, countryCode, password } = req.body.params;
-  if (!fullName || !email || !phone || !countryCode || !password) {
-    return next(new ErrorResponse('Missing property in params.', 400));
+
+  // Validate and encrypt updated password
+  let newPassword;
+  let hashedPassword;
+  if (!password) {
+    newPassword = guardian.password;
+    console.log(newPassword);
   }
-
-  // Encrypt password
-  const salt = await bcrypt.genSalt(10);
-  const hashedPasword = await bcrypt.hash(password, salt);
-
-  // Check uniqueness of email
-  const isExist = await Guardian.findOne({email});
-  if (isExist) {
-    return next(new ErrorResponse('Email is already exist.', 409));
+  else {
+    if (password.length < 8) {
+      return next(new ErrorResponse(`Password min length is 8`, 400));
+    }
+    const salt = await bcrypt.genSalt(10);
+    hashedPassword = await bcrypt.hash(password, salt);
+    newPassword = hashedPassword;
+    console.log(newPassword);
   }
   
   // Update data
@@ -437,26 +421,18 @@ exports.updateGuardianBasicInfo = asyncHandler (async (req, res, next) => {
   guardian.email = email;
   guardian.phone = phone;
   guardian.countryCode = countryCode;
-  guardian.password = hashedPasword;
+  guardian.password = newPassword;
 
   // Save data
-  await guardian.save(async (err) => {
-    if (err) {
-      const result = [];
-      const arrayOfErrors = err.message.split(':');
-      for (let i = 1; i < arrayOfErrors.length; i++) {
-        result.push(arrayOfErrors[i]);
-      }
-      const error = result.join(':');
-      return next(new ErrorResponse(`${error}`, 500));
-    }
+  await guardian.save();
 
-    // Return json data
-    res.status(201).json({
-      success: true,
-      message: `Guardian's basic info updated successfully.`
-    });
+
+  // Return json data to the client
+  res.status(201).json({
+    success: true,
+    message: `Guardian's basic info updated successfully.`
   });
+
 });
 
 
@@ -594,7 +570,7 @@ exports.createSubscription = asyncHandler (async (req, res, next) => {
     return next(new ErrorResponse('Forbidden', 403));
   }
 
-  /* // Create customer payment process
+  // Create customer payment process
   const customer = await stripe.customers.create({
     email: req.body.stripeEmail,
 		source: req.body.stripeToken
@@ -614,7 +590,7 @@ exports.createSubscription = asyncHandler (async (req, res, next) => {
     },
     customer: customer.id
   });
- */
+
   // Create subscription and save it in database
   const subscription = await Subscription.create({
     guardianId: req.user.id,

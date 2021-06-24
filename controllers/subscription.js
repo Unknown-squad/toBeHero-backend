@@ -297,16 +297,11 @@ exports.getChildSubsForGuardian = asyncHandler (async (req, res, next) => {
 // @route   Get localhost:3000/api/v1/guardian/child-subscription/childId/subscriptionId
 // @access  private/guardian
 exports.getChildSubForGuardian = asyncHandler (async (req, res, next) => {
-  
-  // Check if authorized or not
-  if (req.user.person != 'guardian') {
-    return next(new ErrorResponse(`Forbidden.`, 403));
-  }
 
   // Get one child subscription for guardian
   const childSubscription = await Subscription
   .findOne({_id: req.params.subscriptionId, childId: req.params.childId})
-  .select({_id: 1, childId: 1, mentorId: 1, appointments: 1, guardianId: 1})
+  .select({_id: 1, childId: 1, mentorId: 1, appointments: 1, guardianId: 1, courseId: 1})
   .populate({
     path: 'childId',
     select: "fullName picture -_id",
@@ -316,6 +311,11 @@ exports.getChildSubForGuardian = asyncHandler (async (req, res, next) => {
     path: 'mentorId',
     select: "_id fullName gender picture phone countryCode",
     model: Mentor
+  })
+  .populate({
+    path: 'courseId',
+    select: "title _id",
+    model: Course
   });
 
   // Check if no content
@@ -328,6 +328,7 @@ exports.getChildSubForGuardian = asyncHandler (async (req, res, next) => {
     _id: childSubscription._id,
     child: childSubscription.childId,
     mentor: childSubscription.mentorId,
+    course: childSubscription.courseId,
     appointments: childSubscription.appointments
   };
 
