@@ -9,12 +9,11 @@ const {
   getGurdianBasicInfo,
   updateGuardianBasicInfo,
   updateGuardianPicture,
+  getCourseData,
   createSubscription
 } = require('../controllers/guardian');
-const { 
-  mentorAuthorization,
-  guardianAuthorization,
-  childAuthorization
+const {
+  guardianAuthorization
 } = require('../middlewares/guardianAuth');
 
 // middlewares files
@@ -81,10 +80,17 @@ router.put('/api/v1/guardian/basic-info/picture', acceptedIfUserLoggedIn, guardi
 
 
 
-// @desc    Create subscription and create payment process
-// @route   POST localhost:3000/api/v1/guardian/:courseId/checkout
+// @desc    Get course data and send it to client
+// @route   GET localhost:3000/api/v1/guardian/:courseId
 // @access  private/guardian
-router.post('/api/v1/guardian/:courseId/checkout', acceptedIfUserLoggedIn, guardianAuthorization, createSubscription);
+router.get('/api/v1/guardian/:courseId', acceptedIfUserLoggedIn, guardianAuthorization, getCourseData);
+
+
+
+// @desc    Create subscription and create payment process
+// @route   POST localhost:3000/api/v1/guardian/checkout
+// @access  private/guardian
+router.post('/api/v1/guardian/checkout', acceptedIfUserLoggedIn, guardianAuthorization, createSubscription);
 
 
 

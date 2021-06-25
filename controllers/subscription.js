@@ -347,3 +347,54 @@ exports.getChildSubForGuardian = asyncHandler (async (req, res, next) => {
     }
   });
 });
+
+
+
+// @desc    Handle completed courses
+// @route   POST localhost:3000/api/v1/mentor/complete-subscription/subscriptionId
+// @access  private/mentor
+exports.finishCourse  = asyncHandler (async (req, res, next) => {
+  
+  // Get single subscription by id
+  const subscription = await Subscription
+  .findById(req.params.subscriptionId)
+  .select('complete balance mentorId');
+  
+
+  // Check if no subscription
+  if (!subscription) {
+    return next(new ErrorResponse(`No Content.`, 404));
+  }
+
+
+  // Check if mentor have access to this subscription
+  if (subscription.mentorId.toString() !== req.user.id.toString()) {
+    return next(new ErrorResponse(`Forbidden`, 403));
+  }
+
+  
+  // Get mentor by id to change balance
+  const mentor = await Mentor
+  .findById(subscription.mentorId)
+  .select('balance');
+  
+  // Check if no mentor
+  if (!mentor) {
+    return next(new ErrorResponse(`No Content.`, 404));
+  }
+
+  // Make transaction process to mentor
+  mentor.balance += subscription.balance;
+  mentor.save();
+
+  // Convert complete to true and balance to 0
+  subscription.complete = true;
+  subscription.balance = 0;
+  subscription.save();
+
+
+  res.status(201).json({
+    success: true,
+    message: 'Course completed successfully'
+  });
+});

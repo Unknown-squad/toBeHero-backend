@@ -1,4 +1,6 @@
 // Load required packages
+const dotenv = require('dotenv');
+dotenv.config({path: '../config/config.env'});
 const bcrypt = require('bcrypt');
 const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middlewares/async');
@@ -8,7 +10,8 @@ const Subscription = require('../models/subscriptions');
 const Course = require('../models/courses');
 const mongoose = require('mongoose');
 const fs = require('fs');
-const stripe = require('stripe')('sk_test_51Ipv0NAq98pIrueXPNChnWXW3YOSsyNHbpOuM0SDJsQl9ZwLS9VDTuYRp21eP1e4bzyNNcc0yMjvrYqXqWw2Lkyr00NQMVdzx8');
+const { findById } = require('../models/children');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 
 
@@ -519,40 +522,63 @@ exports.updateGuardianPicture = asyncHandler (async (req, res, next) => {
 
 
 
+
+
+
+// @desc    Get course data and send it to client
+// @route   GET localhost:3000/api/v1/guardian/:courseId
+// @access  private/guardian
+exports.getCourseData = asyncHandler (async (req, res, next) => {
+
+  // Get data by id from specific course
+  const course = await Course
+  .findById(req.params.courseId)
+  .select('title price -_id');
+
+
+  // Check if no content
+  if (!course) {
+    return next(new ErrorResponse(`No content.`, 404));
+  }
+
+  // Return data to the client
+  res.status(200).json({
+    success: true,
+    message: 'Course data',
+    data: {
+      kind: 'Course',
+      items: [course]
+    }
+  });
+});
+
+
+
+
 // @desc    Create subscription and create payment
-// @route   POST localhost:3000/api/v1/guardian/:courseId/checkout
+// @route   POST localhost:3000/api/v1/guardian/checkout
 // @access  private/guardian
 exports.createSubscription = asyncHandler (async (req, res, next) => {
 
-  // For testing
-  req.body = {
-    method: 'Create.subscription.POST',
-    params: {
-      childId: '60a8213d30c71700927829d8',
-      address: 'da5s4d5as4das5d4as-cairo-egypt'
-    },
-    stripeToken: req.body.stripeToken,
-    stripeEmail: req.body.stripeEmail
-  };
-
-  // Get course
-  const course = await Course
-  .findById(req.params.courseId)
-  .select('price mentorId description title subscriptionNumber');
-  console.log(course);
-  // Check if no course
-  if (!course) {
-    return next(new ErrorResponse(`No course data with given id ${req.params.courseId}`, 400));
-  }
-
-  // Check validation of req.body
+  // Validate req.body
   const { method, params } = req.body;
   if (!method || !params) {
-    return next(new ErrorResponse('Method or params are missing.', 400));
+    return next(new ErrorResponse(`Invalid shape of body`, 400));
   }
-  const { childId, address } = req.body.params;
-  if (!childId || !address) {
-    return next(new ErrorResponse('Missing property in params.', 400));
+  const {childId, courseId, id, amount} = req.body.params;
+  if (!childId || !courseId || !amount) {
+    return next(new ErrorResponse(`Missing property in body`, 400));
+  }
+
+  // Get course that want to subscripe in
+  const course = await Course
+  .findById(courseId)
+  .select('subscriptionNumber mentorId');
+  console.log(course);
+  
+  // Check if no course
+  if (!course) {
+    return next(new ErrorResponse(`No course data with given id ${courseId}`, 404));
   }
   
   // Get child data from database
@@ -564,32 +590,21 @@ exports.createSubscription = asyncHandler (async (req, res, next) => {
   if (!child) {
     return next(new ErrorResponse(`No child data with given id ${childId}.`, 404));
   }
+  console.log(child);
 
   // Check if guardian not authorized
   if (child.guardianId.toString() != req.user.id.toString()) {
     return next(new ErrorResponse('Forbidden', 403));
   }
 
-  // Create customer payment process
-  const customer = await stripe.customers.create({
-    email: req.body.stripeEmail,
-		source: req.body.stripeToken
+  // Create payment process
+  const payment = await stripe.paymentIntents.create({
+    amount,
+    currency: "EGP",
+    paymentMethod: id,
+    confirm: true
   });
-
-  // Create customer charge in stripe.com in payment field
-  await stripe.charges.create({
-    amount: course.price,
-    receipt_email: req.body.stripeEmail,
-    description: course.description,
-    currency: 'EGP',
-    shipping: {
-      address: {
-        line1: address
-      },
-      name: course.title
-    },
-    customer: customer.id
-  });
+  console.log(`Payment ${payment}`);
 
   // Create subscription and save it in database
   const subscription = await Subscription.create({
@@ -611,6 +626,6 @@ exports.createSubscription = asyncHandler (async (req, res, next) => {
   // Return response to the client
   res.status(201).json({
     success: true,
-    charge: 'You successfully subscribe to this course.'
+    messgae: 'You successfully subscripe to this course.'
   });
 });
