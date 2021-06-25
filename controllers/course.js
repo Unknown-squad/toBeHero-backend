@@ -15,13 +15,21 @@ const mongoose = require(`mongoose`);
 // @access  public
 exports.getOneCourse = asyncHandler(async (req, res, next) => {
 
+  // hold phone number and countryCode
+  let selectPhone;
+
+  // check if current user is guardian
+  if(req.user && req.user.person == `guardian`) {
+    selectPhone = `phone countryCode`;
+  }
+
   // find course with givin id and pupulate mentorId
   const course = await Course
     .findById(req.params.id)
     .select(`-reviewsId`)
     .populate({
     path: `mentorId`,
-    select: `_id fullName picture isAvailable`,
+    select: `_id fullName picture isAvailable ${selectPhone}`,
     model: Mentor
   });
 
