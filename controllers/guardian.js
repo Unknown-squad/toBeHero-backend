@@ -81,7 +81,7 @@ exports.geChildDataForGuardian = asyncHandler (async (req, res, next) => {
   res.status(200).json({
     success: true,
     message: 'Child data',
-    date: {
+    data: {
       kind: 'Child',
       items: [child]
     }
@@ -573,7 +573,7 @@ exports.createSubscription = asyncHandler (async (req, res, next) => {
   // Get course that want to subscripe in
   const course = await Course
   .findById(courseId)
-  .select('subscriptionNumber mentorId');
+  .select('subscriptionNumber mentorId description');
   console.log(course);
   
   // Check if no course
@@ -601,7 +601,8 @@ exports.createSubscription = asyncHandler (async (req, res, next) => {
   const payment = await stripe.paymentIntents.create({
     amount,
     currency: "EGP",
-    paymentMethod: id,
+    payment_method: id,
+    description: course.description,
     confirm: true
   });
   console.log(`Payment ${payment}`);

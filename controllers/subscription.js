@@ -17,7 +17,7 @@ exports.getMentorSubscriptions = asyncHandler (async (req, res, next) => {
   
   // Get all subscriptions for mentor
   const subscriptions = await Subscription
-  .find({mentorId: req.user.id})
+  .find({mentorId: req.user.id, complete: false})
   .select({_id: 1, appointments: 1, guardianId: 1, childId: 1, courseId: 1})
   .populate({
     path: 'guardianId',
@@ -95,7 +95,7 @@ exports.getOneMentorSubscription = asyncHandler (async (req, res, next) => {
     guardianId: subscription.guardianId,
     childId: subscription.childId,
     courseId: subscription.courseId,
-    appontments: subscription.appointments
+    appointments: subscription.appointments
   }
 
   // return data to mentor
@@ -176,7 +176,7 @@ exports.getAllChildSubscriptions = asyncHandler (async (req, res, next) => {
 
   // Get all child subscription
   const subscriptions = await Subscription
-  .find({childId: req.user.id})
+  .find({childId: req.user.id, complete: false})
   .select({_id: 1, mentorId: 1, courseId: 1, appointments: 1})
   .populate({
     path: 'mentorId',
@@ -231,7 +231,7 @@ exports.getChildSubsForGuardian = asyncHandler (async (req, res, next) => {
 
   // get child subscriptions for guardian
   const childSubscriptions = await Subscription
-  .find({childId: req.params.childId})
+  .find({childId: req.params.childId, complete: false})
   .select({_id: 1, courseId: 1, mentorId: 1, appointments: 1, childId: 1})
   .populate({
     path: 'mentorId',
