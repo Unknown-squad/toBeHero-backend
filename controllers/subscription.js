@@ -38,7 +38,7 @@ exports.getMentorSubscriptions = asyncHandler (async (req, res, next) => {
   console.log(subscriptions);
   // Check if no subscriptions yet
   if (subscriptions.length === 0) {
-    return next(new ErrorResponse(`No Content.`, 204));
+    return next(new ErrorResponse(`No Content.`, 404));
   }
 
   // return data to mentor
@@ -81,7 +81,7 @@ exports.getOneMentorSubscription = asyncHandler (async (req, res, next) => {
 
   // Check if no subscription with given id
   if (!subscription) {
-    return next(new ErrorResponse(`No Content.`, 204));
+    return next(new ErrorResponse(`No Content.`, 404));
   }
 
   // Check if mentor authorized
@@ -122,7 +122,7 @@ exports.addNewAppiontment = asyncHandler (async (req, res, next) => {
 
   // Check if no content
   if (!subscription) {
-    return next(new ErrorResponse(`No Content`, 204));
+    return next(new ErrorResponse(`No Content`, 404));
   }
 
   // Check if mentor auhtorized
@@ -191,7 +191,7 @@ exports.getAllChildSubscriptions = asyncHandler (async (req, res, next) => {
 
   // Check if no content
   if (subscriptions.length === 0) {
-    return next(new ErrorResponse(`No Content.`, 204));
+    return next(new ErrorResponse(`No Content.`, 404));
   }
   
   // Get specific data from appointments
@@ -270,7 +270,7 @@ exports.getChildSubsForGuardian = asyncHandler (async (req, res, next) => {
   
   // Check if no content
   if (childSubscriptions.length === 0) {
-    return next(new ErrorResponse(`No Content.`, 204));
+    return next(new ErrorResponse(`No Content.`, 404));
   }
 
   // Check if guardian authorized to see child's subscriptions
@@ -320,7 +320,7 @@ exports.getChildSubForGuardian = asyncHandler (async (req, res, next) => {
 
   // Check if no content
   if (!childSubscription) {
-    return next(new ErrorResponse(`No Content.`, 204));
+    return next(new ErrorResponse(`No Content.`, 404));
   }
 
   // Save the result which will return to the user
@@ -363,7 +363,7 @@ exports.finishCourse  = asyncHandler (async (req, res, next) => {
 
   // Check if no subscription
   if (!subscription) {
-    return next(new ErrorResponse(`No Content.`, 204));
+    return next(new ErrorResponse(`No Content.`, 404));
   }
 
 
@@ -380,7 +380,7 @@ exports.finishCourse  = asyncHandler (async (req, res, next) => {
   
   // Check if no mentor
   if (!mentor) {
-    return next(new ErrorResponse(`No Content.`, 204));
+    return next(new ErrorResponse(`No Content.`, 404));
   }
 
   // Make transaction process to mentor
