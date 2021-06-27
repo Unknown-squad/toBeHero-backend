@@ -27,7 +27,7 @@ exports.getChildrenDataForGuardian = asyncHandler (async (req, res, next) => {
   
   // Check if no content
   if (childrenData.length === 0) {
-    return next(new ErrorResponse(`No children data with given id ${req.user.id}.`, 204));
+    return next(new ErrorResponse(`No children data with given id ${req.user.id}.`, 404));
   }
 
   // Rturn children data for guardian
@@ -56,7 +56,7 @@ exports.geChildDataForGuardian = asyncHandler (async (req, res, next) => {
 
   // Check if no content
   if (!childData) {
-    return next(new ErrorResponse(`No child data with given id ${req.params.childId}.`, 204));
+    return next(new ErrorResponse(`No child data with given id ${req.params.childId}.`, 404));
   }
 
 
@@ -115,7 +115,7 @@ exports.updateChildBasicInfo = asyncHandler (async (req, res, next) => {
 
   // Check if no data
   if (!child) {
-    return next(new ErrorResponse(`No child data with given id ${req.params.childId}.`, 204));
+    return next(new ErrorResponse(`No child data with given id ${req.params.childId}.`, 404));
   }
 
   // Check if guardian authorized to update these data
@@ -361,7 +361,7 @@ exports.getGurdianBasicInfo = asyncHandler (async (req, res, next) => {
 
   // If no guardian data
   if (!guardian) {
-    return next(new ErrorResponse(`No guardian data with given id ${req.user.id}.`, 204));
+    return next(new ErrorResponse(`No guardian data with given id ${req.user.id}.`, 404));
   }
   
   // Return data to client
@@ -389,7 +389,7 @@ exports.updateGuardianBasicInfo = asyncHandler (async (req, res, next) => {
 
   // Check if no data
   if (!guardian) {
-    return next(new ErrorResponse(`No guardian data with given id ${req.user.id}.`, 204));
+    return next(new ErrorResponse(`No guardian data with given id ${req.user.id}.`, 404));
   }
 
   // Check validation of req.body
@@ -507,7 +507,7 @@ exports.updateGuardianPicture = asyncHandler (async (req, res, next) => {
         result.push(arrayOfErrors[i]);
       }
       const error = result.join(':');
-      return next(new ErrorResponse(`${error}`, 500));
+      return next(new ErrorResponse(`${error}`, 400));
     }
 
     // Return json data
@@ -537,7 +537,7 @@ exports.getCourseData = asyncHandler (async (req, res, next) => {
 
   // Check if no content
   if (!course) {
-    return next(new ErrorResponse(`No content.`, 204));
+    return next(new ErrorResponse(`No content.`, 404));
   }
 
   // Return data to the client
@@ -577,7 +577,7 @@ exports.createSubscription = asyncHandler (async (req, res, next) => {
   
   // Check if no course
   if (!course) {
-    return next(new ErrorResponse(`No course data with given id ${courseId}`, 204));
+    return next(new ErrorResponse(`No course data with given id ${courseId}`, 404));
   }
   
   // Get child data from database
@@ -587,7 +587,7 @@ exports.createSubscription = asyncHandler (async (req, res, next) => {
 
   // Check if no child data
   if (!child) {
-    return next(new ErrorResponse(`No child data with given id ${childId}.`, 204));
+    return next(new ErrorResponse(`No child data with given id ${childId}.`, 404));
   }
   console.log(child);
 
