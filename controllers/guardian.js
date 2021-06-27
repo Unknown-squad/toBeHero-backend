@@ -11,7 +11,7 @@ const Course = require('../models/courses');
 const mongoose = require('mongoose');
 const fs = require('fs');
 const { findById } = require('../models/children');
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const stripe = require('stripe')('sk_test_51InwK8DlMEFhQMv27OkI9NfTI7d7WhzsDnvd5QkyRGfDsGd8Lkii6tziyGE9xooZmcZRecKb4f3gS235z3Mko82J00hAhFUKqU');
 
 
 
@@ -27,9 +27,8 @@ exports.getChildrenDataForGuardian = asyncHandler (async (req, res, next) => {
   
   // Check if no content
   if (childrenData.length === 0) {
-    return next(new ErrorResponse(`No children data with given id ${req.user.id}.`, 404));
+    return next(new ErrorResponse(`No children data with given id ${req.user.id}.`, 204));
   }
-  
 
   // Rturn children data for guardian
   res.status(200).json({
@@ -57,7 +56,7 @@ exports.geChildDataForGuardian = asyncHandler (async (req, res, next) => {
 
   // Check if no content
   if (!childData) {
-    return next(new ErrorResponse(`No child data with given id ${req.params.childId}.`, 404));
+    return next(new ErrorResponse(`No child data with given id ${req.params.childId}.`, 204));
   }
 
 
@@ -116,7 +115,7 @@ exports.updateChildBasicInfo = asyncHandler (async (req, res, next) => {
 
   // Check if no data
   if (!child) {
-    return next(new ErrorResponse(`No child data with given id ${req.params.childId}.`, 404));
+    return next(new ErrorResponse(`No child data with given id ${req.params.childId}.`, 204));
   }
 
   // Check if guardian authorized to update these data
@@ -362,7 +361,7 @@ exports.getGurdianBasicInfo = asyncHandler (async (req, res, next) => {
 
   // If no guardian data
   if (!guardian) {
-    return next(new ErrorResponse(`No guardian data with given id ${req.user.id}.`, 404));
+    return next(new ErrorResponse(`No guardian data with given id ${req.user.id}.`, 204));
   }
   
   // Return data to client
@@ -390,7 +389,7 @@ exports.updateGuardianBasicInfo = asyncHandler (async (req, res, next) => {
 
   // Check if no data
   if (!guardian) {
-    return next(new ErrorResponse(`No guardian data with given id ${req.user.id}.`, 404));
+    return next(new ErrorResponse(`No guardian data with given id ${req.user.id}.`, 204));
   }
 
   // Check validation of req.body
@@ -538,7 +537,7 @@ exports.getCourseData = asyncHandler (async (req, res, next) => {
 
   // Check if no content
   if (!course) {
-    return next(new ErrorResponse(`No content.`, 404));
+    return next(new ErrorResponse(`No content.`, 204));
   }
 
   // Return data to the client
@@ -578,7 +577,7 @@ exports.createSubscription = asyncHandler (async (req, res, next) => {
   
   // Check if no course
   if (!course) {
-    return next(new ErrorResponse(`No course data with given id ${courseId}`, 404));
+    return next(new ErrorResponse(`No course data with given id ${courseId}`, 204));
   }
   
   // Get child data from database
@@ -588,7 +587,7 @@ exports.createSubscription = asyncHandler (async (req, res, next) => {
 
   // Check if no child data
   if (!child) {
-    return next(new ErrorResponse(`No child data with given id ${childId}.`, 404));
+    return next(new ErrorResponse(`No child data with given id ${childId}.`, 204));
   }
   console.log(child);
 
@@ -612,8 +611,8 @@ exports.createSubscription = asyncHandler (async (req, res, next) => {
     guardianId: req.user.id,
     childId: childId,
     mentorId: course.mentorId,
-    courseId: req.params.courseId,
-    balance: course.price
+    courseId: courseId,
+    balance: amount
   });
 
   // Save subscription id into child schema
