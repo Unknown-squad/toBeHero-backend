@@ -54,7 +54,7 @@ router.get('/api/v1/guardian/child-subscription/:childId/:subscriptionId', accep
 // @desc    Handle completed courses
 // @route   POST localhost:3000/api/v1/mentor/complete-subscription/subscriptionId
 // @access  private/mentor
-router.get('/api/v1/mentor/complete-subscription/:subscriptionId', acceptedIfUserLoggedIn, subscriptionAuthorization.mentorAuthorization, subscription.finishCourse);
+router.post('/api/v1/mentor/complete-subscription/:subscriptionId', acceptedIfUserLoggedIn, subscriptionAuthorization.mentorAuthorization, subscription.finishCourse);
 
 
 module.exports = router;
