@@ -41,13 +41,38 @@ exports.getMentorSubscriptions = asyncHandler (async (req, res, next) => {
     return next(new ErrorResponse(`No Content.`, 404));
   }
 
+  // Check appointments and return unfinished appointments and other data
+  let mentorSubs = [];
+  subscriptions.forEach(el => {
+    let arrayOfDates = [];
+    el.appointments.forEach(el => {
+      if (el.date > Date.now()) {
+        arrayOfDates.push({
+          cancel: el.cancel,
+          mentor: el.mentor,
+          child: el.child,
+          _id: el._id,
+          title: el.title,
+          date: el.date
+        });
+      }
+    });
+    mentorSubs.push({
+      _id: el._id,
+      gaurdianId: el.guardianId,
+      courseId: el.courseId,
+      childId: el.childId,
+      appointments: arrayOfDates
+    });
+  });
+
   // return data to mentor
   res.status(200).json({
     success: true,
     message: 'Subscriptions data',
     data: {
       kind: 'subscription',
-      items: subscriptions
+      items: mentorSubs
     }
   });
 });
@@ -61,7 +86,7 @@ exports.getOneMentorSubscription = asyncHandler (async (req, res, next) => {
 
   // Get one subscription for mentor
   const subscription = await Subscription
-  .findById(req.params.subscriptionId)
+  .findOne({_id: req.params.subscriptionId, complete: false})
   .select({_id: 1, guardianId: 1, childId: 1, courseId: 1, appointments: 1, mentorId: 1})
   .populate({
     path: 'guardianId',
@@ -89,13 +114,28 @@ exports.getOneMentorSubscription = asyncHandler (async (req, res, next) => {
     return next(new ErrorResponse(`Forbidden.`, 403));
   }
 
+  // Check appointments and return unfinished appointments and other data
+  let appointments = [];
+  subscription.appointments.forEach(el => {
+    if (el.date > Date.now()) {
+      appointments.push({
+        cancel: el.cancel,
+        mentor: el.mentor,
+        child: el.child,
+        _id: el._id,
+        title: el.title,
+        date: el.date
+      });
+    }
+  });
+
   // Return data which needed
   let subscriptionData = {
     _id: subscription._id,
     guardianId: subscription.guardianId,
     childId: subscription.childId,
     courseId: subscription.courseId,
-    appointments: subscription.appointments
+    appointments: appointments
   }
 
   // return data to mentor
@@ -199,10 +239,12 @@ exports.getAllChildSubscriptions = asyncHandler (async (req, res, next) => {
   subscriptions.forEach(el => {
     let appointments = [];
     el.appointments.forEach(el => {
-      appointments.push({
-        title: el.title,
-        date: el.date
-      });
+      if (el.date > Date.now()) {
+        appointments.push({
+          title: el.title,
+          date: el.date
+        });
+      }
     });
     subscriptionsData.push({
       _id: el._id,
@@ -249,6 +291,18 @@ exports.getChildSubsForGuardian = asyncHandler (async (req, res, next) => {
     model: Children
   });
   
+  // Check if no content
+  if (childSubscriptions.length === 0) {
+    return next(new ErrorResponse(`No Content.`, 404));
+  }
+
+  // Check if guardian authorized to see child's subscriptions
+  childSubscriptions.forEach(el => {
+    if (el.childId.guardianId.toString() != req.user.id.toString()) {
+      return next(new ErrorResponse(`Forbidden.`, 403));
+    }
+  });
+
   // Get child's nextAppointment && other data
   let childSubs = [];
   childSubscriptions.forEach(el => {
@@ -267,19 +321,7 @@ exports.getChildSubsForGuardian = asyncHandler (async (req, res, next) => {
       nextAppointment: nextAppointment
     });
   });
-  
-  // Check if no content
-  if (childSubscriptions.length === 0) {
-    return next(new ErrorResponse(`No Content.`, 404));
-  }
 
-  // Check if guardian authorized to see child's subscriptions
-  childSubscriptions.forEach(el => {
-    if (el.childId.guardianId.toString() != req.user.id.toString()) {
-      return next(new ErrorResponse(`Forbidden.`, 403));
-    }
-  });
-  
   // return data to child
   res.status(200).json({
     success: true,
@@ -300,7 +342,7 @@ exports.getChildSubForGuardian = asyncHandler (async (req, res, next) => {
 
   // Get one child subscription for guardian
   const childSubscription = await Subscription
-  .findOne({_id: req.params.subscriptionId, childId: req.params.childId})
+  .findOne({_id: req.params.subscriptionId, childId: req.params.childId,guardianId: req.user.id, complete:false})
   .select({_id: 1, childId: 1, mentorId: 1, appointments: 1, guardianId: 1, courseId: 1})
   .populate({
     path: 'childId',
@@ -323,13 +365,28 @@ exports.getChildSubForGuardian = asyncHandler (async (req, res, next) => {
     return next(new ErrorResponse(`No Content.`, 404));
   }
 
+  // Check appointments and return unfinished appointments and other data
+  let appointments = [];
+  childSubscription.appointments.forEach(el => {
+    if (el.date > Date.now()) {
+      appointments.push({
+        cancel: el.cancel,
+        mentor: el.mentor,
+        child: el.child,
+        _id: el._id,
+        title: el.title,
+        date: el.date
+      });
+    }
+  });
+
   // Save the result which will return to the user
   let childSub = {
     _id: childSubscription._id,
     child: childSubscription.childId,
     mentor: childSubscription.mentorId,
     course: childSubscription.courseId,
-    appointments: childSubscription.appointments
+    appointments: appointments
   };
 
   // Check if guardian authorized for child's subscription
