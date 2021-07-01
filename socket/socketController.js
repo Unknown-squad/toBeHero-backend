@@ -1,5 +1,6 @@
 // load required modules
 const { Server } = require(`socket.io`);
+const Subscription = require(`../models/subscriptions`);
 
 // exporting socket server
 exports.ioServer = (httpServer) => {
@@ -14,18 +15,28 @@ exports.ioServer = (httpServer) => {
     socket.on(`join-room`, (subscriptionId, appointmentId) => {
 
       // create room id
-      const roomId = `${subscriptionId}A${appointmentId}`;
+      const roomId = `${subscriptionId}SA${appointmentId}`;
 
       // join user to room
       socket.join(roomId);
 
       // listening to start-live event
-      io.on(`start-live`, () => {
+      io.on(`start-live`, async () => {
 
         // create event to active live button
         io.to(roomId).emit(`activate-button`, roomId);
 
+        // find subscription with it's id
+        const currentSubscription = Subscription.findById(subscriptionId);
+        
+        // find appointment index
+        const appointmentIndex = currentSubscription.appointments.findIndex(element => element._id == appointmentId);
+
+        // activate appointment
+        currentSubscription.appointments[appointmentIndex].active = true;
+        
         // save appointment activation in database
+        currentSubscription.save();
 
       });
 
@@ -35,8 +46,18 @@ exports.ioServer = (httpServer) => {
         // create event to active live button
         io.to(roomId).emit(`deactivate-button`, true);
 
-        // save appointment deactivation in database
+        // find subscription with it's id
+        const currentSubscription = Subscription.findById(subscriptionId);
         
+        // find appointment index
+        const appointmentIndex = currentSubscription.appointments.findIndex(element => element._id == appointmentId);
+
+        // activate appointment
+        currentSubscription.appointments[appointmentIndex].active = false;
+        
+        // save appointment activation in database
+        currentSubscription.save();
+
       });
 
     });
