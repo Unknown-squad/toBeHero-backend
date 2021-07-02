@@ -27,18 +27,18 @@ exports.ioServer = (httpServer) => {
         io.to(roomId).emit(`activate-button`, roomId);
 
         // activate appointment
-        activeAppointment(subscriptionId, appointmentId, true);
+        await activeAppointment(subscriptionId, appointmentId, true);
         
       });
       
       // listening to end-live event
-      io.on(`end-live`, () => {
+      io.on(`end-live`, async () => {
         
         // create event to active live button
         io.to(roomId).emit(`deactivate-button`, true);
         
         // deactivate appointment
-        activeAppointment(subscriptionId, appointmentId, false);
+        await activeAppointment(subscriptionId, appointmentId, false);
 
       });
 
