@@ -42,6 +42,17 @@ exports.ioServer = (httpServer) => {
 
       });
 
+      // user disconnected
+      socket.on(`disconnect`, async () => {
+
+        // create event to active live button
+        io.to(roomId).emit(`deactivate-button`, true);
+        
+        // deactivate appointment
+        await activeAppointment(subscriptionId, appointmentId, false);
+
+      });
+
     });
     
   });
