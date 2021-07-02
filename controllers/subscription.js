@@ -59,7 +59,7 @@ exports.getMentorSubscriptions = asyncHandler (async (req, res, next) => {
     });
     mentorSubs.push({
       _id: el._id,
-      gaurdianId: el.guardianId,
+      guardianId: el.guardianId,
       courseId: el.courseId,
       childId: el.childId,
       appointments: arrayOfDates
@@ -241,6 +241,7 @@ exports.getAllChildSubscriptions = asyncHandler (async (req, res, next) => {
     el.appointments.forEach(el => {
       if (el.date > Date.now()) {
         appointments.push({
+          _id: el._id,
           title: el.title,
           date: el.date
         });
