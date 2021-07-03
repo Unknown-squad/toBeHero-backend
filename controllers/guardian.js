@@ -555,6 +555,11 @@ exports.getChildrenAndCourseData = asyncHandler (async (req, res, next) => {
   .find({courseId: req.params.courseId})
   .select('childId courseId');
 
+  // Check if no subscriptions
+  if (!subscriptions) {
+    return next(new ErrorResponse(`No content.`, 404));
+  }
+
   // Filter children that unsubscriped in this course
   console.log(subscriptions);
   for (let i = 0; i < children.length; i++) {
@@ -569,6 +574,7 @@ exports.getChildrenAndCourseData = asyncHandler (async (req, res, next) => {
   let result = [];
   children.forEach(el => {
     result.push({
+      _id: el._id,
       fullName: el.fullName,
       picture: el.picture
     });
