@@ -9,7 +9,7 @@ const {
   getGurdianBasicInfo,
   updateGuardianBasicInfo,
   updateGuardianPicture,
-  getCourseData,
+  getChildrenAndCourseData,
   createSubscription
 } = require('../controllers/guardian');
 const {
@@ -80,10 +80,10 @@ router.put('/api/v1/guardian/basic-info/picture', acceptedIfUserLoggedIn, guardi
 
 
 
-// @desc    Get course data and send it to client
+// @desc    Get children and course data then send it to client
 // @route   GET localhost:3000/api/v1/guardian/:courseId
 // @access  private/guardian
-router.get('/api/v1/guardian/:courseId', acceptedIfUserLoggedIn, guardianAuthorization, getCourseData);
+router.get('/api/v1/guardian/:courseId', acceptedIfUserLoggedIn, guardianAuthorization, getChildrenAndCourseData);
 
 
 

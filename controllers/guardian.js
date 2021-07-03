@@ -527,7 +527,7 @@ exports.updateGuardianPicture = asyncHandler (async (req, res, next) => {
 // @desc    Get course data and send it to client
 // @route   GET localhost:3000/api/v1/guardian/:courseId
 // @access  private/guardian
-exports.getCourseData = asyncHandler (async (req, res, next) => {
+exports.getChildrenAndCourseData = asyncHandler (async (req, res, next) => {
 
   // Get data by id from specific course
   const course = await Course
@@ -540,13 +540,50 @@ exports.getCourseData = asyncHandler (async (req, res, next) => {
     return next(new ErrorResponse(`No content.`, 404));
   }
 
+  // Get children data for specific guardian
+  const children = await Children
+  .find({guardianId: req.user.id})
+  .select('fullName picture');
+
+  // Check if no children
+  if (!children) {
+    return next(new ErrorResponse(`No content.`, 404));
+  }
+
+  // Get subscriptions with courseId
+  const subscriptions = await Subscription
+  .find({courseId: req.params.courseId})
+  .select('childId courseId');
+
+  // Filter children that unsubscriped in this course
+  console.log(subscriptions);
+  for (let i = 0; i < children.length; i++) {
+    for (let j = 0; j < subscriptions.length; j++) {
+      if (children[i]._id.toString() === subscriptions[j].childId.toString()) {
+        children.splice(children[i], 1);
+      }
+    }
+  }
+
+  // Filter data to return it without childId
+  let result = [];
+  children.forEach(el => {
+    result.push({
+      fullName: el.fullName,
+      picture: el.picture
+    });
+  });
+  
   // Return data to the client
   res.status(200).json({
     success: true,
     message: 'Course data',
     data: {
       kind: 'Course',
-      items: [course]
+      items: {
+        course,
+        children: result
+      }
     }
   });
 });
