@@ -534,7 +534,6 @@ exports.getChildrenAndCourseData = asyncHandler (async (req, res, next) => {
   .findById(req.params.courseId)
   .select('title price -_id');
 
-
   // Check if no content
   if (!course) {
     return next(new ErrorResponse(`No content.`, 404));
@@ -552,8 +551,8 @@ exports.getChildrenAndCourseData = asyncHandler (async (req, res, next) => {
 
   // Get subscriptions with courseId
   const subscriptions = await Subscription
-  .find({courseId: req.params.courseId})
-  .select('childId courseId');
+  .find({courseId: req.params.courseId, guardianId: req.user.id})
+  .select('childId courseId guardianId');
 
   // Check if no subscriptions
   if (!subscriptions) {
@@ -561,23 +560,29 @@ exports.getChildrenAndCourseData = asyncHandler (async (req, res, next) => {
   }
 
   // Filter children that unsubscriped in this course
-  console.log(subscriptions);
   for (let i = 0; i < children.length; i++) {
+    let index = children[i];
     for (let j = 0; j < subscriptions.length; j++) {
       if (children[i]._id.toString() === subscriptions[j].childId.toString()) {
-        children.splice(children[i], 1);
+        delete children[i];
+        break;
       }
     }
   }
-
+  
   // Filter data to return it without childId
   let result = [];
-  children.forEach(el => {
-    result.push({
-      _id: el._id,
-      fullName: el.fullName,
-      picture: el.picture
-    });
+  children.filter(el => {
+    if (el === null) {
+      children.splice(el, 1);
+    }
+    else {
+      result.push({
+        _id: el._id,
+        fullName: el.fullName,
+        picture: el.picture
+      });
+    }
   });
   
   // Return data to the client
