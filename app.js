@@ -1,6 +1,9 @@
 // Load required packeges
 const express = require('express');
 const app = express();
+const http = require(`http`);
+const httpServer = http.createServer(app);
+const { ioServer } = require(`./socket/socketController`);
 const path = require('path');
 const dotenv = require(`dotenv`);
 const morgan = require(`morgan`);
@@ -28,7 +31,7 @@ const connectDB = require(`./config/db`);
 // CORS security
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+  res.setHeader('Access-Control-Allow-Origin', process.env.CLIENT_DOMAIN);
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   next();
@@ -109,14 +112,17 @@ app.use(errorHandling);
 /* app.use(errorHandler);
 app.use(subscriptionErrorHandling); */
 
+// use socket.io
+ioServer(httpServer);
+
 // Connect to server
 const port = process.env.PORT || 3000;
-const server = app.listen(port, () => {
+httpServer.listen(port, () => {
   console.log(`listening to server in ${process.env.NODE_ENV} mode on port ${port}...`);
 });
 
 // handle crash server error
 process.on('unhandledRejection', (reason, promise) => {
     console.log(`ERROR: ${reason}`);
-    server.close(() => process.exit(1));
+    httpServer.close(() => process.exit(1));
 });

@@ -42,6 +42,10 @@ const subscriptionSchema = new mongoose.Schema({
         requried: [true, `please add date to appointment`]
       },
       title: String,
+      active: {
+        type: Boolean,
+        default: false
+      },
       cancel: {
         type: Boolean,
         default: false
