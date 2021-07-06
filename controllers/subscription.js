@@ -35,7 +35,6 @@ exports.getMentorSubscriptions = asyncHandler (async (req, res, next) => {
     model: Course
   });
 
-  console.log(subscriptions);
   // Check if no subscriptions yet
   if (subscriptions.length === 0) {
     return next(new ErrorResponse(`No Content.`, 404));
@@ -57,6 +56,21 @@ exports.getMentorSubscriptions = asyncHandler (async (req, res, next) => {
         });
       }
     });
+    
+    // sort appointments by minimum value
+    if (arrayOfDates.length > 1) {
+      let temp = 0;
+      for (let i = 0; i < arrayOfDates.length; i++) {
+        for (let j = i; j < arrayOfDates.length; j++) {
+          if (arrayOfDates[j].date < arrayOfDates[i].date) {
+            temp = arrayOfDates[j];
+            arrayOfDates[j] = arrayOfDates[i];
+            arrayOfDates[i] = temp;
+          }
+        }
+      }
+    }
+
     mentorSubs.push({
       _id: el._id,
       guardianId: el.guardianId,
@@ -128,6 +142,20 @@ exports.getOneMentorSubscription = asyncHandler (async (req, res, next) => {
       });
     }
   });
+
+  // sort appointments by minimum value
+  if (appointments.length > 1) {
+    let temp = 0;
+    for (let i = 0; i < appointments.length; i++) {
+      for (let j = i; j < appointments.length; j++) {
+        if (appointments[j].date < appointments[i].date) {
+          temp = appointments[j];
+          appointments[j] = appointments[i];
+          appointments[i] = temp;
+        }
+      }
+    }
+  }
 
   // Return data which needed
   let subscriptionData = {
@@ -243,10 +271,26 @@ exports.getAllChildSubscriptions = asyncHandler (async (req, res, next) => {
         appointments.push({
           _id: el._id,
           title: el.title,
-          date: el.date
+          date: el.date,
+          active: el.active
         });
       }
     });
+
+    // sort appointments by minimum value
+    if (appointments.length > 1) {
+      let temp = 0;
+      for (let i = 0; i < appointments.length; i++) {
+        for (let j = i; j < appointments.length; j++) {
+          if (appointments[j].date < appointments[i].date) {
+            temp = appointments[j];
+            appointments[j] = appointments[i];
+            appointments[i] = temp;
+          }
+        }
+      }
+    }
+    
     subscriptionsData.push({
       _id: el._id,
       mentorId: el.mentorId,
@@ -376,10 +420,25 @@ exports.getChildSubForGuardian = asyncHandler (async (req, res, next) => {
         child: el.child,
         _id: el._id,
         title: el.title,
-        date: el.date
+        date: el.date,
+        active: el.active
       });
     }
   });
+
+  // sort appointments by minimum value
+  if (appointments.length > 1) {
+    let temp = 0;
+    for (let i = 0; i < appointments.length; i++) {
+      for (let j = i; j < appointments.length; j++) {
+        if (appointments[j].date < appointments[i].date) {
+          temp = appointments[j];
+          appointments[j] = appointments[i];
+          appointments[i] = temp;
+        }
+      }
+    }
+  }
 
   // Save the result which will return to the user
   let childSub = {
