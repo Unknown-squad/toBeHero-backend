@@ -59,7 +59,7 @@ exports.ioServer = (httpServer) => {
       if(socket.subscriptionId && socket.appointmentId) {
 
         // save appointment activation to database
-        await activeAppointment(subscriptionId, appointmentId, false);
+        await activeAppointment(socket.subscriptionId, socket.appointmentId, false);
 
       }
 
