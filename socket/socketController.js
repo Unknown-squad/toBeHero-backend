@@ -21,12 +21,16 @@ exports.ioServer = (httpServer) => {
     // listen to event that come from mentor to active button that allow child to open live page
     socket.on("mentor-in", async (subscriptionId, appointmentId) => {
 
+      // store subscription id and appointment id in mentor socket.io profile
+      socket.subscriptionId = subscriptionId;
+      socket.appointmentId = appointmentId;
+
       // active 'join live' button to child
       io.emit(`child-in${subscriptionId}`, true);
 
       // save appointment activation to database
       await activeAppointment(subscriptionId, appointmentId, true);
-
+      
     });
     
     // listening to event that allow child to send his socket id to mentor
@@ -34,17 +38,31 @@ exports.ioServer = (httpServer) => {
       
       // send socket id of child to mentor
       io.emit(`subscription${subscriptionId}`, socket.id);
-
+      
     });
     
+    // deactivate the appointment when user end call
+    socket.on(`call-ended`, async (subscriptionId, appointmentId) => {
+      
+      // save appointment activation to database
+      await activeAppointment(subscriptionId, appointmentId, false);
+
+    })
+    
     // listening to event that raised if call is ended
-    socket.on("disconnect", async (subscriptionId, appointmentId) => {
+    socket.on("disconnect", async () => {
 
       // raise event that notify user that call ended
       socket.broadcast.emit("callEnded");
 
-      // save appointment deactivation to database
-      await activeAppointment(subscriptionId, appointmentId, false);
+      // deactivate the appointment if disconnected user is mentor
+      if(socket.subscriptionId && socket.appointmentId) {
+
+        // save appointment activation to database
+        await activeAppointment(subscriptionId, appointmentId, false);
+
+      }
+
     });
 
     // listening to event that recieves video data
