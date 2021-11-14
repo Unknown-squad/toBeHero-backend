@@ -1,5 +1,8 @@
 # toBeHero-backend
-ToBeHero is mentorship platform for kids, this repo is made for the server side of the project.
+ToBeHero is a mentorship platform for kids.
+
+## API Documentation
+[here](https://tobehero.docs.apiary.io/)
 
 ## Local Setup
 
